@@ -2,32 +2,54 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
+.react-calendar {
+  border: none !important;
+  width: 350px;
+  min-width: 300px;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+  .react-calendar__navigation {
+    width: inherit;
+    height: 3.5rem;
+    display: flex;
+    text-align: center;
+    align-items: center;
+    padding: 0 5.5rem;
+
+    .react-calendar__navigation__label {
+      width: 5.5rem;
+      height: 1.375rem;
+      font-size: 16px;
+      border: none;
+      font-weight: 700;
+      background-color: #fff;
+    }
   }
 }
 
+/* Font */
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  font-family:
+    'Pretendard Variable',
+    Pretendard,
+    -apple-system,
+    BlinkMacSystemFont,
+    system-ui,
+    'Segoe UI',
+    'Apple SD Gothic Neo',
+    'Noto Sans KR',
+    'Malgun Gothic',
+    'Apple Color Emoji',
+    'Segoe UI Emoji',
+    'Segoe UI Symbol',
+    sans-serif;
+  font-size: 14px; /* 0.875rem */
+  font-style: normal;
+  font-weight: 500;
+  line-height: 1;
+  word-break: keep-all;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+/* Prevent drag */
+* {
+  @apply select-none;
 }
