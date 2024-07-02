@@ -1,0 +1,1 @@
+export { LoginPageLayout } from './LoginPageLayput'
