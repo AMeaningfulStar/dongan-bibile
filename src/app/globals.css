@@ -7,6 +7,17 @@
   width: 350px;
   min-width: 300px;
 
+  .react-calendar__month-view__weekdays {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .react-calendar__tile {
+    width: 50px;
+    height: 50px;
+    border-radius: 9999px;
+  }
+
   .react-calendar__navigation {
     width: inherit;
     height: 3.5rem;
