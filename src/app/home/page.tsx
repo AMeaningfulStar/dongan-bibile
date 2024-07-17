@@ -89,20 +89,20 @@ export default function Main() {
         </div>
       </div>
       {/* 하단 네비게이션 바 */}
-      <div className="fixed bottom-0 left-0 flex w-full justify-between border-y border-b-white bg-white pb-9">
+      <div className="fixed bottom-0 left-0 flex w-full justify-between border-t bg-white pb-9">
         <Link href={'/home'} className="px-6 py-3">
           <Image alt="button" src={CALENDAR_ICON} />
         </Link>
         <Link href={'/meditation'} className="px-6 py-3">
           <Image alt="button" src={MEDITATION_ICON} />
         </Link>
-        <Link href={'/home'} className="px-6 py-3">
+        <Link href={'/bible'} className="px-6 py-3">
           <Image alt="button" src={BIBLE_ICON} />
         </Link>
-        <Link href={'/home'} className="px-6 py-3">
+        <Link href={'/status'} className="px-6 py-3">
           <Image alt="button" src={STATUS_ICON} />
         </Link>
-        <Link href={'/home'} className="px-6 py-3">
+        <Link href={'/event'} className="px-6 py-3">
           <Image alt="button" src={EVENT_ICON} />
         </Link>
       </div>
