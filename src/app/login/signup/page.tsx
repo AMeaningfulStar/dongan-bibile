@@ -1,5 +1,6 @@
 'use client'
 
+import { collection, getDocs, query, where } from 'firebase/firestore'
 import Image from 'next/image'
 import { useState } from 'react'
 import { twMerge } from 'tailwind-merge'
@@ -21,6 +22,39 @@ export default function SignUp() {
     setUseAffiliation,
   } = useSignUpStore()
   const [isShowDrop, setIsShowDrop] = useState<boolean>(false)
+  const [isEmailValidation, setIsEmailValidation] = useState<EmailValidationStatus>(EmailValidationStatus.Default)
+
+  // 이메일 중복 확인
+  const checkForDuplicateEmail = async () => {
+    try {
+      const emailRegEx = /^[A-Za-z0-9]([-_.]?[A-Za-z0-9])*@[A-Za-z0-9]([-_.]?[A-Za-z0-9])*\.[A-Za-z]{2,3}$/i
+
+      // 이메일 형식 검사
+      if (!emailRegEx.test(signUpValue.useEmail)) {
+        setIsEmailValidation(EmailValidationStatus.InvalidFormat)
+
+        setTimeout(() => setIsEmailValidation(EmailValidationStatus.Default), 3000)
+
+        return
+      }
+
+      const result = query(collection(firestore, 'users'), where('email', '==', signUpValue.useEmail))
+
+      const querySnapshot = await getDocs(result)
+
+      if (!querySnapshot.empty) {
+        setIsEmailValidation(EmailValidationStatus.Error)
+
+        setTimeout(() => setIsEmailValidation(EmailValidationStatus.Default), 3000)
+
+        return
+      }
+
+      setIsEmailValidation(EmailValidationStatus.Success)
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   return (
     <div className="relative flex h-full min-h-screen w-full items-center justify-center bg-black">
@@ -44,16 +78,36 @@ export default function SignUp() {
               />
             </div>
             <div className="flex flex-col gap-y-1">
-              <label htmlFor="email" className="ml-1 text-base font-light">
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                placeholder="이메일 입력해주세요"
-                className="p-1 text-base outline-none"
-                onChange={(event) => setUseEmail(event.target.value)}
-              />
+              <div className="flex items-center gap-x-2">
+                <label htmlFor="email" className="ml-1 text-base font-light">
+                  Email
+                </label>
+                {isEmailValidation === EmailValidationStatus.Error && (
+                  <span className="text-sm leading-none text-red-500">이미 존재하는 Email 입니다.</span>
+                )}
+                {isEmailValidation === EmailValidationStatus.InvalidFormat && (
+                  <span className="text-sm leading-none text-red-500">올바른 Email 형식이 아닙니다.</span>
+                )}
+                {isEmailValidation === EmailValidationStatus.Success && (
+                  <span className="text-sm leading-none text-green-500">사용 가능한 Email 입니다.</span>
+                )}
+              </div>
+              <div className="flex gap-x-2">
+                <input
+                  id="email"
+                  type="email"
+                  placeholder="이메일 입력해주세요"
+                  className="flex-grow p-1 text-base outline-none"
+                  value={signUpValue.useEmail}
+                  onChange={(event) => setUseEmail(event.target.value)}
+                />
+                <button
+                  className="h-8 w-24 rounded-lg bg-white active:bg-gray-400 active:text-white"
+                  onClick={async () => checkForDuplicateEmail()}
+                >
+                  <span className="text-sm font-normal leading-none">중복확인</span>
+                </button>
+              </div>
             </div>
             <div className="flex flex-col gap-y-1">
               <label htmlFor="password" className="ml-1 text-base font-light">
