@@ -9,7 +9,10 @@ interface SignUpStoreType {
   setUseVerifyPassword: (inputValue: string) => void
   setUsePhoneNum: (inputValue: string) => void
   setUsePosition: (inputValue: string) => void
-  setUseAffiliation: (inputValue: string) => void
+  setUseGrade: (inputValue: number) => void
+  setUseClass: (inputValue: number) => void
+  checkPasswordsLength: () => boolean
+  checkPasswordsMatch: () => boolean
   validateSignUpValue: () => { isError: boolean; errorMessage: string }
 }
 
@@ -20,7 +23,8 @@ interface SignUpState {
   useVerifyPassword: string
   usePhoneNum: string
   usePosition: string
-  useAffiliation: string
+  useGrade: number
+  useClass: number
 }
 
 const useSignUpStore = create<SignUpStoreType>()((set, get) => ({
@@ -31,7 +35,8 @@ const useSignUpStore = create<SignUpStoreType>()((set, get) => ({
     useVerifyPassword: '',
     usePhoneNum: '',
     usePosition: '',
-    useAffiliation: '',
+    useGrade: 0,
+    useClass: 0,
   },
 
   // 회원가입 입력 정보 초기화
@@ -103,17 +108,41 @@ const useSignUpStore = create<SignUpStoreType>()((set, get) => ({
       },
     })),
 
-  // 사용자 소속 set
-  setUseAffiliation: (inputValue) =>
+  // 사용자 학년 set
+  setUseGrade: (inputValue) =>
     set((state: SignUpStoreType) => ({
       signUpValue: {
         ...state.signUpValue,
-        useAffiliation: inputValue,
+        useGrade: inputValue,
       },
     })),
 
+  // 사용자 반 set
+  setUseClass: (inputValue) =>
+    set((state: SignUpStoreType) => ({
+      signUpValue: {
+        ...state.signUpValue,
+        useClass: inputValue,
+      },
+    })),
+
+  checkPasswordsLength: () => {
+    const { usePassword } = get().signUpValue
+
+    if (usePassword.length >= 8) return true
+
+    return false
+  },
+
+  checkPasswordsMatch: () => {
+    const { usePassword, useVerifyPassword } = get().signUpValue
+    if (usePassword === useVerifyPassword) return true
+
+    return false
+  },
+
   validateSignUpValue: () => {
-    const { useName, useEmail, usePassword, useVerifyPassword, usePhoneNum, usePosition, useAffiliation } =
+    const { useName, useEmail, usePassword, useVerifyPassword, usePhoneNum, usePosition, useGrade, useClass } =
       get().signUpValue
 
     // 모든 정보를 입력했는지 확인
@@ -124,13 +153,10 @@ const useSignUpStore = create<SignUpStoreType>()((set, get) => ({
       !validateString(useVerifyPassword) ||
       !validateString(usePhoneNum) ||
       !validateString(usePosition) ||
-      !validateString(useAffiliation)
+      !validateNumber(useGrade) ||
+      !validateNumber(useClass)
     )
       return { isError: true, errorMessage: '모든 정보를 입력바랍니다' }
-
-    // 비밀번호 확인이 맞는지 확인
-    if (checkPasswordsMatch(usePassword, useVerifyPassword))
-      return { isError: true, errorMessage: '입력하신 비밀번호가 다릅니다' }
 
     return { isError: false, errorMessage: '' }
   },
@@ -141,10 +167,10 @@ const validateString = (string: string) => {
   return true
 }
 
-const checkPasswordsMatch = (password: string, verify_password: string) => {
-  if (password === verify_password) return true
+const validateNumber = (number: number) => {
+  if (number === 0) return false
 
-  return false
+  return true
 }
 
 export default useSignUpStore
