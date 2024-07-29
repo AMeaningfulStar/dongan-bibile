@@ -1,7 +1,8 @@
 import { create } from 'zustand'
 
-interface SignUpStoreType {
-  signUpValue: SignUpState
+interface SignupStoreType {
+  signUpValue: SignupState
+  errorMessage: string
   initSignUpValue: () => void
   setUseName: (inputValue: string) => void
   setUseEmail: (inputValue: string) => void
@@ -11,12 +12,13 @@ interface SignUpStoreType {
   setUsePosition: (inputValue: string) => void
   setUseGrade: (inputValue: number) => void
   setUseClass: (inputValue: number) => void
+  setErrorMessage: (newErrorMessage: string) => void
   checkPasswordsLength: () => boolean
   checkPasswordsMatch: () => boolean
   validateSignUpValue: () => { isError: boolean; errorMessage: string }
 }
 
-interface SignUpState {
+interface SignupState {
   useName: string
   useEmail: string
   usePassword: string
@@ -27,7 +29,7 @@ interface SignUpState {
   useClass: number
 }
 
-const useSignUpStore = create<SignUpStoreType>()((set, get) => ({
+const useSignUpStore = create<SignupStoreType>()((set, get) => ({
   signUpValue: {
     useName: '',
     useEmail: '',
@@ -39,9 +41,11 @@ const useSignUpStore = create<SignUpStoreType>()((set, get) => ({
     useClass: 0,
   },
 
+  errorMessage: '',
+
   // 회원가입 입력 정보 초기화
   initSignUpValue: () =>
-    set((state: SignUpStoreType) => ({
+    set((state: SignupStoreType) => ({
       signUpValue: {
         ...state.signUpValue,
         useName: '',
@@ -56,7 +60,7 @@ const useSignUpStore = create<SignUpStoreType>()((set, get) => ({
 
   // 사용자 이름 set
   setUseName: (inputValue) =>
-    set((state: SignUpStoreType) => ({
+    set((state: SignupStoreType) => ({
       signUpValue: {
         ...state.signUpValue,
         useName: inputValue,
@@ -65,7 +69,7 @@ const useSignUpStore = create<SignUpStoreType>()((set, get) => ({
 
   // 사용자 Email set
   setUseEmail: (inputValue) =>
-    set((state: SignUpStoreType) => ({
+    set((state: SignupStoreType) => ({
       signUpValue: {
         ...state.signUpValue,
         useEmail: inputValue,
@@ -74,7 +78,7 @@ const useSignUpStore = create<SignUpStoreType>()((set, get) => ({
 
   // 사용자 비밀번호 set
   setUsePassword: (inputValue) =>
-    set((state: SignUpStoreType) => ({
+    set((state: SignupStoreType) => ({
       signUpValue: {
         ...state.signUpValue,
         usePassword: inputValue,
@@ -83,7 +87,7 @@ const useSignUpStore = create<SignUpStoreType>()((set, get) => ({
 
   // 사용자 비밀번호 set
   setUseVerifyPassword: (inputValue) =>
-    set((state: SignUpStoreType) => ({
+    set((state: SignupStoreType) => ({
       signUpValue: {
         ...state.signUpValue,
         useVerifyPassword: inputValue,
@@ -92,7 +96,7 @@ const useSignUpStore = create<SignUpStoreType>()((set, get) => ({
 
   // 사용자 전화번호 set
   setUsePhoneNum: (inputValue) =>
-    set((state: SignUpStoreType) => ({
+    set((state: SignupStoreType) => ({
       signUpValue: {
         ...state.signUpValue,
         usePhoneNum: inputValue,
@@ -101,7 +105,7 @@ const useSignUpStore = create<SignUpStoreType>()((set, get) => ({
 
   // 사용자 직분 set
   setUsePosition: (inputValue) =>
-    set((state: SignUpStoreType) => ({
+    set((state: SignupStoreType) => ({
       signUpValue: {
         ...state.signUpValue,
         usePosition: inputValue,
@@ -110,7 +114,7 @@ const useSignUpStore = create<SignUpStoreType>()((set, get) => ({
 
   // 사용자 학년 set
   setUseGrade: (inputValue) =>
-    set((state: SignUpStoreType) => ({
+    set((state: SignupStoreType) => ({
       signUpValue: {
         ...state.signUpValue,
         useGrade: inputValue,
@@ -119,11 +123,17 @@ const useSignUpStore = create<SignUpStoreType>()((set, get) => ({
 
   // 사용자 반 set
   setUseClass: (inputValue) =>
-    set((state: SignUpStoreType) => ({
+    set((state: SignupStoreType) => ({
       signUpValue: {
         ...state.signUpValue,
         useClass: inputValue,
       },
+    })),
+
+  setErrorMessage: (newErrorMessage) =>
+    set((state: SignupStoreType) => ({
+      ...state,
+      errorMessage: newErrorMessage,
     })),
 
   checkPasswordsLength: () => {
