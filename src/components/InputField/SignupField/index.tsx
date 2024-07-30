@@ -32,6 +32,11 @@ interface SignFieldType extends BaseFieldType {
   defaultText: string
 }
 
+interface EmailFieldType extends SignFieldType {
+  emailValidation: EmailValidationStatus
+  setEmailValidation: (status: EmailValidationStatus) => void
+}
+
 interface PasswordFieldType extends SignFieldType {
   errorMessage: string
   checkFunction: () => boolean
@@ -101,6 +106,7 @@ export function SignupInputField() {
             position: signUpValue.usePosition,
             grade: signUpValue.useGrade,
             class: signUpValue.useClass,
+            admin: false,
           }).then(() => route.push('/', { scroll: false }))
         },
       )
@@ -124,6 +130,8 @@ export function SignupInputField() {
         defaultText="이메일 입력해주세요"
         setFunction={setUseEmail}
         inputValue={signUpValue.useEmail}
+        emailValidation={isEmailValidation}
+        setEmailValidation={setIsEmailValidation}
       />
       <PasswordField
         labelName="비밀번호 (최소 8자 이상)"
@@ -201,9 +209,16 @@ function DefaultField({ labelName, fieldID, inputType, defaultText, setFunction,
   )
 }
 
-function EmailField({ labelName, fieldID, inputType, defaultText, setFunction, inputValue }: SignFieldType) {
-  const [isEmailValidation, setIsEmailValidation] = useState<EmailValidationStatus>(EmailValidationStatus.Default)
-
+function EmailField({
+  labelName,
+  fieldID,
+  inputType,
+  defaultText,
+  setFunction,
+  inputValue,
+  emailValidation,
+  setEmailValidation,
+}: EmailFieldType) {
   // 이메일 중복 확인
   const checkForDuplicateEmail = async () => {
     try {
@@ -211,8 +226,8 @@ function EmailField({ labelName, fieldID, inputType, defaultText, setFunction, i
 
       // 이메일 형식 검사
       if (!emailRegEx.test(inputValue)) {
-        setIsEmailValidation(EmailValidationStatus.InvalidFormat)
-        setTimeout(() => setIsEmailValidation(EmailValidationStatus.Default), 3000)
+        setEmailValidation(EmailValidationStatus.InvalidFormat)
+        setTimeout(() => setEmailValidation(EmailValidationStatus.Default), 3000)
         return
       }
 
@@ -221,14 +236,14 @@ function EmailField({ labelName, fieldID, inputType, defaultText, setFunction, i
       const querySnapshot = await getDocs(result)
 
       if (!querySnapshot.empty) {
-        setIsEmailValidation(EmailValidationStatus.Error)
+        setEmailValidation(EmailValidationStatus.Error)
 
-        setTimeout(() => setIsEmailValidation(EmailValidationStatus.Default), 3000)
+        setTimeout(() => setEmailValidation(EmailValidationStatus.Default), 3000)
 
         return
       }
 
-      setIsEmailValidation(EmailValidationStatus.Success)
+      setEmailValidation(EmailValidationStatus.Success)
     } catch (error) {
       console.error('Error checking for duplicate email:', error)
     }
@@ -239,13 +254,13 @@ function EmailField({ labelName, fieldID, inputType, defaultText, setFunction, i
         <label htmlFor={fieldID} className="ml-1 text-base font-light">
           {labelName}
         </label>
-        {isEmailValidation === EmailValidationStatus.Error && (
+        {emailValidation === EmailValidationStatus.Error && (
           <span className="text-sm leading-none text-red-500">이미 존재하는 Email 입니다.</span>
         )}
-        {isEmailValidation === EmailValidationStatus.InvalidFormat && (
+        {emailValidation === EmailValidationStatus.InvalidFormat && (
           <span className="text-sm leading-none text-red-500">올바른 Email 형식이 아닙니다.</span>
         )}
-        {isEmailValidation === EmailValidationStatus.Success && (
+        {emailValidation === EmailValidationStatus.Success && (
           <span className="text-sm leading-none text-green-500">사용 가능한 Email 입니다.</span>
         )}
       </div>
