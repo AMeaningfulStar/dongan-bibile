@@ -1,33 +1,51 @@
 'use client'
+import { onAuthStateChanged, signOut } from 'firebase/auth'
+import { doc, getDoc } from 'firebase/firestore'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 
-import Image from 'next/image'
-import Link from 'next/link'
-import { useEffect, useState } from 'react'
-import { Calendar } from 'react-calendar'
-import 'react-calendar/dist/Calendar.css'
+import { auth, firestore } from '@/libs/firebase'
+import useFirebaseStore from '@/stores/FirebaseStore'
 
-import BIBLE_ICON from '@icon/bible_icon.svg'
-import CALENDAR_ICON from '@icon/calendar_icon.svg'
-import EVENT_ICON from '@icon/event_icon.svg'
-import MEDITATION_ICON from '@icon/meditation_icon.svg'
-import STATUS_ICON from '@icon/status_icon.svg'
-
-export type DatePiece = Date | null
-export type SelectedDate = DatePiece | [DatePiece, DatePiece]
+import { DashboardLayout } from '@/components/Layout'
 
 export default function Main() {
-  // FIXME: 임시 작업
-  const [selectedDate, setSelectedDate] = useState<SelectedDate>(new Date())
+  const { firebaseInfo, setFirebaseUid, setFirebaseInfo, initFirebaseInfo } = useFirebaseStore()
+  const route = useRouter()
+
+  const handleSignOut = () => {
+    signOut(auth)
+      .then(() => {
+        initFirebaseInfo()
+        route.push('/', { scroll: false })
+      })
+      .catch((error) => {
+        console.error('Error checking for duplicate email:', error)
+      })
+  }
 
   useEffect(() => {
-    console.log('🚀 ~ Home ~ selectedDate:', selectedDate)
-  }, [selectedDate])
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const docRef = doc(firestore, 'users', user.uid)
+        const docSnap = await getDoc(docRef)
 
+        if (docSnap.exists()) {
+          setFirebaseUid(user.uid)
+          setFirebaseInfo(docSnap.data())
+        } else {
+          // docSnap.data() will be undefined in this case
+          console.log('No such document!')
+        }
+      }
+    })
+  }, [])
+
+  const printFirebaseInfo = () => {
+    console.log('🚀 ~ Main ~ firebaseInfo:', firebaseInfo)
+  }
   return (
-    <div className="flex min-h-screen w-full flex-col items-center py-20">
-      <div className="fixed left-0 top-0 flex w-full items-center justify-center border-b border-[#AAAAAA] bg-white pb-3 pt-10">
-        <span className="text-xl font-light leading-none">홈</span>
-      </div>
+    <DashboardLayout pageName="홈">
       {/* 청신호 연속 읽은 날짜 텍스트 */}
       <div className="w-full px-4 py-2.5">
         <div className="rounded-full bg-[#E8EEFF] py-2.5 pl-5">
@@ -39,17 +57,7 @@ export default function Main() {
       {/* 캘린더 */}
       <div className="mb-10 flex w-full flex-col items-center px-4">
         <div className="w-full py-5 text-lg font-light leading-none">나의 말씀 읽기</div>
-        {/* FIXME: 캘린더는 수정이 필요 */}
-        <Calendar
-          locale="ko"
-          calendarType="gregory"
-          showNeighboringMonth={false}
-          prev2Label={null}
-          next2Label={null}
-          view="month"
-          onChange={setSelectedDate}
-          value={selectedDate}
-        />
+        <div className="h-96 w-full bg-slate-500"></div>
       </div>
       {/* 청신호 진행률 */}
       <div className="mb-3 flex w-full flex-col gap-y-3 px-4">
@@ -72,11 +80,11 @@ export default function Main() {
       {/* 버튼 4개 */}
       <div className="mb-6 flex flex-col gap-y-4">
         <div className="flex gap-x-4">
-          <button className="h-8 w-32 rounded-lg border border-black bg-white">
-            <span className="text-sm font-normal leading-none">비밀번호 찾기</span>
+          <button className="h-8 w-32 rounded-lg border border-black bg-white" onClick={() => printFirebaseInfo()}>
+            <span className="text-sm font-normal leading-none">비밀번호 변경</span>
           </button>
-          <button className="h-8 w-32 rounded-lg border border-black bg-white">
-            <span className="text-sm font-normal leading-none">회원가입</span>
+          <button className="h-8 w-32 rounded-lg border border-black bg-white" onClick={() => handleSignOut()}>
+            <span className="text-sm font-normal leading-none">로그아웃</span>
           </button>
         </div>
         <div className="flex gap-x-4">
@@ -88,24 +96,6 @@ export default function Main() {
           </button>
         </div>
       </div>
-      {/* 하단 네비게이션 바 */}
-      <div className="fixed bottom-0 left-0 flex w-full justify-between border-t bg-white pb-9">
-        <Link href={'/home'} className="px-6 py-3">
-          <Image alt="button" src={CALENDAR_ICON} />
-        </Link>
-        <Link href={'/meditation'} className="px-6 py-3">
-          <Image alt="button" src={MEDITATION_ICON} />
-        </Link>
-        <Link href={'/bible'} className="px-6 py-3">
-          <Image alt="button" src={BIBLE_ICON} />
-        </Link>
-        <Link href={'/status'} className="px-6 py-3">
-          <Image alt="button" src={STATUS_ICON} />
-        </Link>
-        <Link href={'/event'} className="px-6 py-3">
-          <Image alt="button" src={EVENT_ICON} />
-        </Link>
-      </div>
-    </div>
+    </DashboardLayout>
   )
 }
