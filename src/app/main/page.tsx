@@ -1,6 +1,7 @@
 'use client'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import { doc, getDoc } from 'firebase/firestore'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import 'react-calendar/dist/Calendar.css'
@@ -129,6 +130,14 @@ export default function Main() {
       </div>
       {/* 버전 */}
       <p className="mb-6 text-base font-normal leading-none">버전: 1.0.0</p>
+      {firebaseInfo.useAdmin && (
+        <Link
+          href={'/admin'}
+          className="mb-4 flex h-8 w-32 items-center justify-center rounded-lg border border-black bg-white"
+        >
+          관리자 페이지
+        </Link>
+      )}
       {/* 버튼 2개 */}
       <div className="mb-6 flex gap-x-4">
         <button className="h-8 w-32 rounded-lg border border-black bg-white">
