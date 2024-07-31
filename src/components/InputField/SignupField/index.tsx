@@ -11,7 +11,7 @@ import { InputContainer } from '@/components/Layout'
 
 import { EmailValidationStatus } from '@/libs/emailValidationStatus'
 import { auth, firestore } from '@/libs/firebase'
-import useSignUpStore from '@/stores/SignupStore'
+import useSignUpStore from '@/stores/SignUpStore'
 
 import ARROWUP_ICON from '@icon/arrowup_icon.svg'
 
@@ -107,6 +107,8 @@ export function SignupInputField() {
             grade: signUpValue.useGrade,
             class: signUpValue.useClass,
             admin: false,
+            bibleReadingDates: [],
+            challengeStreakCount: 0,
           }).then(() => route.push('/', { scroll: false }))
         },
       )
