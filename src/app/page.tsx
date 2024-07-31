@@ -1,21 +1,29 @@
 'use client'
 
+import { signInWithEmailAndPassword } from 'firebase/auth'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
-
-import useLoginStore from '@/stores/LoginStore'
+import { useEffect, useState } from 'react'
 
 import { auth } from '@/libs/firebase'
+import useFirebaseStore from '@/stores/FirebaseStore'
+import useLoginStore from '@/stores/LoginStore'
+
 import LOGIN_BACKGROUND from '@image/Login_Background.svg'
 import LOGIN_BOTTOM from '@image/Login_Bottom.svg'
-import { signInWithEmailAndPassword } from 'firebase/auth'
 
 export default function Login() {
   const { loginValue, setUseEmail, setUsePassword, validateLoginValue } = useLoginStore()
+  const { firebaseInfo } = useFirebaseStore()
   const [errorMessage, setErrorMessage] = useState<string>('')
   const route = useRouter()
+
+  useEffect(() => {
+    if (firebaseInfo.uid) {
+      route.push('/main', { scroll: false })
+    }
+  }, [firebaseInfo])
 
   const handleOnSunbmit = async () => {
     const emailRegEx = /^[A-Za-z0-9]([-_.]?[A-Za-z0-9])*@[A-Za-z0-9]([-_.]?[A-Za-z0-9])*\.[A-Za-z]{2,3}$/i
@@ -83,7 +91,7 @@ export default function Login() {
       >
         <span className="text-sm font-normal leading-none">로그인</span>
       </button>
-      <p className="mb-4 text-base font-normal leading-none text-white">버전: 1.0</p>
+      <p className="mb-4 text-base font-normal leading-none text-white">버전: 1.0.0</p>
       <div className="mb-4 flex flex-col gap-y-4">
         <div className="flex gap-x-4">
           <button className="h-8 w-32 rounded-lg bg-white">
