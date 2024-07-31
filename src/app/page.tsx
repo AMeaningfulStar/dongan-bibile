@@ -55,27 +55,27 @@ export default function Login() {
     <div className="flex min-h-screen w-full flex-col items-center justify-between bg-black pb-9 pt-10">
       <Image alt="backbround image" src={LOGIN_BACKGROUND} className="mb-2.5" />
       <div className="flex flex-col gap-y-2.5">
-        <div className="flex min-w-56 items-center justify-between">
-          <label htmlFor="userID" className="text-xl font-light leading-none text-white">
-            Email
+        <div className="flex min-w-64 items-center justify-between">
+          <label htmlFor="userID" className="w-16 text-lg font-light leading-none text-white">
+            이메일
           </label>
           <input
             id="userID"
             type="email"
-            className="h-7 pl-1 outline-none"
+            className="h-7 flex-grow pl-1 outline-none"
             placeholder="이메일 입력해주세요"
             value={loginValue.email}
             onChange={(event) => setUseEmail(event.target.value)}
           />
         </div>
         <div className="flex items-center justify-between">
-          <label htmlFor="userPW" className="text-xl font-light leading-none text-white">
-            PW
+          <label htmlFor="userPW" className="w-16 text-lg font-light leading-none text-white">
+            비밀번호
           </label>
           <input
             id="userPW"
             type="password"
-            className="h-7 pl-1 outline-none"
+            className="h-7 flex-grow pl-1 outline-none"
             placeholder="비밀번호를 입력하세요"
             value={loginValue.password}
             onChange={(event) => setUsePassword(event.target.value)}
@@ -92,23 +92,13 @@ export default function Login() {
         <span className="text-sm font-normal leading-none">로그인</span>
       </button>
       <p className="mb-4 text-base font-normal leading-none text-white">버전: 1.0.0</p>
-      <div className="mb-4 flex flex-col gap-y-4">
-        <div className="flex gap-x-4">
-          <button className="h-8 w-32 rounded-lg bg-white">
-            <span className="text-sm font-normal leading-none">비밀번호 찾기</span>
-          </button>
-          <Link href={'/signup'} className="flex h-8 w-32 items-center justify-center rounded-lg bg-white">
-            <span className="text-sm font-normal leading-none">회원가입</span>
-          </Link>
-        </div>
-        <div className="flex gap-x-4">
-          <button className="h-8 w-32 rounded-lg bg-white">
-            <span className="text-sm font-normal leading-none">이용 가이드</span>
-          </button>
-          <button className="h-8 w-32 rounded-lg bg-white">
-            <span className="text-sm font-normal leading-none">문의하기</span>
-          </button>
-        </div>
+      <div className="mb-4 flex gap-x-4">
+        <button className="h-8 w-32 rounded-lg bg-white">
+          <span className="text-sm font-normal leading-none">비밀번호 찾기</span>
+        </button>
+        <Link href={'/signup'} className="flex h-8 w-32 items-center justify-center rounded-lg bg-white">
+          <span className="text-sm font-normal leading-none">회원가입</span>
+        </Link>
       </div>
       <Image alt="image" src={LOGIN_BOTTOM} />
     </div>
