@@ -24,6 +24,39 @@ export default function Main() {
       })
   }
 
+  // 청신호 진행률 계산
+  const calculateChallengeProgress = () => {
+    const start = new Date('2024-08-11').getTime()
+    const end = new Date('2024-12-21').getTime()
+    const today = new Date().getTime()
+
+    const totalDuration = (end - start) / (1000 * 60 * 60 * 24) // 전체 기간 (일 단위)
+    const elapsedDuration = (today - start) / (1000 * 60 * 60 * 24) // 경과한 기간 (일 단위)
+
+    if (today < start) {
+      return 0
+    }
+
+    const progress = (elapsedDuration / totalDuration) * 100
+
+    return Math.round(progress)
+  }
+
+  // 나의 진행률 계산
+  const calculateMyProgress = () => {
+    const start = new Date('2024-08-11').getTime()
+    const end = new Date('2024-12-21').getTime()
+    const totalDuration = (end - start) / (1000 * 60 * 60 * 24) + 1
+
+    if (firebaseInfo.bibleReadingDates?.length) {
+      const result = (firebaseInfo.bibleReadingDates.length / totalDuration) * 100
+
+      return Math.round(result)
+    }
+
+    return 0
+  }
+
   useEffect(() => {
     onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -63,38 +96,32 @@ export default function Main() {
       <div className="mb-3 flex w-full flex-col gap-y-3 px-4">
         <div className="pt-5 text-lg font-light leading-none">청신호 진행률</div>
         <div className="flex items-center gap-x-2">
-          <div className="h-2 flex-grow bg-[#E8EEFF]"></div>
-          <div>000 %</div>
+          <div className="relative h-2 flex-grow bg-[#E8EEFF]">
+            <div className="absolute h-full bg-[#0276F9]" style={{ width: `${calculateChallengeProgress()}%` }}></div>
+          </div>
+          <div>{calculateChallengeProgress()}%</div>
         </div>
       </div>
       {/* 나의 진행률 */}
       <div className="mb-16 flex w-full flex-col gap-y-3 px-4">
         <div className="pt-5 text-lg font-light leading-none">나의 진행률</div>
         <div className="flex items-center gap-x-2">
-          <div className="h-2 flex-grow bg-[#E8EEFF]"></div>
-          <div>000 %</div>
+          <div className="relative h-2 flex-grow bg-[#E8EEFF]">
+            <div className="absolute h-full bg-[#0276F9]" style={{ width: `${calculateMyProgress()}%` }}></div>
+          </div>
+          <div>{calculateMyProgress()}%</div>
         </div>
       </div>
       {/* 버전 */}
-      <p className="mb-6 text-base font-normal leading-none">버전: 1.0</p>
-      {/* 버튼 4개 */}
-      <div className="mb-6 flex flex-col gap-y-4">
-        <div className="flex gap-x-4">
-          <button className="h-8 w-32 rounded-lg border border-black bg-white" onClick={() => printFirebaseInfo()}>
-            <span className="text-sm font-normal leading-none">비밀번호 변경</span>
-          </button>
-          <button className="h-8 w-32 rounded-lg border border-black bg-white" onClick={() => handleSignOut()}>
-            <span className="text-sm font-normal leading-none">로그아웃</span>
-          </button>
-        </div>
-        <div className="flex gap-x-4">
-          <button className="h-8 w-32 rounded-lg border border-black bg-white">
-            <span className="text-sm font-normal leading-none">이용 가이드</span>
-          </button>
-          <button className="h-8 w-32 rounded-lg border border-black bg-white">
-            <span className="text-sm font-normal leading-none">문의하기</span>
-          </button>
-        </div>
+      <p className="mb-6 text-base font-normal leading-none">버전: 1.0.0</p>
+      {/* 버튼 2개 */}
+      <div className="mb-6 flex gap-x-4">
+        <button className="h-8 w-32 rounded-lg border border-black bg-white">
+          <span className="text-sm font-normal leading-none">비밀번호 변경</span>
+        </button>
+        <button className="h-8 w-32 rounded-lg border border-black bg-white" onClick={() => handleSignOut()}>
+          <span className="text-sm font-normal leading-none">로그아웃</span>
+        </button>
       </div>
     </DashboardLayout>
   )
