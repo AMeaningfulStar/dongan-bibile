@@ -34,7 +34,12 @@
     }
   }
   .react-calendar__tile {
-    background: #EEEEEE;
+    background: #eeeeee;
+  }
+
+  .react-calendar__tile--active {
+    background: #a7d2ff;
+    color: black;
   }
 
   .react-calendar__tile--now {
