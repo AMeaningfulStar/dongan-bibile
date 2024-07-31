@@ -1,20 +1,28 @@
-import Image from 'next/image'
-import Link from 'next/link'
+'use client'
 
-import BIBLE_ICON from '@icon/bible_icon.svg'
-import CALENDAR_ICON from '@icon/calendar_icon.svg'
-import EVENT_ICON from '@icon/event_icon.svg'
+import { ko } from 'date-fns/locale'
+import Image from 'next/image'
+import { forwardRef, useState } from 'react'
+import DatePicker from 'react-datepicker'
+
+import 'react-datepicker/dist/react-datepicker.css'
+
+import { DashboardLayout } from '@/components/Layout'
+
 import KAKAO_ICON from '@icon/kakao_icon.svg'
 import LINK_ICON from '@icon/link_icon.svg'
-import MEDITATION_ICON from '@icon/meditation_icon.svg'
-import STATUS_ICON from '@icon/status_icon.svg'
 
 export default function Meditation() {
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date())
+
+  const PickerCustomInput = forwardRef(({ value, onClick }: any, ref: any) => (
+    <button className="h-full flex-grow" onClick={onClick} ref={ref}>
+      {value}
+    </button>
+  ))
+
   return (
-    <div className="flex min-h-screen w-full flex-col items-center py-20">
-      <div className="fixed left-0 top-0 flex w-full items-center justify-center border-b border-[#AAAAAA] bg-white pb-3 pt-10">
-        <span className="text-xl font-light">말씀읽기</span>
-      </div>
+    <DashboardLayout pageName="말씀읽기">
       {/* 오늘의 말씀 */}
       <div className="w-full border-l-4 border-[#0276F9] bg-[#ECF0FB] py-2.5 pl-2.5">
         <span className="text-base font-semibold leading-none">오늘의 말씀: 마태복음 1 - 2장</span>
@@ -23,7 +31,15 @@ export default function Meditation() {
       <div className="flex w-full justify-between gap-x-3 px-4 py-3">
         <div className="flex flex-grow gap-x-2.5">
           <div className="text-base">날짜</div>
-          <button className="flex-grow rounded-md border border-black">00 / 00</button>
+          <DatePicker
+            dateFormat="MM월 dd일" // 날짜 형태
+            locale={ko}
+            shouldCloseOnSelect // 날짜를 선택하면 datepicker가 자동으로 닫힘
+            customInput={<PickerCustomInput />}
+            minDate={new Date('2024-07-01')} // minDate 이전 날짜 선택 불가
+            selected={selectedDate}
+            onChange={(date) => setSelectedDate(date)}
+          />
         </div>
         <div className="flex flex-grow gap-x-2.5">
           <div className="text-base">성경</div>
@@ -37,11 +53,11 @@ export default function Meditation() {
         </button>
       </div>
       {/* 말씀 타이틀 */}
-      <div className="flex w-full justify-center py-7">
+      {/* <div className="flex w-full justify-center py-7">
         <span className="text-xl font-medium leading-none">마태복음 1장</span>
-      </div>
+      </div> */}
       {/* 말씀 */}
-      <div className="mb-5 flex w-full flex-col gap-y-1 px-4">
+      {/* <div className="mb-5 flex w-full flex-col gap-y-1 px-4">
         <div className="my-1 text-base font-semibold">예수 그리스도의 계보(눅 3:23-38)</div>
         <div className="flex gap-x-2 leading-tight">
           <span>1</span>
@@ -156,25 +172,7 @@ export default function Meditation() {
           <span>25</span>
           <span>아들을 낳기까지 동침하지 아니하더니 낳으매 이름을 예수라 하니라</span>
         </div>
-      </div>
-      {/* 하단 네비게이션 바 */}
-      <div className="fixed bottom-0 left-0 flex w-full justify-between border-t bg-white pb-9">
-        <Link href={'/home'} className="px-6 py-3">
-          <Image alt="button" src={CALENDAR_ICON} />
-        </Link>
-        <Link href={'/meditation'} className="px-6 py-3">
-          <Image alt="button" src={MEDITATION_ICON} />
-        </Link>
-        <Link href={'/bible'} className="px-6 py-3">
-          <Image alt="button" src={BIBLE_ICON} />
-        </Link>
-        <Link href={'/status'} className="px-6 py-3">
-          <Image alt="button" src={STATUS_ICON} />
-        </Link>
-        <Link href={'/event'} className="px-6 py-3">
-          <Image alt="button" src={EVENT_ICON} />
-        </Link>
-      </div>
-    </div>
+      </div> */}
+    </DashboardLayout>
   )
 }
