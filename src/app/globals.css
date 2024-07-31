@@ -34,14 +34,21 @@
     }
   }
   .react-calendar__tile {
-    background: #EEEEEE;
+    background: #eeeeee;
   }
 
   .react-calendar__tile--now {
     border: 1px solid black;
   }
-
   .react-calendar__tile--read {
+    background: #64ABFB;
+  }
+
+  .react-calendar__tile--now:enabled:hover {
+    background: #a7d2ff;
+  }
+
+  .react-calendar__tile--read:enabled:hover {
     background: #0276f9;
   }
 }
