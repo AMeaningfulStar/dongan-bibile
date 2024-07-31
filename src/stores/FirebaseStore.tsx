@@ -16,6 +16,8 @@ interface ReadDataType {
   name: string
   phoneNum: string
   position: string
+  bibleReadingDates: Array<string>
+  challengeStreakCount: number
 }
 
 interface FirebaseState {
@@ -27,6 +29,8 @@ interface FirebaseState {
   useGrade: number | null
   useClass: number | null
   useAdmin: boolean | null
+  bibleReadingDates: Array<string> | null
+  challengeStreakCount: number | null
 }
 
 const useFirebaseStore = create(
@@ -41,6 +45,8 @@ const useFirebaseStore = create(
         useGrade: null,
         useClass: null,
         useAdmin: false,
+        bibleReadingDates: null,
+        challengeStreakCount: null,
       },
 
       initFirebaseInfo: () =>
@@ -55,6 +61,8 @@ const useFirebaseStore = create(
             useGrade: null,
             useClass: null,
             useAdmin: false,
+            bibleReadingDates: null,
+            challengeStreakCount: null,
           },
         })),
 
@@ -77,6 +85,8 @@ const useFirebaseStore = create(
             useGrade: newFirebaseInfo.grade,
             useClass: newFirebaseInfo.class,
             useAdmin: newFirebaseInfo.admin,
+            bibleReadingDates: newFirebaseInfo.bibleReadingDates,
+            challengeStreakCount: newFirebaseInfo.challengeStreakCount,
           },
         })),
     }),

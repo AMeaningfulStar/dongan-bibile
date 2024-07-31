@@ -3,11 +3,14 @@ import { onAuthStateChanged, signOut } from 'firebase/auth'
 import { doc, getDoc } from 'firebase/firestore'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
+import 'react-calendar/dist/Calendar.css'
 
 import { auth, firestore } from '@/libs/firebase'
 import useFirebaseStore from '@/stores/FirebaseStore'
 
 import { DashboardLayout } from '@/components/Layout'
+import moment from 'moment'
+import Calendar from 'react-calendar'
 
 export default function Main() {
   const { firebaseInfo, setFirebaseUid, setFirebaseInfo, initFirebaseInfo } = useFirebaseStore()
@@ -67,30 +70,42 @@ export default function Main() {
           setFirebaseUid(user.uid)
           setFirebaseInfo(docSnap.data())
         } else {
-          // docSnap.data() will be undefined in this case
           console.log('No such document!')
         }
       }
     })
   }, [])
 
-  const printFirebaseInfo = () => {
-    console.log('🚀 ~ Main ~ firebaseInfo:', firebaseInfo)
-  }
   return (
     <DashboardLayout pageName="홈">
       {/* 청신호 연속 읽은 날짜 텍스트 */}
       <div className="w-full px-4 py-2.5">
         <div className="rounded-full bg-[#E8EEFF] py-2.5 pl-5">
           <div className="text-lg font-light leading-none">
-            청신호 연속 <span className="font-medium text-[#0276F9]">000</span> 일째
+            청신호 연속 <span className="font-medium text-[#0276F9]">{firebaseInfo.challengeStreakCount}</span> 일째
           </div>
         </div>
       </div>
       {/* 캘린더 */}
       <div className="mb-10 flex w-full flex-col items-center px-4">
         <div className="w-full py-5 text-lg font-light leading-none">나의 말씀 읽기</div>
-        <div className="h-96 w-full bg-slate-500"></div>
+        <Calendar
+          locale="ko"
+          formatDay={(locale, data) => moment(data).format('DD')}
+          maxDetail="month"
+          minDetail="month"
+          calendarType="gregory"
+          showNeighboringMonth={false}
+          className="mx-auto w-full text-sm"
+          prev2Label={null}
+          next2Label={null}
+          view="month"
+          tileClassName={({ date, view }) => {
+            if (firebaseInfo.bibleReadingDates?.find((x) => x === moment(date).format('YYYY-MM-DD'))) {
+              return 'react-calendar__tile--read'
+            }
+          }}
+        />
       </div>
       {/* 청신호 진행률 */}
       <div className="mb-3 flex w-full flex-col gap-y-3 px-4">

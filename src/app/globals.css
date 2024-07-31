@@ -4,8 +4,6 @@
 
 .react-calendar {
   border: none !important;
-  width: 350px;
-  min-width: 300px;
 
   .react-calendar__month-view__weekdays {
     display: flex;
@@ -13,9 +11,9 @@
   }
 
   .react-calendar__tile {
-    width: 50px;
-    height: 50px;
-    border-radius: 9999px;
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
   }
 
   .react-calendar__navigation {
@@ -34,6 +32,17 @@
       font-weight: 700;
       background-color: #fff;
     }
+  }
+  .react-calendar__tile {
+    background: #EEEEEE;
+  }
+
+  .react-calendar__tile--now {
+    border: 1px solid black;
+  }
+
+  .react-calendar__tile--read {
+    background: #0276f9;
   }
 }
 
