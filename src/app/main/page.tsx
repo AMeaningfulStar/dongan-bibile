@@ -15,12 +15,14 @@ import useFirebaseStore from '@/stores/FirebaseStore'
 
 import { DashboardLayout } from '@/components/Layout'
 
+import useBibleInfo from '@/stores/BibleInfo'
 import AIRPLANE_ICON from '@icon/airplane_Icon.svg'
 import FIRE_ICON from '@icon/fire_Icon.svg'
 import TRAFFICLIGHT_ICON from '@icon/trafficLight_Icon.svg'
 
 export default function Main() {
   const { firebaseInfo, setFirebaseUid, setFirebaseInfo, initFirebaseInfo } = useFirebaseStore()
+  const { setDatePick } = useBibleInfo()
   const route = useRouter()
 
   const handleSignOut = () => {
@@ -67,6 +69,18 @@ export default function Main() {
     return 0
   }
 
+  const goToBibleReading = async (datePick: string) => {
+    const datePickRef = doc(firestore, 'biblePlan', datePick)
+    const datePickSnapshot = await getDoc(datePickRef)
+
+    if (datePickSnapshot.exists()) {
+      setDatePick(datePick)
+      route.push('/bible', { scroll: false })
+    } else {
+      route.push('/bible/no-data', { scroll: false })
+    }
+  }
+
   useEffect(() => {
     onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -108,6 +122,7 @@ export default function Main() {
           prev2Label={null}
           next2Label={null}
           view="month"
+          onChange={(event: any) => goToBibleReading(moment(event).format('YYYY-MM-DD'))}
           tileClassName={({ date, view }) => {
             if (firebaseInfo.bibleReadingDates?.find((x) => x === moment(date).format('YYYY-MM-DD'))) {
               return 'react-calendar__tile--read'
