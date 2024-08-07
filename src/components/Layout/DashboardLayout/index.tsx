@@ -71,6 +71,27 @@ export function LoadingScreen({ pageName }: { pageName: string }) {
   )
 }
 
+export function NoBibleData({ pageName }: { pageName: string }) {
+  return (
+    <div className="flex min-h-screen w-full flex-col items-center py-24">
+      <div className="fixed left-0 top-0 flex w-full items-center justify-center border-b border-[#AAAAAA] bg-white pb-3 pt-12">
+        <Title textColor="">{pageName}</Title>
+      </div>
+      <div className="flex flex-grow flex-col items-center justify-center gap-y-5">
+        <Image alt="image" src={LIGHTUP_ICON} />
+        <div className="text-xl leading-none">해당 날짜에 말씀을 준비중입니다</div>
+        <Link
+          href={'/main'}
+          className="my-5 rounded-full border-2 border-[#0276F9] px-10 py-3 font-semibold text-[#0276F9]"
+        >
+          홈으로 이동하기
+        </Link>
+      </div>
+      <NavigationBar />
+    </div>
+  )
+}
+
 function NavigationBar() {
   return (
     <div className="fixed bottom-0 left-0 flex w-full justify-between border-t bg-white pb-9">

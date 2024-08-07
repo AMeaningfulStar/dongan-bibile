@@ -1,19 +1,28 @@
 'use client'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import { doc, getDoc } from 'firebase/firestore'
+import moment from 'moment'
+import Image from 'next/image'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
+import Calendar from 'react-calendar'
+
 import 'react-calendar/dist/Calendar.css'
 
 import { auth, firestore } from '@/libs/firebase'
 import useFirebaseStore from '@/stores/FirebaseStore'
 
 import { DashboardLayout } from '@/components/Layout'
-import moment from 'moment'
-import Calendar from 'react-calendar'
+
+import useBibleInfo from '@/stores/BibleInfo'
+import AIRPLANE_ICON from '@icon/airplane_Icon.svg'
+import FIRE_ICON from '@icon/fire_Icon.svg'
+import TRAFFICLIGHT_ICON from '@icon/trafficLight_Icon.svg'
 
 export default function Main() {
   const { firebaseInfo, setFirebaseUid, setFirebaseInfo, initFirebaseInfo } = useFirebaseStore()
+  const { setDatePick } = useBibleInfo()
   const route = useRouter()
 
   const handleSignOut = () => {
@@ -60,6 +69,18 @@ export default function Main() {
     return 0
   }
 
+  const goToBibleReading = async (datePick: string) => {
+    const datePickRef = doc(firestore, 'biblePlan', datePick)
+    const datePickSnapshot = await getDoc(datePickRef)
+
+    if (datePickSnapshot.exists()) {
+      setDatePick(datePick)
+      route.push('/bible', { scroll: false })
+    } else {
+      route.push('/bible/no-data', { scroll: false })
+    }
+  }
+
   useEffect(() => {
     onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -80,10 +101,11 @@ export default function Main() {
     <DashboardLayout pageName="홈">
       {/* 청신호 연속 읽은 날짜 텍스트 */}
       <div className="w-full px-4 py-2.5">
-        <div className="rounded-full bg-[#E8EEFF] py-2.5 pl-5">
+        <div className="item-center flex gap-x-1 rounded-full bg-[#E8EEFF] py-2.5 pl-5">
           <div className="text-lg font-light leading-none">
             청신호 연속 <span className="font-medium text-[#0276F9]">{firebaseInfo.challengeStreakCount}</span> 일째
           </div>
+          <Image alt="icon" src={FIRE_ICON} />
         </div>
       </div>
       {/* 캘린더 */}
@@ -100,6 +122,7 @@ export default function Main() {
           prev2Label={null}
           next2Label={null}
           view="month"
+          onChange={(event: any) => goToBibleReading(moment(event).format('YYYY-MM-DD'))}
           tileClassName={({ date, view }) => {
             if (firebaseInfo.bibleReadingDates?.find((x) => x === moment(date).format('YYYY-MM-DD'))) {
               return 'react-calendar__tile--read'
@@ -109,7 +132,10 @@ export default function Main() {
       </div>
       {/* 청신호 진행률 */}
       <div className="mb-3 flex w-full flex-col gap-y-3 px-4">
-        <div className="pt-5 text-lg font-light leading-none">청신호 진행률</div>
+        <div className="flex items-center gap-x-1 pt-5">
+          <Image alt="icon" src={TRAFFICLIGHT_ICON} />
+          <span className="text-lg font-light leading-none">청신호 진행률</span>
+        </div>
         <div className="flex items-center gap-x-2">
           <div className="relative h-2 flex-grow bg-[#E8EEFF]">
             <div className="absolute h-full bg-[#0276F9]" style={{ width: `${calculateChallengeProgress()}%` }}></div>
@@ -119,7 +145,10 @@ export default function Main() {
       </div>
       {/* 나의 진행률 */}
       <div className="mb-16 flex w-full flex-col gap-y-3 px-4">
-        <div className="pt-5 text-lg font-light leading-none">나의 진행률</div>
+        <div className="flex items-center gap-x-1 pt-5">
+          <Image alt="icon" src={AIRPLANE_ICON} />
+          <span className="text-lg font-light leading-none">나의 진행률</span>
+        </div>
         <div className="flex items-center gap-x-2">
           <div className="relative h-2 flex-grow bg-[#E8EEFF]">
             <div className="absolute h-full bg-[#0276F9]" style={{ width: `${calculateMyProgress()}%` }}></div>
@@ -130,6 +159,14 @@ export default function Main() {
       {/* 버전 */}
       <p className="mb-6 text-base font-normal leading-none">버전: 1.0.0</p>
       {/* 버튼 2개 */}
+      {firebaseInfo.useAdmin && (
+        <Link
+          href={'/admin'}
+          className="mb-4 flex h-8 w-32 items-center justify-center rounded-lg border border-black bg-white"
+        >
+          관리자 페이지
+        </Link>
+      )}
       <div className="mb-6 flex gap-x-4">
         <button className="h-8 w-32 rounded-lg border border-black bg-white">
           <span className="text-sm font-normal leading-none">비밀번호 변경</span>
