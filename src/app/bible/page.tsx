@@ -83,7 +83,9 @@ export default function Bible() {
             shouldCloseOnSelect // 날짜를 선택하면 datepicker가 자동으로 닫힘
             customInput={<PickerCustomInput />}
             minDate={new Date('2024-07-01')} // minDate 이전 날짜 선택 불가
-            selected={moment(datePick, 'YYYY-MM-DD').toDate()}
+            selected={
+              moment(datePick, 'YYYY-MM-DD', true).isValid() ? moment(datePick, 'YYYY-MM-DD').toDate() : new Date()
+            }
             onChange={(date) => handleDatePick(moment(date).format('YYYY-MM-DD'))}
           />
         </div>
