@@ -16,9 +16,9 @@ import useFirebaseStore from '@/stores/FirebaseStore'
 import { DashboardLayout } from '@/components/Layout'
 
 import useBibleInfo from '@/stores/BibleInfo'
-import AIRPLANE_ICON from '@icon/airplane_Icon.svg'
-import FIRE_ICON from '@icon/fire_Icon.svg'
-import TRAFFICLIGHT_ICON from '@icon/trafficLight_Icon.svg'
+import AIRPLANE_ICON from '@icon/airplane_icon.svg'
+import FIRE_ICON from '@icon/fire_icon.svg'
+import TRAFFICLIGHT_ICON from '@icon/trafficLight_icon.svg'
 
 export default function Main() {
   const { firebaseInfo, setFirebaseUid, setFirebaseInfo, initFirebaseInfo } = useFirebaseStore()
