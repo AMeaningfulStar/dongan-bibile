@@ -26,7 +26,7 @@ export default function Status() {
       </div>
       {/* 하단 네비게이션 바 */}
       <div className="fixed bottom-0 left-0 flex w-full justify-between border-t bg-white pb-9">
-        <Link href={'/home'} className="px-6 py-3">
+        <Link href={'/main'} className="px-6 py-3">
           <Image alt="button" src={CALENDAR_ICON} />
         </Link>
         <Link href={'/meditation'} className="px-6 py-3">
