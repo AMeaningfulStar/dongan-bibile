@@ -18,7 +18,7 @@ export default function Status() {
         <Image alt="image" src={LIGHTUP_ICON} />
         <div className="text-xl leading-none">이벤트가 없습니다</div>
         <Link
-          href={'/home'}
+          href={'/main'}
           className="my-5 rounded-full border-2 border-[#0276F9] px-10 py-3 font-semibold text-[#0276F9]"
         >
           홈으로 이동하기
