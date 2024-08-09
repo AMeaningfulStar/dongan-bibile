@@ -38,7 +38,14 @@ export default function Bible() {
     const datePickSnapshot = await getDoc(datePickRef)
 
     if (datePickSnapshot.exists()) {
-      setDatePick(datePick)
+      // datePick이 유효한지 확인
+      const isValidDate = moment(datePick, 'YYYY-MM-DD', true).isValid()
+      if (isValidDate) {
+        setDatePick(datePick)
+      } else {
+        console.error('Invalid date selected:', datePick)
+        // 유효하지 않은 날짜 처리
+      }
     } else {
       route.push('/bible/no-data', { scroll: false })
     }
@@ -76,7 +83,9 @@ export default function Bible() {
             shouldCloseOnSelect // 날짜를 선택하면 datepicker가 자동으로 닫힘
             customInput={<PickerCustomInput />}
             minDate={new Date('2024-07-01')} // minDate 이전 날짜 선택 불가
-            selected={new Date(datePick)}
+            selected={
+              moment(datePick, 'YYYY-MM-DD', true).isValid() ? moment(datePick, 'YYYY-MM-DD').toDate() : new Date()
+            }
             onChange={(date) => handleDatePick(moment(date).format('YYYY-MM-DD'))}
           />
         </div>
