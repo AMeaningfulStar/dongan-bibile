@@ -134,7 +134,7 @@ export default function Bible() {
           </div>
 
           {item.verses.map((item, idx) => (
-            <div key={idx} className="flex w-full gap-x-2 px-4 leading-tight">
+            <div key={idx} className="flex w-full gap-x-2 px-4 leading-normal">
               <span>{item.verse}</span>
               <span>{item.text}</span>
             </div>
