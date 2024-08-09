@@ -6,7 +6,7 @@ import { ChangeEvent, useEffect, useState } from 'react'
 import Calendar from 'react-calendar'
 
 import { firestore } from '@/libs/firebase'
-import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { arrayRemove, arrayUnion, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
 
 import { DashboardLayout } from '@/components/Layout'
 import { BookOption, options } from '@/libs/bibleOption'
@@ -63,33 +63,50 @@ export default function SetBible() {
   }
 
   const handleAddBibleList = async () => {
-    // biblePlan 컬렉션에서 datePick 문서 참조
-    const bibleInfoRef = doc(firestore, 'biblePlan', datePick)
-    const bibleInfoSnap = await getDoc(bibleInfoRef)
+    try {
+      // biblePlan 컬렉션에서 datePick 문서 참조
+      const bibleInfoRef = doc(firestore, 'biblePlan', datePick)
+      const bibleInfoSnap = await getDoc(bibleInfoRef)
 
-    if (bibleInfoSnap.exists()) {
-      await setDoc(doc(firestore, 'biblePlan', datePick), {
-        bibleInfo: [
-          ...bibleInfoSnap.data().bibleInfo,
-          {
+      if (bibleInfoSnap.exists()) {
+        await updateDoc(bibleInfoRef, {
+          bibleInfo: arrayUnion({
             name: selectedBook?.label,
             book: selectedBook?.book,
             chapter: selectedChapter,
             testament: selectedBook?.testament,
-          },
-        ],
-      })
-    } else {
-      await setDoc(doc(firestore, 'biblePlan', datePick), {
-        bibleInfo: [
-          {
-            name: selectedBook?.label,
-            book: selectedBook?.book,
-            chapter: selectedChapter,
-            testament: selectedBook?.testament,
-          },
-        ],
-      })
+          }),
+        }).then(() => readBibleList(datePick))
+      } else {
+        await setDoc(bibleInfoRef, {
+          bibleInfo: [
+            {
+              name: selectedBook?.label,
+              book: selectedBook?.book,
+              chapter: selectedChapter,
+              testament: selectedBook?.testament,
+            },
+          ],
+        }).then(() => readBibleList(datePick))
+      }
+    } catch (error) {
+      console.error('Error checking for bible list update:', error)
+    }
+  }
+
+  const handleDeleteBibleList = async (index: number) => {
+    try {
+      // biblePlan 컬렉션에서 datePick 문서 참조
+      const bibleInfoRef = doc(firestore, 'biblePlan', datePick)
+      const bibleInfoSnap = await getDoc(bibleInfoRef)
+
+      if (bibleInfoSnap.exists()) {
+        await updateDoc(bibleInfoRef, {
+          bibleInfo: arrayRemove(bibleList[index]),
+        }).then(() => readBibleList(datePick))
+      }
+    } catch (error) {
+      console.error('Error checking for bible list delete:', error)
     }
   }
 
@@ -118,12 +135,15 @@ export default function SetBible() {
         <div className="w-full">
           <span className="text-xl font-light leading-none">{moment(datePick).format('YYYY-MM-DD')}</span>
         </div>
-        <div className="w-full">
+        <div className="flex w-full flex-col gap-y-2">
           {bibleList.map((item, idx) => (
-            <div key={idx} className="flex">
-              <span className="text-lg font-light leading-none">
+            <div key={idx} className="flex items-center justify-between rounded-lg border p-2">
+              <span className="text-base font-light leading-none">
                 {item.name} {item.chapter}장
               </span>
+              <button className="rounded-sm border bg-[#E8EEFF] p-1" onClick={() => handleDeleteBibleList(idx)}>
+                삭제
+              </button>
             </div>
           ))}
         </div>
