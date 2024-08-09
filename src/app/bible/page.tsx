@@ -1,8 +1,10 @@
 'use client'
 
 import { ko } from 'date-fns/locale'
+import { arrayUnion, doc, getDoc, updateDoc } from 'firebase/firestore'
 import moment from 'moment'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { forwardRef, useState } from 'react'
 import DatePicker from 'react-datepicker'
 import { twMerge } from 'tailwind-merge'
@@ -10,19 +12,19 @@ import { twMerge } from 'tailwind-merge'
 import 'react-datepicker/dist/react-datepicker.css'
 
 import { BibleType } from '@/libs/bibleType'
+import { firestore } from '@/libs/firebase'
 import { useBibleData } from '@/libs/swr/useBibleData'
 import useBibleInfo from '@/stores/BibleInfo'
 
 import { DashboardLayout, ErrorLayout, LoadingLayout } from '@/components/Layout'
 
-import { firestore } from '@/libs/firebase'
+import useFirebaseStore from '@/stores/FirebaseStore'
 import KAKAO_ICON from '@icon/kakao_icon.svg'
 import LINK_ICON from '@icon/link_icon.svg'
-import { doc, getDoc } from 'firebase/firestore'
-import { useRouter } from 'next/navigation'
 
 export default function Bible() {
   const { datePick, bibleType, setBibleType, setDatePick } = useBibleInfo()
+  const { firebaseInfo } = useFirebaseStore()
   const { bibleData, isLoading, isError } = useBibleData(datePick, bibleType)
   const [isShowDrop, setIsShowDrop] = useState<boolean>(false)
   const route = useRouter()
@@ -54,6 +56,21 @@ export default function Bible() {
   const handleDropdown = (type: BibleType) => {
     setBibleType(type)
     setIsShowDrop(false)
+  }
+
+  const handleBibleRead = async () => {
+    try {
+      const bibleReadRef = doc(firestore, 'users', firebaseInfo.uid as string)
+      const bibleReadSnap = await getDoc(bibleReadRef)
+
+      if (bibleReadSnap.exists()) {
+        await updateDoc(bibleReadRef, {
+          bibleReadingDates: arrayUnion(datePick),
+        }).then(() => route.push('/main', { scroll: false }))
+      }
+    } catch (error) {
+      console.error('Error checking for bible read:', error)
+    }
   }
 
   if (isLoading) {
@@ -141,6 +158,19 @@ export default function Bible() {
           ))}
         </div>
       ))}
+
+      <button
+        className={twMerge(
+          'mb-5 mt-16 h-9 w-40 rounded-full border ',
+          firebaseInfo.bibleReadingDates?.includes(datePick)
+            ? 'border-[#CCC] bg-[#CCC] text-white'
+            : 'border-[#0276F9] bg-[#0276F9] text-white',
+        )}
+        disabled={firebaseInfo.bibleReadingDates?.includes(datePick)}
+        onClick={handleBibleRead}
+      >
+        말씀을 읽었습니다
+      </button>
     </DashboardLayout>
   )
 }
