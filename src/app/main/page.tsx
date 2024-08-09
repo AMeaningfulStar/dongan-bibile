@@ -61,9 +61,15 @@ export default function Main() {
     const totalDuration = (end - start) / (1000 * 60 * 60 * 24) + 1
 
     if (firebaseInfo.bibleReadingDates?.length) {
-      const result = (firebaseInfo.bibleReadingDates.length / totalDuration) * 100
-
-      return Math.round(result)
+      // start와 end 사이의 날짜만 필터링
+      const validDates = firebaseInfo.bibleReadingDates.filter(date => {
+        const currentDate = new Date(date).getTime();
+        return currentDate >= start && currentDate <= end;
+      });
+  
+      const result = (validDates.length / totalDuration) * 100;
+  
+      return Math.round(result);
     }
 
     return 0
