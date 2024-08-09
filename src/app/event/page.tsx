@@ -1,7 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
 
-import BIBLE_ICON from '@icon/bible_icon.svg'
 import CALENDAR_ICON from '@icon/calendar_icon.svg'
 import EVENT_ICON from '@icon/event_icon.svg'
 import LIGHTUP_ICON from '@icon/lightup_icon.svg'
@@ -32,9 +31,6 @@ export default function Status() {
         </Link>
         <Link href={'/meditation'} className="px-6 py-3">
           <Image alt="button" src={MEDITATION_ICON} />
-        </Link>
-        <Link href={'/bible'} className="px-6 py-3">
-          <Image alt="button" src={BIBLE_ICON} />
         </Link>
         <Link href={'/status'} className="px-6 py-3">
           <Image alt="button" src={STATUS_ICON} />
