@@ -16,10 +16,10 @@ import { firestore } from '@/libs/firebase'
 import { useBibleData } from '@/libs/swr/useBibleData'
 import useBibleInfo from '@/stores/BibleInfo'
 
+import { KakaoShareBtn } from '@/components/Button'
 import { DashboardLayout, ErrorLayout, LoadingLayout } from '@/components/Layout'
 
 import useFirebaseStore from '@/stores/FirebaseStore'
-import KAKAO_ICON from '@icon/kakao_icon.svg'
 import LINK_ICON from '@icon/link_icon.svg'
 
 export default function Bible() {
@@ -138,9 +138,10 @@ export default function Bible() {
             </ul>
           </div>
         </div>
-        <button className="flex h-6 w-6 items-center justify-center rounded-full bg-[#FFEB3B]">
-          <Image alt="icon" src={KAKAO_ICON} className="w-4" />
-        </button>
+        <KakaoShareBtn
+          startBible={bibleData?.data[0] as { title: string; chapter: number }}
+          endBible={bibleData?.data.at(-1) as { title: string; chapter: number }}
+        />
         <button className="flex h-6 w-6 items-center justify-center rounded-full bg-[#AAAAAA]">
           <Image alt="icon" src={LINK_ICON} />
         </button>
