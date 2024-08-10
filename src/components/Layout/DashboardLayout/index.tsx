@@ -30,8 +30,8 @@ export function DashboardLayout({ children, pageName }: LayoutType) {
     }
   }, [])
   return (
-    <div className="flex min-h-screen w-full flex-col items-center py-24">
-      <div className="fixed left-0 top-0 z-30 flex w-full items-center justify-center border-b border-[#AAAAAA] bg-white pb-3 pt-12">
+    <div className="flex min-h-screen w-full flex-col items-center py-14">
+      <div className="fixed left-0 top-0 z-30 flex w-full items-center justify-center border-b border-[#AAAAAA] bg-white py-4">
         <Title textColor="">{pageName}</Title>
       </div>
       {children}
@@ -51,8 +51,8 @@ export function LoadingScreen({ pageName }: { pageName: string }) {
   }, [])
 
   return (
-    <div className="flex min-h-screen w-full flex-col items-center py-24">
-      <div className="fixed left-0 top-0 flex w-full items-center justify-center border-b border-[#AAAAAA] bg-white pb-3 pt-12">
+    <div className="flex min-h-screen w-full flex-col items-center py-14">
+      <div className="fixed left-0 top-0 flex w-full items-center justify-center border-b border-[#AAAAAA] bg-white py-4">
         <Title textColor="">{pageName}</Title>
       </div>
       <div className="flex flex-grow flex-col items-center justify-center gap-y-5">
@@ -72,8 +72,8 @@ export function LoadingScreen({ pageName }: { pageName: string }) {
 
 export function NoBibleData({ pageName }: { pageName: string }) {
   return (
-    <div className="flex min-h-screen w-full flex-col items-center py-24">
-      <div className="fixed left-0 top-0 flex w-full items-center justify-center border-b border-[#AAAAAA] bg-white pb-3 pt-12">
+    <div className="flex min-h-screen w-full flex-col items-center py-14">
+      <div className="fixed left-0 top-0 flex w-full items-center justify-center border-b border-[#AAAAAA] bg-white py-4">
         <Title textColor="">{pageName}</Title>
       </div>
       <div className="flex flex-grow flex-col items-center justify-center gap-y-5">
@@ -93,7 +93,7 @@ export function NoBibleData({ pageName }: { pageName: string }) {
 
 function NavigationBar() {
   return (
-    <div className="fixed bottom-0 left-0 flex w-full justify-between border-t bg-white pb-9">
+    <div className="fixed bottom-0 left-0 flex w-full justify-between border-t bg-white pb-4">
       <Link href={'/main'} className="px-6 py-3">
         <Image alt="button" src={CALENDAR_ICON} />
       </Link>

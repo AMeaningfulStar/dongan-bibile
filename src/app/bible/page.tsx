@@ -166,7 +166,7 @@ export default function Bible() {
 
       <button
         className={twMerge(
-          'mb-5 mt-16 h-9 w-40 rounded-full border ',
+          'mb-10 mt-16 h-9 w-40 rounded-full border ',
           firebaseInfo.bibleReadingDates?.includes(datePick)
             ? 'border-[#CCC] bg-[#CCC] text-white'
             : 'border-[#0276F9] bg-[#0276F9] text-white',

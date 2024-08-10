@@ -11,8 +11,8 @@ import STATUS_ICON from '@icon/status_icon.svg'
 
 export default function Status() {
   return (
-    <div className="flex min-h-screen w-full flex-col items-center py-24">
-      <div className="fixed left-0 top-0 z-30 flex w-full items-center justify-center border-b border-[#AAAAAA] bg-white pb-3 pt-12">
+    <div className="flex min-h-screen w-full flex-col items-center py-14">
+      <div className="fixed left-0 top-0 z-30 flex w-full items-center justify-center border-b border-[#AAAAAA] bg-white py-4">
         <Title textColor="">이벤트</Title>
       </div>
       {/* 이벤트 페이지 empty */}
@@ -27,7 +27,7 @@ export default function Status() {
         </Link>
       </div>
       {/* 하단 네비게이션 바 */}
-      <div className="fixed bottom-0 left-0 flex w-full justify-between border-t bg-white pb-9">
+      <div className="fixed bottom-0 left-0 flex w-full justify-between border-t bg-white pb-4">
         <Link href={'/main'} className="px-6 py-3">
           <Image alt="button" src={CALENDAR_ICON} />
         </Link>
