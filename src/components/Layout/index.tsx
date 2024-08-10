@@ -1,3 +1,3 @@
 export { AuthLayout, InputContainer, OverlayBackground } from './AuthLayout'
-export { DashboardLayout, LoadingScreen, NoBibleData } from './DashboardLayout'
+export { DashboardLayout, LoadingScreen, NavigationBar, NoBibleData } from './DashboardLayout'
 export { ErrorLayout, LoadingLayout } from './LoadingLayout'

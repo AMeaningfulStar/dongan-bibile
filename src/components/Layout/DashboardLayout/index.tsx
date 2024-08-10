@@ -2,8 +2,9 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useEffect } from 'react'
+import { twMerge } from 'tailwind-merge'
 
 import { Title } from '@/components/Text'
 
@@ -11,6 +12,10 @@ import useFirebaseStore from '@/stores/FirebaseStore'
 
 import CALENDAR_ICON from '@icon/calendar_icon.svg'
 import EVENT_ICON from '@icon/event_icon.svg'
+import FOCUS_CALENDAR_ICON from '@icon/focus_calendar_Icon.svg'
+import FOCUS_EVENT_ICON from '@icon/focus_event_icon.svg'
+import FOCUS_MEDITATION_ICON from '@icon/focus_meditation_icon.svg'
+import FOCUS_STATUS_ICON from '@icon/focus_status_icon.svg'
 import LIGHTUP_ICON from '@icon/lightup_icon.svg'
 import MEDITATION_ICON from '@icon/meditation_icon.svg'
 import STATUS_ICON from '@icon/status_icon.svg'
@@ -91,20 +96,50 @@ export function NoBibleData({ pageName }: { pageName: string }) {
   )
 }
 
-function NavigationBar() {
+export function NavigationBar() {
+  const pathname = usePathname()
+
+  const checkMainPage = () => {
+    if (pathname !== '/main' && pathname !== '/bible' && pathname !== '/bible/no-data') return false
+
+    return true
+  }
+
+  const checkMeditationPage = () => {
+    if (pathname !== '/meditation') return false
+
+    return true
+  }
+
+  const checkSatusPage = () => {
+    if (pathname !== '/status') return false
+
+    return true
+  }
+
+  const checkEventPage = () => {
+    if (pathname !== '/event') return false
+
+    return true
+  }
+
   return (
     <div className="fixed bottom-0 left-0 flex w-full justify-between border-t bg-white pb-4">
       <Link href={'/main'} className="px-6 py-3">
-        <Image alt="button" src={CALENDAR_ICON} />
+        <Image alt="button" className={twMerge(checkMainPage() ? 'hidden' : '')} src={CALENDAR_ICON} />
+        <Image alt="button" className={twMerge(checkMainPage() ? '' : 'hidden')} src={FOCUS_CALENDAR_ICON} />
       </Link>
       <Link href={'/meditation'} className="px-6 py-3">
-        <Image alt="button" src={MEDITATION_ICON} />
+        <Image alt="button" className={twMerge(checkMeditationPage() ? 'hidden' : '')} src={MEDITATION_ICON} />
+        <Image alt="button" className={twMerge(checkMeditationPage() ? '' : 'hidden')} src={FOCUS_MEDITATION_ICON} />
       </Link>
       <Link href={'/status'} className="px-6 py-3">
-        <Image alt="button" src={STATUS_ICON} />
+        <Image alt="button" className={twMerge(checkSatusPage() ? 'hidden' : '')} src={STATUS_ICON} />
+        <Image alt="button" className={twMerge(checkSatusPage() ? '' : 'hidden')} src={FOCUS_STATUS_ICON} />
       </Link>
       <Link href={'/event'} className="px-6 py-3">
-        <Image alt="button" src={EVENT_ICON} />
+        <Image alt="button" className={twMerge(checkEventPage() ? 'hidden' : '')} src={EVENT_ICON} />
+        <Image alt="button" className={twMerge(checkEventPage() ? '' : 'hidden')} src={FOCUS_EVENT_ICON} />
       </Link>
     </div>
   )

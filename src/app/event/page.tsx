@@ -3,11 +3,8 @@ import Link from 'next/link'
 
 import { Title } from '@/components/Text'
 
-import CALENDAR_ICON from '@icon/calendar_icon.svg'
-import EVENT_ICON from '@icon/event_icon.svg'
+import { NavigationBar } from '@/components/Layout'
 import LIGHTUP_ICON from '@icon/lightup_icon.svg'
-import MEDITATION_ICON from '@icon/meditation_icon.svg'
-import STATUS_ICON from '@icon/status_icon.svg'
 
 export default function Status() {
   return (
@@ -26,21 +23,7 @@ export default function Status() {
           홈으로 이동하기
         </Link>
       </div>
-      {/* 하단 네비게이션 바 */}
-      <div className="fixed bottom-0 left-0 flex w-full justify-between border-t bg-white pb-4">
-        <Link href={'/main'} className="px-6 py-3">
-          <Image alt="button" src={CALENDAR_ICON} />
-        </Link>
-        <Link href={'/meditation'} className="px-6 py-3">
-          <Image alt="button" src={MEDITATION_ICON} />
-        </Link>
-        <Link href={'/status'} className="px-6 py-3">
-          <Image alt="button" src={STATUS_ICON} />
-        </Link>
-        <Link href={'/event'} className="px-6 py-3">
-          <Image alt="button" src={EVENT_ICON} />
-        </Link>
-      </div>
+      <NavigationBar />
     </div>
   )
 }
