@@ -1,6 +1,14 @@
 import type { Metadata } from 'next'
 import './globals.css'
 
+import KakaoInit from '@/components/KakaoInit'
+
+declare global {
+  interface Window {
+    Kakao: any
+  }
+}
+
 export const metadata: Metadata = {
   title: '2024청신호',
   description: '청소년2부 신약일독 호우!',
@@ -37,6 +45,7 @@ export default function RootLayout({
       <head>
         <link rel="apple-touch-icon" href="/image/192.png" />
         <link rel="apple-touch-icon" href="/image/512.png" />
+        <KakaoInit />
       </head>
       <body>{children}</body>
     </html>
