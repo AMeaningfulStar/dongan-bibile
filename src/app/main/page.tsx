@@ -62,14 +62,14 @@ export default function Main() {
 
     if (firebaseInfo.bibleReadingDates?.length) {
       // start와 end 사이의 날짜만 필터링
-      const validDates = firebaseInfo.bibleReadingDates.filter(date => {
-        const currentDate = new Date(date).getTime();
-        return currentDate >= start && currentDate <= end;
-      });
-  
-      const result = (validDates.length / totalDuration) * 100;
-  
-      return Math.round(result);
+      const validDates = firebaseInfo.bibleReadingDates.filter((date) => {
+        const currentDate = new Date(date).getTime()
+        return currentDate >= start && currentDate <= end
+      })
+
+      const result = (validDates.length / totalDuration) * 100
+
+      return Math.round(result)
     }
 
     return 0
@@ -80,8 +80,12 @@ export default function Main() {
     const datePickSnapshot = await getDoc(datePickRef)
 
     if (datePickSnapshot.exists()) {
-      setDatePick(datePick)
-      route.push('/bible', { scroll: false })
+      if (datePickSnapshot.data().bibleInfo.length === 0) {
+        route.push('/bible/no-data', { scroll: false })
+      } else {
+        setDatePick(datePick)
+        route.push('/bible', { scroll: false })
+      }
     } else {
       route.push('/bible/no-data', { scroll: false })
     }

@@ -42,8 +42,13 @@ export default function Bible() {
     if (datePickSnapshot.exists()) {
       // datePick이 유효한지 확인
       const isValidDate = moment(datePick, 'YYYY-MM-DD', true).isValid()
+
       if (isValidDate) {
-        setDatePick(datePick)
+        if (datePickSnapshot.data().bibleInfo.length === 0) {
+          route.push('/bible/no-data', { scroll: false })
+        } else {
+          setDatePick(datePick)
+        }
       } else {
         console.error('Invalid date selected:', datePick)
         // 유효하지 않은 날짜 처리
