@@ -1,6 +1,8 @@
 import Image from 'next/image'
 import Link from 'next/link'
 
+import { Title } from '@/components/Text'
+
 import CALENDAR_ICON from '@icon/calendar_icon.svg'
 import EVENT_ICON from '@icon/event_icon.svg'
 import LIGHTUP_ICON from '@icon/lightup_icon.svg'
@@ -9,9 +11,9 @@ import STATUS_ICON from '@icon/status_icon.svg'
 
 export default function Status() {
   return (
-    <div className="flex min-h-screen w-full flex-col items-center py-20">
-      <div className="fixed left-0 top-0 flex w-full items-center justify-center border-b border-[#AAAAAA] bg-white pb-3 pt-10">
-        <span className="text-xl font-light">이벤트</span>
+    <div className="flex min-h-screen w-full flex-col items-center py-24">
+      <div className="fixed left-0 top-0 z-30 flex w-full items-center justify-center border-b border-[#AAAAAA] bg-white pb-3 pt-12">
+        <Title textColor="">이벤트</Title>
       </div>
       {/* 이벤트 페이지 empty */}
       <div className="flex flex-grow flex-col items-center justify-center gap-y-5">
