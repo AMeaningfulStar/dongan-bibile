@@ -205,232 +205,199 @@ export const options: BookOption[] = [
     chapters: 7,
   },
   {
-    label: '나',
-
+    label: '나훔',
     book: 'nahum',
     testament: 'oldTestament',
     chapters: 3,
   },
   {
-    label: '하국',
-
+    label: '하박국',
     book: 'habakkuk',
     testament: 'oldTestament',
     chapters: 3,
   },
   {
-    label: '스냐',
-
+    label: '스바냐',
     book: 'zephaniah',
     testament: 'oldTestament',
     chapters: 3,
   },
   {
-    label: '학',
-
+    label: '학개',
     book: 'haggai',
     testament: 'oldTestament',
     chapters: 2,
   },
   {
-    label: '스랴',
-
+    label: '스가랴',
     book: 'zechariah',
     testament: 'oldTestament',
     chapters: 14,
   },
   {
-    label: '말기',
-
+    label: '말라기',
     book: 'malachi',
     testament: 'oldTestament',
     chapters: 4,
   },
   {
-    label: '마복음',
-
+    label: '마태복음',
     book: 'matthew',
     testament: 'newTestament',
     chapters: 28,
   },
   {
-    label: '마복음',
-
+    label: '마가복음',
     book: 'mark',
     testament: 'newTestament',
     chapters: 16,
   },
   {
-    label: '누복음',
-
+    label: '누가복음',
     book: 'luke',
     testament: 'newTestament',
     chapters: 24,
   },
   {
-    label: '요복음',
-
+    label: '요한복음',
     book: 'john',
     testament: 'newTestament',
     chapters: 21,
   },
   {
-    label: '사행전',
-
+    label: '사도행전',
     book: 'acts',
     testament: 'newTestament',
     chapters: 28,
   },
   {
-    label: '로서',
-
+    label: '로마서',
     book: 'romans',
     testament: 'newTestament',
     chapters: 16,
   },
   {
-    label: '고도전서',
-
+    label: '고린도전서',
     book: 'firstCorinthians',
     testament: 'newTestament',
     chapters: 16,
   },
   {
-    label: '고도후서',
-
+    label: '고린도후서',
     book: 'secondCorinthians',
     testament: 'newTestament',
     chapters: 13,
   },
   {
-    label: '갈디아서',
-
+    label: '갈라디아서',
     book: 'galatians',
     testament: 'newTestament',
     chapters: 6,
   },
   {
-    label: '에소서',
-
+    label: '에베소서',
     book: 'ephesians',
     testament: 'newTestament',
     chapters: 6,
   },
   {
-    label: '빌보서',
-
+    label: '빌립보서',
     book: 'philippians',
     testament: 'newTestament',
     chapters: 4,
   },
   {
-    label: '골새서',
-
+    label: '골로새서',
     book: 'colossians',
     testament: 'newTestament',
     chapters: 4,
   },
   {
-    label: '데로니가전서',
-
+    label: '데살로니가전서',
     book: 'firstThessalonians',
     testament: 'newTestament',
     chapters: 5,
   },
   {
-    label: '데로니가후서',
-
+    label: '데살로니가후서',
     book: 'secondThessalonians',
     testament: 'newTestament',
     chapters: 3,
   },
   {
-    label: '디데전서',
-
+    label: '디모데전서',
     book: 'firstTimothy',
     testament: 'newTestament',
     chapters: 6,
   },
   {
-    label: '디데후서',
-
+    label: '디모데후서',
     book: 'secondTimothy',
     testament: 'newTestament',
     chapters: 4,
   },
   {
-    label: '디서',
-
+    label: '디도서',
     book: 'titus',
     testament: 'newTestament',
     chapters: 3,
   },
   {
-    label: '빌몬서',
-
+    label: '빌레몬서',
     book: 'philemon',
     testament: 'newTestament',
     chapters: 1,
   },
   {
-    label: '히리서',
-
+    label: '히브리서',
     book: 'hebrews',
     testament: 'newTestament',
     chapters: 13,
   },
   {
-    label: '야보서',
-
+    label: '야고보서',
     book: 'james',
     testament: 'newTestament',
     chapters: 5,
   },
   {
-    label: '베로전서',
-
+    label: '베드로전서',
     book: 'firstPeter',
     testament: 'newTestament',
     chapters: 5,
   },
   {
-    label: '베로후서',
-
+    label: '베드로후서',
     book: 'secondPeter',
     testament: 'newTestament',
     chapters: 3,
   },
   {
-    label: '요일서',
-
+    label: '요한일서',
     book: 'firstJohn',
     testament: 'newTestament',
     chapters: 5,
   },
   {
-    label: '요이서',
-
+    label: '요한이서',
     book: 'secondJohn',
     testament: 'newTestament',
     chapters: 1,
   },
   {
-    label: '요삼서',
-
+    label: '요한삼서',
     book: 'thirdJohn',
     testament: 'newTestament',
     chapters: 1,
   },
   {
-    label: '유서',
-
+    label: '유다서',
     book: 'jude',
     testament: 'newTestament',
     chapters: 1,
   },
   {
-    label: '요계시록',
-
+    label: '요한계시록',
     book: 'revelation',
     testament: 'newTestament',
     chapters: 22,
