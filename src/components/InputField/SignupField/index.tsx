@@ -58,6 +58,7 @@ interface DropdownFieldType {
 export function SignupInputField() {
   const {
     signUpValue,
+    initSignUpValue,
     setUseName,
     setUseEmail,
     setUsePassword,
@@ -95,13 +96,13 @@ export function SignupInputField() {
     if (error.isError) {
       setErrorMessage(error.errorMessage)
     } else if (isEmailValidation !== EmailValidationStatus.Success) {
-      setErrorMessage('email 중복 확인해주세요')
+      setErrorMessage('아이디 중복 확인해주세요')
     } else {
       createUserWithEmailAndPassword(auth, `${signUpValue.useEmail}@dongan.com`, signUpValue.usePassword).then(
         async (userCredential) => {
           await setDoc(doc(firestore, 'users', userCredential.user.uid), {
             name: signUpValue.useName,
-            email: signUpValue.useEmail,
+            email: `${signUpValue.useEmail}@dongan.com`,
             phoneNum: signUpValue.usePhoneNum,
             position: signUpValue.usePosition,
             grade: signUpValue.useGrade,
@@ -109,7 +110,10 @@ export function SignupInputField() {
             admin: false,
             bibleReadingDates: [],
             challengeStreakCount: 0,
-          }).then(() => route.push('/', { scroll: false }))
+          }).then(() => {
+            initSignUpValue()
+            route.push('/', { scroll: false })
+          })
         },
       )
     }
@@ -129,7 +133,7 @@ export function SignupInputField() {
         labelName="아이디"
         fieldID="email"
         inputType="text"
-        defaultText="이메일 입력해주세요"
+        defaultText="아이디 입력해주세요"
         setFunction={setUseEmail}
         inputValue={signUpValue.useEmail}
         emailValidation={isEmailValidation}
@@ -275,7 +279,10 @@ function EmailField({
           placeholder={defaultText}
           className="flex-grow p-1 text-base outline-none"
           value={inputValue}
-          onChange={(event) => setFunction(event.target.value)}
+          onChange={(event) => {
+            setEmailValidation(EmailValidationStatus.Default)
+            setFunction(event.target.value)
+          }}
         />
         <button
           className="h-8 w-24 rounded-lg bg-white active:bg-gray-400 active:text-white"
