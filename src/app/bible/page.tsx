@@ -126,12 +126,12 @@ export default function Bible() {
           >
             <ul className="z-30 py-2 text-sm text-gray-700" aria-labelledby="dropdownDefaultButton">
               <li>
-                <button className="block px-4 py-2" onClick={() => handleDropdown(BibleType.REVISED)}>
+                <button className="block w-full px-4 py-2 text-start" onClick={() => handleDropdown(BibleType.REVISED)}>
                   개역개정
                 </button>
               </li>
               <li>
-                <button className="block px-4 py-2" onClick={() => handleDropdown(BibleType.EASY)}>
+                <button className="block w-full px-4 py-2 text-start" onClick={() => handleDropdown(BibleType.EASY)}>
                   쉬운성경
                 </button>
               </li>
