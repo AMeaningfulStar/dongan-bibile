@@ -14,7 +14,7 @@ import LOGIN_BACKGROUND from '@image/Login_Background.svg'
 import LOGIN_BOTTOM from '@image/Login_Bottom.svg'
 
 export default function Login() {
-  const { loginValue, setUseEmail, setUsePassword, validateLoginValue } = useLoginStore()
+  const { loginValue, initLoginValue, setUseEmail, setUsePassword, validateLoginValue } = useLoginStore()
   const { firebaseInfo } = useFirebaseStore()
   const [errorMessage, setErrorMessage] = useState<string>('')
   const route = useRouter()
@@ -40,6 +40,7 @@ export default function Login() {
       signInWithEmailAndPassword(auth, useId, loginValue.password)
         .then((userCredential) => {
           if (userCredential.user) {
+            initLoginValue()
             route.push('/main', { scroll: false })
           }
         })
