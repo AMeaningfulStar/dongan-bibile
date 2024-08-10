@@ -12,7 +12,7 @@ interface BibleStore {
 const useBibleInfo = create<BibleStore>((set) => ({
   datePick: '',
 
-  bibleType: BibleType.REVISED,
+  bibleType: BibleType.EASY,
 
   setDatePick: (newDatePick: string) =>
     set((state: BibleStore) => ({
