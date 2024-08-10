@@ -27,7 +27,7 @@ export default function Login() {
 
   const handleOnSunbmit = async () => {
     // FIXME: 추후 프로젝트의 진행 방향에 따라 수정해야함
-    const emailRegEx = /^010\d{8}@[A-Za-z0-9]([-_.]?[A-Za-z0-9])*\.[A-Za-z]{2,3}$/i
+    const emailRegEx = /^[A-Za-z0-9]([-_.]?[A-Za-z0-9])*@[A-Za-z0-9]([-_.]?[A-Za-z0-9])*\.[A-Za-z]{2,3}$/i
     const useId = `${loginValue.email}@dongan.com`
 
     if (!emailRegEx.test(useId)) {
