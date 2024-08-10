@@ -12,7 +12,7 @@ import useFirebaseStore from '@/stores/FirebaseStore'
 
 import CALENDAR_ICON from '@icon/calendar_icon.svg'
 import EVENT_ICON from '@icon/event_icon.svg'
-import FOCUS_CALENDAR_ICON from '@icon/focus_calendar_Icon.svg'
+import FOCUS_CALENDAR_ICON from '@icon/focus_calendar_icon.svg'
 import FOCUS_EVENT_ICON from '@icon/focus_event_icon.svg'
 import FOCUS_MEDITATION_ICON from '@icon/focus_meditation_icon.svg'
 import FOCUS_STATUS_ICON from '@icon/focus_status_icon.svg'
