@@ -97,7 +97,7 @@ export function SignupInputField() {
     } else if (isEmailValidation !== EmailValidationStatus.Success) {
       setErrorMessage('email 중복 확인해주세요')
     } else {
-      createUserWithEmailAndPassword(auth, signUpValue.useEmail, signUpValue.usePassword).then(
+      createUserWithEmailAndPassword(auth, `${signUpValue.useEmail}@dongan.com`, signUpValue.usePassword).then(
         async (userCredential) => {
           await setDoc(doc(firestore, 'users', userCredential.user.uid), {
             name: signUpValue.useName,
@@ -126,9 +126,9 @@ export function SignupInputField() {
         inputValue={signUpValue.useName}
       />
       <EmailField
-        labelName="Email"
+        labelName="아이디"
         fieldID="email"
-        inputType="email"
+        inputType="text"
         defaultText="이메일 입력해주세요"
         setFunction={setUseEmail}
         inputValue={signUpValue.useEmail}
@@ -136,13 +136,13 @@ export function SignupInputField() {
         setEmailValidation={setIsEmailValidation}
       />
       <PasswordField
-        labelName="비밀번호 (최소 8자 이상)"
+        labelName="비밀번호 (최소 6자 이상)"
         fieldID="password"
         inputType="password"
         defaultText="비밀번호 입력해주세요"
         setFunction={setUsePassword}
         inputValue={signUpValue.usePassword}
-        errorMessage="최소 8자 이상이어야 합니다"
+        errorMessage="최소 6자 이상이어야 합니다"
         checkFunction={checkPasswordsLength}
       />
       <PasswordField
@@ -224,16 +224,18 @@ function EmailField({
   // 이메일 중복 확인
   const checkForDuplicateEmail = async () => {
     try {
-      const emailRegEx = /^[A-Za-z0-9]([-_.]?[A-Za-z0-9])*@[A-Za-z0-9]([-_.]?[A-Za-z0-9])*\.[A-Za-z]{2,3}$/i
+      // FIXME: 추후 프로젝트의 진행 방향에 따라 수정해야함
+      const emailRegEx = /^010\d{8}@[A-Za-z0-9]([-_.]?[A-Za-z0-9])*\.[A-Za-z]{2,3}$/i
+      const useId = `${inputValue}@dongan.com`
 
       // 이메일 형식 검사
-      if (!emailRegEx.test(inputValue)) {
+      if (!emailRegEx.test(useId)) {
         setEmailValidation(EmailValidationStatus.InvalidFormat)
         setTimeout(() => setEmailValidation(EmailValidationStatus.Default), 3000)
         return
       }
 
-      const result = query(collection(firestore, 'users'), where('email', '==', inputValue))
+      const result = query(collection(firestore, 'users'), where('email', '==', useId))
 
       const querySnapshot = await getDocs(result)
 
@@ -257,13 +259,13 @@ function EmailField({
           {labelName}
         </label>
         {emailValidation === EmailValidationStatus.Error && (
-          <span className="text-sm leading-none text-red-500">이미 존재하는 Email 입니다.</span>
+          <span className="text-sm leading-none text-red-500">이미 존재하는 아이디 입니다.</span>
         )}
         {emailValidation === EmailValidationStatus.InvalidFormat && (
-          <span className="text-sm leading-none text-red-500">올바른 Email 형식이 아닙니다.</span>
+          <span className="text-sm leading-none text-red-500">올바른 아이디 형식이 아닙니다.</span>
         )}
         {emailValidation === EmailValidationStatus.Success && (
-          <span className="text-sm leading-none text-green-500">사용 가능한 Email 입니다.</span>
+          <span className="text-sm leading-none text-green-500">사용 가능한 아이디 입니다.</span>
         )}
       </div>
       <div className="flex gap-x-2">

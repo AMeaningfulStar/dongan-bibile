@@ -26,16 +26,18 @@ export default function Login() {
   }, [firebaseInfo])
 
   const handleOnSunbmit = async () => {
-    const emailRegEx = /^[A-Za-z0-9]([-_.]?[A-Za-z0-9])*@[A-Za-z0-9]([-_.]?[A-Za-z0-9])*\.[A-Za-z]{2,3}$/i
+    // FIXME: 추후 프로젝트의 진행 방향에 따라 수정해야함
+    const emailRegEx = /^010\d{8}@[A-Za-z0-9]([-_.]?[A-Za-z0-9])*\.[A-Za-z]{2,3}$/i
+    const useId = `${loginValue.email}@dongan.com`
 
-    if (!emailRegEx.test(loginValue.email)) {
-      setErrorMessage('올바른 이메일 형식이 아닙니다')
+    if (!emailRegEx.test(useId)) {
+      setErrorMessage('올바른 아이디 형식이 아닙니다')
       setTimeout(() => setErrorMessage(''), 3000)
       return
     }
 
     if (!validateLoginValue().isError) {
-      signInWithEmailAndPassword(auth, loginValue.email, loginValue.password)
+      signInWithEmailAndPassword(auth, useId, loginValue.password)
         .then((userCredential) => {
           if (userCredential.user) {
             route.push('/main', { scroll: false })
@@ -46,7 +48,7 @@ export default function Login() {
           setTimeout(() => setErrorMessage(''), 3000)
         })
     } else {
-      setErrorMessage('이메일과 비밀번호를 확인해주세요')
+      setErrorMessage('아이디과 비밀번호를 확인해주세요')
       setTimeout(() => setErrorMessage(''), 3000)
     }
   }
@@ -57,13 +59,13 @@ export default function Login() {
       <div className="flex flex-col gap-y-2.5">
         <div className="flex min-w-64 items-center justify-between">
           <label htmlFor="userID" className="w-16 text-lg font-light leading-none text-white">
-            이메일
+            아이디
           </label>
           <input
             id="userID"
-            type="email"
+            type="text"
             className="h-7 flex-grow pl-1 outline-none"
-            placeholder="이메일 입력해주세요"
+            placeholder="아이디 입력해주세요"
             value={loginValue.email}
             onChange={(event) => setUseEmail(event.target.value)}
           />

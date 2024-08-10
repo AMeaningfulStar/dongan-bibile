@@ -139,7 +139,7 @@ const useSignUpStore = create<SignupStoreType>()((set, get) => ({
   checkPasswordsLength: () => {
     const { usePassword } = get().signUpValue
 
-    if (usePassword.length >= 8) return true
+    if (usePassword.length >= 6) return true
 
     return false
   },
