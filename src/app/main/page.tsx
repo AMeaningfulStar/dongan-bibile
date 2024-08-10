@@ -81,8 +81,12 @@ export default function Main() {
     const datePickSnapshot = await getDoc(datePickRef)
 
     if (datePickSnapshot.exists()) {
-      setDatePick(datePick)
-      route.push('/bible', { scroll: false })
+      if (datePickSnapshot.data().bibleInfo.length === 0) {
+        route.push('/bible/no-data', { scroll: false })
+      } else {
+        setDatePick(datePick)
+        route.push('/bible', { scroll: false })
+      }
     } else {
       route.push('/bible/no-data', { scroll: false })
     }
