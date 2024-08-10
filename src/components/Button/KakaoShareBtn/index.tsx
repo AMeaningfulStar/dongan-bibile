@@ -19,7 +19,7 @@ export function KakaoShareBtn({ startBible, endBible }: { startBible: KakaoConte
         content: {
           title: '2024 청신호',
           description: `오늘의 말씀은 ${startBible.title} ${startBible.chapter}장-${endBible.title} ${endBible.chapter}장 입니다`,
-          imageUrl: 'https://mud-kage.kakao.com/dn/NTmhS/btqfEUdFAUf/FjKzkZsnoeE4o19klTOVI1/openlink_640x640s.jpg',
+          imageUrl: '/1024.png',
           link: {
             mobileWebUrl: location.href,
             webUrl: location.href,
