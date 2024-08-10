@@ -69,6 +69,15 @@ export default function Bible() {
       const bibleReadSnap = await getDoc(bibleReadRef)
 
       if (bibleReadSnap.exists()) {
+        // 현재 날짜와 datePick 비교
+        const today = new Date().setHours(0, 0, 0, 0) // 오늘 날짜를 기준으로 시간 초기화
+        const selectedDate = new Date(datePick).setHours(0, 0, 0, 0) // 선택한 날짜의 시간 초기화
+
+        if (selectedDate > today) {
+          alert('미리 읽기 완료는 할 수 없습니다')
+          return // 미래 날짜면 함수 종료
+        }
+
         await updateDoc(bibleReadRef, {
           bibleReadingDates: arrayUnion(datePick),
         }).then(() => route.push('/main', { scroll: false }))
