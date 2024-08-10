@@ -11,26 +11,24 @@ interface KakaoContent {
 
 export function KakaoShareBtn({ startBible, endBible }: { startBible: KakaoContent; endBible: KakaoContent }) {
   const shareOnKakao = () => {
-    if (window.Kakao && window.location) {
-      const { Kakao, location } = window
-
-      Kakao.Link.sendDefault({
+    if (window.Kakao) {
+      window.Kakao.Link.sendDefault({
         objectType: 'feed',
         content: {
           title: '2024 청신호',
-          description: `오늘의 말씀은 ${startBible.title} ${startBible.chapter}장-${endBible.title} ${endBible.chapter}장 입니다`,
+          description: `오늘의 말씀:${startBible.title} ${startBible.chapter}장-${endBible.title} ${endBible.chapter}장`,
           imageUrl: '/1024.png',
           link: {
-            mobileWebUrl: location.href,
-            webUrl: location.href,
+            mobileWebUrl: 'https://dongan-bibile.vercel.app/',
+            webUrl: 'https://dongan-bibile.vercel.app/',
           },
         },
         buttons: [
           {
             title: '말씀 읽으러 고우!',
             link: {
-              mobileWebUrl: location.href,
-              webUrl: location.href,
+              mobileWebUrl: 'https://dongan-bibile.vercel.app/',
+              webUrl: 'https://dongan-bibile.vercel.app/',
             },
           },
         ],
