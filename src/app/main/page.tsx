@@ -29,6 +29,7 @@ export default function Main() {
     signOut(auth)
       .then(() => {
         initFirebaseInfo()
+        useFirebaseStore.persist.clearStorage()
         route.push('/', { scroll: false })
       })
       .catch((error) => {
@@ -62,14 +63,14 @@ export default function Main() {
 
     if (firebaseInfo.bibleReadingDates?.length) {
       // start와 end 사이의 날짜만 필터링
-      const validDates = firebaseInfo.bibleReadingDates.filter(date => {
-        const currentDate = new Date(date).getTime();
-        return currentDate >= start && currentDate <= end;
-      });
-  
-      const result = (validDates.length / totalDuration) * 100;
-  
-      return Math.round(result);
+      const validDates = firebaseInfo.bibleReadingDates.filter((date) => {
+        const currentDate = new Date(date).getTime()
+        return currentDate >= start && currentDate <= end
+      })
+
+      const result = (validDates.length / totalDuration) * 100
+
+      return Math.round(result)
     }
 
     return 0
