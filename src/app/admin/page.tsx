@@ -12,6 +12,12 @@ export default function Admin() {
         >
           <span className="text-sm font-normal leading-none">성경읽기 관리</span>
         </Link>
+        <Link
+          href={'/admin/bible-read-status-checker'}
+          className="flex h-8 w-36 items-center justify-center rounded-lg border border-black bg-white"
+        >
+          <span className="text-sm font-normal leading-none">성경읽기 현황</span>
+        </Link>
       </div>
     </DashboardLayout>
   )
