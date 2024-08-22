@@ -9,6 +9,7 @@ import { DashboardLayout } from '@/components/Layout'
 
 import useBibleInfo from '@/stores/BibleInfo'
 
+import KEYWORD_ADD_ICON from '@icon/keyword_add_icon.svg'
 import LIGHTUP_SMALL_ICON from '@icon/lightup_small_icon.svg'
 import SPEECH_BUBBLE_ICON from '@icon/speech_bubble_icon.svg'
 
@@ -43,7 +44,7 @@ export default function Meditation() {
         </div>
         <div>나에게 와닿는 키워드를 눌러 공감을 표현해보세요!</div>
       </div>
-      <div className="flex h-36 w-full flex-wrap gap-2 overflow-y-scroll px-4">
+      <div className="mb-7 flex h-36 w-full flex-wrap gap-2 overflow-y-scroll px-4">
         {/* <div className="flex h-[1.875rem] items-center gap-x-px rounded-full bg-slate-400 px-3">
           <span># 희생하는사랑</span>
           <span>(4)</span>
@@ -52,6 +53,19 @@ export default function Meditation() {
           <Image alt="lightup icon" src={LIGHTUP_SMALL_ICON} />
           <span className="font-light">오늘의 묵상 키워드를 추가해보세요</span>
         </div>
+      </div>
+      <div className="mb-7 flex w-full items-end gap-x-2 px-4 py-5">
+        <div className="h-[1.875rem] w-full border-b border-[#222]">
+          <input
+            className="h-full w-full p-2 outline-none"
+            type="text"
+            maxLength={10}
+            placeholder="나만의 키워드를 추가해보세요"
+          />
+        </div>
+        <button className="">
+          <Image alt="add button" src={KEYWORD_ADD_ICON} />
+        </button>
       </div>
     </DashboardLayout>
   )
