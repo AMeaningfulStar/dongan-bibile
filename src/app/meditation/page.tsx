@@ -1,11 +1,15 @@
 'use client'
 import { ko } from 'date-fns/locale'
+import moment from 'moment'
+import Image from 'next/image'
 import { forwardRef } from 'react'
 import DatePicker from 'react-datepicker'
 
 import { DashboardLayout } from '@/components/Layout'
+
 import useBibleInfo from '@/stores/BibleInfo'
-import moment from 'moment'
+
+import LIGHTUP_SMALL_ICON from '@icon/lightup_small_icon.svg'
 import SPEECH_BUBBLE_ICON from '@icon/speech_bubble_icon.svg'
 
 export default function Meditation() {
@@ -38,6 +42,16 @@ export default function Meditation() {
           <span className="text-lg leading-none">오늘의 묵상 키워드</span>
         </div>
         <div>나에게 와닿는 키워드를 눌러 공감을 표현해보세요!</div>
+      </div>
+      <div className="flex h-36 w-full flex-wrap gap-2 overflow-y-scroll px-4">
+        {/* <div className="flex h-[1.875rem] items-center gap-x-px rounded-full bg-slate-400 px-3">
+          <span># 희생하는사랑</span>
+          <span>(4)</span>
+        </div> */}
+        <div className="flex h-full w-full flex-col items-center justify-center gap-y-2">
+          <Image alt="lightup icon" src={LIGHTUP_SMALL_ICON} />
+          <span className="font-light">오늘의 묵상 키워드를 추가해보세요</span>
+        </div>
       </div>
     </DashboardLayout>
   )
