@@ -6,6 +6,7 @@ import DatePicker from 'react-datepicker'
 import { DashboardLayout } from '@/components/Layout'
 import useBibleInfo from '@/stores/BibleInfo'
 import moment from 'moment'
+import SPEECH_BUBBLE_ICON from '@icon/speech_bubble_icon.svg'
 
 export default function Meditation() {
   const { datePick } = useBibleInfo()
@@ -30,6 +31,13 @@ export default function Meditation() {
             moment(datePick, 'YYYY-MM-DD', true).isValid() ? moment(datePick, 'YYYY-MM-DD').toDate() : new Date()
           }
         />
+      </div>
+      <div className="flex w-full flex-col gap-y-1 p-4">
+        <div className="flex gap-x-1">
+          <Image alt="icon" src={SPEECH_BUBBLE_ICON} />
+          <span className="text-lg leading-none">오늘의 묵상 키워드</span>
+        </div>
+        <div>나에게 와닿는 키워드를 눌러 공감을 표현해보세요!</div>
       </div>
     </DashboardLayout>
   )
