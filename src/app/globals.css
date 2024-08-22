@@ -59,6 +59,7 @@
   flex-grow: 1;
   border: 1px solid black !important;
   border-radius: 0.375rem;
+  height: 100%;
 
   .react-datepicker__input-container {
     flex-grow: 1;
@@ -69,8 +70,18 @@
   }
 }
 
+.meditation-datepicker {
+  .react-datepicker-popper {
+    left: -8% !important;
+  
+    .react-datepicker__triangle {
+      display: none !important;
+    }
+  }
+}
+
 .react-datepicker-popper {
-  left: 30px !important;
+  left: 20% !important;
 
   .react-datepicker__triangle {
     display: none !important;
