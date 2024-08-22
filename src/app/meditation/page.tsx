@@ -54,7 +54,7 @@ export default function Meditation() {
           <span className="font-light">오늘의 묵상 키워드를 추가해보세요</span>
         </div>
       </div>
-      <div className="mb-7 flex w-full items-end gap-x-2 px-4 py-5">
+      <div className="mb-5 flex w-full items-end gap-x-2 px-4 py-5">
         <div className="h-[1.875rem] w-full border-b border-[#222]">
           <input
             className="h-full w-full p-2 outline-none"
@@ -66,6 +66,12 @@ export default function Meditation() {
         <button className="">
           <Image alt="add button" src={KEYWORD_ADD_ICON} />
         </button>
+      </div>
+      <div className="flex w-full justify-center">
+        <span>오늘 나에게 와닿은 키워드로 10초 동안 기도해보세요</span>
+      </div>
+      <div className="flex w-full justify-center py-5">
+        <button className="h-9 w-40 rounded-full border border-[#0276F9] bg-[#0276F9] text-white">기도했습니다</button>
       </div>
     </DashboardLayout>
   )
