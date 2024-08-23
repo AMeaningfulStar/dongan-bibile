@@ -2,7 +2,7 @@
 import { ko } from 'date-fns/locale'
 import moment from 'moment'
 import Image from 'next/image'
-import { forwardRef } from 'react'
+import { forwardRef, KeyboardEvent, useState } from 'react'
 import DatePicker from 'react-datepicker'
 
 import { DashboardLayout } from '@/components/Layout'
@@ -14,6 +14,7 @@ import LIGHTUP_SMALL_ICON from '@icon/lightup_small_icon.svg'
 import SPEECH_BUBBLE_ICON from '@icon/speech_bubble_icon.svg'
 
 export default function Meditation() {
+  const [inputValue, setInputValue] = useState<string>('')
   const { datePick } = useBibleInfo()
 
   const PickerCustomInput = forwardRef(({ value, onClick }: any, ref: any) => (
@@ -21,6 +22,19 @@ export default function Meditation() {
       {value}
     </button>
   ))
+
+  const activeEnter = (event: KeyboardEvent) => {
+    if (event.nativeEvent.isComposing) {
+      return
+    }
+    if (event.key === 'Enter') {
+      return createKeyword()
+    }
+  }
+
+  const createKeyword = async () => {
+    console.log(inputValue)
+  }
 
   return (
     <DashboardLayout pageName="묵상노트">
@@ -57,13 +71,16 @@ export default function Meditation() {
       <div className="mb-5 flex w-full items-end gap-x-2 px-4 py-5">
         <div className="h-[1.875rem] w-full border-b border-[#222]">
           <input
-            className="h-full w-full p-2 outline-none"
             type="text"
             maxLength={10}
+            value={inputValue}
+            onChange={(event) => setInputValue(event.target.value)}
+            onKeyDown={(event) => activeEnter(event)}
+            className="h-full w-full p-2 outline-none"
             placeholder="나만의 키워드를 추가해보세요"
           />
         </div>
-        <button className="">
+        <button className="" onClick={() => createKeyword()}>
           <Image alt="add button" src={KEYWORD_ADD_ICON} />
         </button>
       </div>
