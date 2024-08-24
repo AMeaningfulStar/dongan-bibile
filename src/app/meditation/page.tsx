@@ -22,6 +22,7 @@ import SPEECH_BUBBLE_ICON from '@icon/speech_bubble_icon.svg'
 export default function Meditation() {
   const [inputValue, setInputValue] = useState<string>('')
   const [keywordList, setKeywordList] = useState<Array<{ text: string; likeCount: Array<string> }>>([])
+  const [isPrayerBtn, setIsPrayerBtn] = useState<boolean>(false)
   const { datePick, setDatePick } = useBibleInfo()
   const { firebaseInfo } = useFirebaseStore()
 
@@ -42,6 +43,15 @@ export default function Meditation() {
 
   const createKeyword = async () => {
     try {
+      // 현재 날짜와 datePick 비교
+      const today = new Date().setHours(0, 0, 0, 0) // 오늘 날짜를 기준으로 시간 초기화
+      const selectedDate = new Date(datePick).setHours(0, 0, 0, 0) // 선택한 날짜의 시간 초기화
+
+      if (selectedDate > today) {
+        alert('미리 키워드를 등록할 수 없습니다')
+        return
+      }
+
       const meditationDocRef = doc(firestore, 'meditation', datePick)
       const docSnapshot = await getDoc(meditationDocRef)
 
@@ -158,8 +168,67 @@ export default function Meditation() {
     )
   }
 
+  const handlePrayerButtonClick = async () => {
+    try {
+      const bibleReadRef = doc(firestore, 'users', firebaseInfo.uid as string)
+      const bibleReadSnap = await getDoc(bibleReadRef)
+
+      if (bibleReadSnap.exists()) {
+        // 현재 날짜와 datePick 비교
+        const today = new Date().setHours(0, 0, 0, 0) // 오늘 날짜를 기준으로 시간 초기화
+        const selectedDate = new Date(datePick).setHours(0, 0, 0, 0) // 선택한 날짜의 시간 초기화
+
+        if (selectedDate > today) {
+          alert('해당 날짜에 다시 시도하세요')
+          return
+        }
+
+        if (!firebaseInfo.bibleReadingDates?.includes(datePick)) {
+          alert('먼저 말씀을 읽어주세요')
+          return
+        }
+
+        await updateDoc(bibleReadRef, {
+          prayerDates: arrayUnion(datePick),
+        })
+      }
+    } catch (error) {
+      console.error('Error checking for prayer:', error)
+    }
+  }
+
+  const isDisabled = async () => {
+    try {
+      const bibleReadRef = doc(firestore, 'users', firebaseInfo.uid as string)
+      const bibleReadSnap = await getDoc(bibleReadRef)
+
+      if (bibleReadSnap.exists()) {
+        // 현재 날짜와 datePick 비교
+        const today = new Date().setHours(0, 0, 0, 0) // 오늘 날짜를 기준으로 시간 초기화
+        const selectedDate = new Date(datePick).setHours(0, 0, 0, 0) // 선택한 날짜의 시간 초기화
+
+        if (selectedDate > today) {
+          setIsPrayerBtn(true)
+          return
+        }
+
+        const prayerDates = bibleReadSnap.data().prayerDates as Array<string>
+
+        if(prayerDates.includes(datePick)) {
+          setIsPrayerBtn(true)
+          return
+        }
+
+        setIsPrayerBtn(false)
+      }
+    } catch (error) {
+      console.error('Error checking for prayer:', error)
+    }
+  }
+
   useEffect(() => {
     readKeywordList()
+    isDisabled()
   }, [datePick])
 
   return (
@@ -215,7 +284,16 @@ export default function Meditation() {
         <span>오늘 나에게 와닿은 키워드로 10초 동안 기도해보세요</span>
       </div>
       <div className="flex w-full justify-center py-5">
-        <button className="h-9 w-40 rounded-full border border-[#0276F9] bg-[#0276F9] text-white">기도했습니다</button>
+        <button
+          className={twMerge(
+            'h-9 w-40 rounded-full border',
+            isPrayerBtn ? 'border-[#AAA] bg-[#EEE] text-[#AAA]' : 'border-[#0276F9] bg-[#0276F9] text-white',
+          )}
+          onClick={() => handlePrayerButtonClick()}
+          disabled={isPrayerBtn}
+        >
+          기도했습니다
+        </button>
       </div>
     </DashboardLayout>
   )
