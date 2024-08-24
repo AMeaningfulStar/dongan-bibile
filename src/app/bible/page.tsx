@@ -80,7 +80,7 @@ export default function Bible() {
 
         await updateDoc(bibleReadRef, {
           bibleReadingDates: arrayUnion(datePick),
-        }).then(() => route.push('/main', { scroll: false }))
+        }).then(() => route.push('/meditation', { scroll: false }))
       }
     } catch (error) {
       console.error('Error checking for bible read:', error)
