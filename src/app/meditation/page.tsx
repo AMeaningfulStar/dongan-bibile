@@ -7,6 +7,8 @@ import { forwardRef, KeyboardEvent, useEffect, useState } from 'react'
 import DatePicker from 'react-datepicker'
 import { twMerge } from 'tailwind-merge'
 
+import 'react-datepicker/dist/react-datepicker.css'
+
 import { DashboardLayout } from '@/components/Layout'
 
 import { firestore } from '@/libs/firebase'
