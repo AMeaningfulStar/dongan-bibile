@@ -1,6 +1,6 @@
 'use client'
 import { ko } from 'date-fns/locale'
-import { doc, getDoc, updateDoc } from 'firebase/firestore'
+import { arrayUnion, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
 import moment from 'moment'
 import Image from 'next/image'
 import { forwardRef, KeyboardEvent, useEffect, useState } from 'react'
@@ -39,7 +39,47 @@ export default function Meditation() {
   }
 
   const createKeyword = async () => {
-    console.log(inputValue)
+    try {
+      const meditationDocRef = doc(firestore, 'meditation', datePick)
+      const docSnapshot = await getDoc(meditationDocRef)
+
+      if (docSnapshot.exists()) {
+        const keywords = docSnapshot.data().keywords
+
+        // 특정 키워드가 존재하는지 확인
+        const keywordIndex = keywords.findIndex(
+          (keyword: { text: string; likeCount: Array<string> }) => keyword.text === inputValue,
+        )
+
+        if (keywordIndex === -1) {
+          await updateDoc(meditationDocRef, {
+            keywords: arrayUnion({
+              text: inputValue,
+              likeCount: [firebaseInfo.uid],
+            }),
+          }).then(() => {
+            setInputValue('')
+            readKeywordList()
+          })
+        } else {
+          alert('이미 등록된 키워드입니다.')
+        }
+      } else {
+        await setDoc(meditationDocRef, {
+          keywords: [
+            {
+              text: inputValue,
+              likeCount: [firebaseInfo.uid],
+            },
+          ],
+        }).then(() => {
+          setInputValue('')
+          readKeywordList()
+        })
+      }
+    } catch (error) {
+      console.error('Error checking for create keyword:', error)
+    }
   }
 
   const readKeywordList = async () => {
