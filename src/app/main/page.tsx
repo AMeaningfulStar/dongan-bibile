@@ -22,7 +22,7 @@ import TRAFFICLIGHT_ICON from '@icon/trafficLight_icon.svg'
 
 export default function Main() {
   const { firebaseInfo, setFirebaseUid, setFirebaseInfo, initFirebaseInfo } = useFirebaseStore()
-  const { setDatePick } = useBibleInfo()
+  const { datePick, setDatePick } = useBibleInfo()
   const route = useRouter()
 
   const handleSignOut = () => {
@@ -106,6 +106,10 @@ export default function Main() {
         }
       }
     })
+
+    if (datePick === '') {
+      setDatePick(moment(new Date()).format('YYYY-MM-DD'))
+    }
   }, [])
 
   return (

@@ -1,82 +1,300 @@
-import { LoadingScreen } from '@/components/Layout'
+'use client'
+import { ko } from 'date-fns/locale'
+import { arrayUnion, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
+import moment from 'moment'
+import Image from 'next/image'
+import { forwardRef, KeyboardEvent, useEffect, useState } from 'react'
+import DatePicker from 'react-datepicker'
+import { twMerge } from 'tailwind-merge'
+
+import 'react-datepicker/dist/react-datepicker.css'
+
+import { DashboardLayout } from '@/components/Layout'
+
+import { firestore } from '@/libs/firebase'
+import useBibleInfo from '@/stores/BibleInfo'
+import useFirebaseStore from '@/stores/FirebaseStore'
+
+import KEYWORD_ADD_ICON from '@icon/keyword_add_icon.svg'
+import LIGHTUP_SMALL_ICON from '@icon/lightup_small_icon.svg'
+import SPEECH_BUBBLE_ICON from '@icon/speech_bubble_icon.svg'
 
 export default function Meditation() {
+  const [inputValue, setInputValue] = useState<string>('')
+  const [keywordList, setKeywordList] = useState<Array<{ text: string; likeCount: Array<string> }>>([])
+  const [isPrayerBtn, setIsPrayerBtn] = useState<boolean>(false)
+  const { datePick, setDatePick } = useBibleInfo()
+  const { firebaseInfo } = useFirebaseStore()
+
+  const PickerCustomInput = forwardRef(({ value, onClick }: any, ref: any) => (
+    <button className="h-full flex-grow" onClick={onClick} ref={ref}>
+      {value}
+    </button>
+  ))
+
+  const activeEnter = (event: KeyboardEvent) => {
+    if (event.nativeEvent.isComposing) {
+      return
+    }
+    if (event.key === 'Enter') {
+      return createKeyword()
+    }
+  }
+
+  const createKeyword = async () => {
+    try {
+      // 현재 날짜와 datePick 비교
+      const today = new Date().setHours(0, 0, 0, 0) // 오늘 날짜를 기준으로 시간 초기화
+      const selectedDate = new Date(datePick).setHours(0, 0, 0, 0) // 선택한 날짜의 시간 초기화
+
+      if (selectedDate > today) {
+        alert('미리 키워드를 등록할 수 없습니다')
+        return
+      }
+
+      const meditationDocRef = doc(firestore, 'meditation', datePick)
+      const docSnapshot = await getDoc(meditationDocRef)
+
+      if (docSnapshot.exists()) {
+        const keywords = docSnapshot.data().keywords
+
+        // 특정 키워드가 존재하는지 확인
+        const keywordIndex = keywords.findIndex(
+          (keyword: { text: string; likeCount: Array<string> }) => keyword.text === inputValue,
+        )
+
+        if (keywordIndex === -1) {
+          await updateDoc(meditationDocRef, {
+            keywords: arrayUnion({
+              text: inputValue,
+              likeCount: [firebaseInfo.uid],
+            }),
+          }).then(() => {
+            setInputValue('')
+            readKeywordList()
+          })
+        } else {
+          alert('이미 등록된 키워드입니다.')
+        }
+      } else {
+        await setDoc(meditationDocRef, {
+          keywords: [
+            {
+              text: inputValue,
+              likeCount: [firebaseInfo.uid],
+            },
+          ],
+        }).then(() => {
+          setInputValue('')
+          readKeywordList()
+        })
+      }
+    } catch (error) {
+      console.error('Error checking for create keyword:', error)
+    }
+  }
+
+  const readKeywordList = async () => {
+    try {
+      const keywordListRef = doc(firestore, 'meditation', datePick)
+      const keywordListSnap = await getDoc(keywordListRef)
+
+      if (keywordListSnap.exists()) {
+        const response: Array<{ text: string; likeCount: Array<string> }> = keywordListSnap.data().keywords
+
+        setKeywordList(response)
+      } else {
+        setKeywordList([])
+      }
+    } catch (error) {
+      console.error('Error checking for keyword list:', error)
+    }
+  }
+
+  const Keyword = ({ text, likeCountUser }: { text: string; likeCountUser: Array<string> }) => {
+    const keywordColor = (likeCount: number) => {
+      if (likeCount < 5) {
+        return 'bg-[#E8EEFF]'
+      } else if (likeCount < 10) {
+        return 'bg-[#A7D1FF]'
+      } else {
+        return 'bg-[#64ABFB]'
+      }
+    }
+
+    const incrementLikeCount = async () => {
+      try {
+        if (likeCountUser.includes(firebaseInfo.uid as string)) return
+
+        const meditationDocRef = doc(firestore, 'meditation', datePick)
+        const docSnapshot = await getDoc(meditationDocRef)
+
+        if (docSnapshot.exists()) {
+          const keywords = docSnapshot.data().keywords
+
+          // 특정 키워드를 찾기
+          const updatedKeywords = keywords.map((keyword: { text: string; likeCount: Array<string> }) => {
+            if (keyword.text === text) {
+              return {
+                ...keyword,
+                likeCount: [...keyword.likeCount, firebaseInfo.uid],
+              }
+            }
+
+            return keyword
+          })
+
+          // Firestore 문서 업데이트
+          await updateDoc(meditationDocRef, {
+            keywords: updatedKeywords,
+          }).then(() => readKeywordList())
+        }
+      } catch (error) {
+        console.error('Error checking for keyword like count:', error)
+      }
+    }
+
+    return (
+      <div
+        className={twMerge(
+          'flex h-[1.875rem] items-center gap-x-px rounded-full px-3',
+          keywordColor(likeCountUser.length),
+        )}
+        onClick={() => incrementLikeCount()}
+      >
+        <span># {text}</span>
+        <span>({likeCountUser.length})</span>
+      </div>
+    )
+  }
+
+  const handlePrayerButtonClick = async () => {
+    try {
+      const bibleReadRef = doc(firestore, 'users', firebaseInfo.uid as string)
+      const bibleReadSnap = await getDoc(bibleReadRef)
+
+      if (bibleReadSnap.exists()) {
+        // 현재 날짜와 datePick 비교
+        const today = new Date().setHours(0, 0, 0, 0) // 오늘 날짜를 기준으로 시간 초기화
+        const selectedDate = new Date(datePick).setHours(0, 0, 0, 0) // 선택한 날짜의 시간 초기화
+
+        if (selectedDate > today) {
+          alert('해당 날짜에 다시 시도하세요')
+          return
+        }
+
+        if (!firebaseInfo.bibleReadingDates?.includes(datePick)) {
+          alert('먼저 말씀을 읽어주세요')
+          return
+        }
+
+        await updateDoc(bibleReadRef, {
+          prayerDates: arrayUnion(datePick),
+        })
+      }
+    } catch (error) {
+      console.error('Error checking for prayer:', error)
+    }
+  }
+
+  const isDisabled = async () => {
+    try {
+      const bibleReadRef = doc(firestore, 'users', firebaseInfo.uid as string)
+      const bibleReadSnap = await getDoc(bibleReadRef)
+
+      if (bibleReadSnap.exists()) {
+        // 현재 날짜와 datePick 비교
+        const today = new Date().setHours(0, 0, 0, 0) // 오늘 날짜를 기준으로 시간 초기화
+        const selectedDate = new Date(datePick).setHours(0, 0, 0, 0) // 선택한 날짜의 시간 초기화
+
+        if (selectedDate > today) {
+          setIsPrayerBtn(true)
+          return
+        }
+
+        const prayerDates = bibleReadSnap.data().prayerDates as Array<string>
+
+        if(prayerDates.includes(datePick)) {
+          setIsPrayerBtn(true)
+          return
+        }
+
+        setIsPrayerBtn(false)
+      }
+    } catch (error) {
+      console.error('Error checking for prayer:', error)
+    }
+  }
+
+  useEffect(() => {
+    readKeywordList()
+    isDisabled()
+  }, [datePick])
+
   return (
-    <LoadingScreen pageName="묵상노트"></LoadingScreen>
-    // <div className="flex min-h-screen w-full flex-col items-center py-20">
-    //   <div className="fixed left-0 top-0 flex w-full items-center justify-center border-b border-[#AAAAAA] bg-white pb-3 pt-10">
-    //     <span className="text-xl font-light">묵상노트</span>
-    //   </div>
-    //   {/* 날짜 세팅 */}
-    //   <div className="flex w-full justify-between gap-x-3 px-4 py-3">
-    //     <div className="flex flex-grow gap-x-3">
-    //       <div className="text-base">날짜</div>
-    //       <button className="flex-grow rounded-md border border-black">00 / 00</button>
-    //     </div>
-    //   </div>
-    //   {/* 나의 묵상 */}
-    //   <div className="flex w-full flex-col px-4">
-    //     <div className="w-full py-5 text-lg font-light leading-none">나의 묵상</div>
-    //     <div className="mb-2.5 flex w-full flex-col gap-y-4 rounded-lg bg-[#E8EEFF] p-5">
-    //       <label htmlFor="keyword" className="flex gap-x-1">
-    //         <span>1.</span>
-    //         <span>오늘 성경 말씀 중 내 마음 속에 남는 키워드는 무엇인가요? 한 단어로 표현해보세요.</span>
-    //       </label>
-    //       <input
-    //         id="keyword"
-    //         className="border-b border-[#AAAAAA] bg-transparent p-px font-light outline-none"
-    //         placeholder="ex. 하나님의 사랑, 구원, 복음 등.."
-    //       />
-    //     </div>
-    //     <div className="flex w-full flex-col gap-y-4 rounded-lg bg-[#E8EEFF] p-5">
-    //       <label htmlFor="promise" className="flex gap-x-1">
-    //         <span>2.</span>
-    //         <span>'오늘의 키워드'를 활용하여 오늘 하루의 다짐을 적어보세요.</span>
-    //       </label>
-    //       <input
-    //         id="promise"
-    //         className="border-b border-[#AAAAAA] bg-transparent p-px font-light outline-none"
-    //         placeholder="ex. 도움이 필요한 친구를 도와주자"
-    //       />
-    //     </div>
-    //   </div>
-    //   {/* 묵상 완료 버튼 */}
-    //   <div className="py-7">
-    //     <button className="h-8 w-32 rounded-lg border border-black bg-white">
-    //       <span className="text-sm font-normal leading-none">묵상 완료</span>
-    //     </button>
-    //   </div>
-    //   {/* 오늘의 묵상 키워드 */}
-    //   <div className="flex w-full flex-col gap-y-5 px-4 mb-4">
-    //     <div className="w-full text-lg font-light leading-none">오늘의 묵상 키워드</div>
-    //     <div className="flex flex-wrap gap-2">
-    //       <div className="rounded-full bg-[#E8EEFF] px-3 py-2">#친구</div>
-    //       <div className="rounded-full bg-[#A7D2FF] px-3 py-2">#견손</div>
-    //       <div className="rounded-full bg-[#64ABFB] px-3 py-2">#섬김</div>
-    //       <div className="rounded-full bg-[#0276F9] px-3 py-2">#김대현전도사님</div>
-    //       <div className="rounded-full bg-[#A7D2FF] px-3 py-2">#공부열심히하기</div>
-    //       <div className="rounded-full bg-[#E8EEFF] px-3 py-2">#희생하는사람</div>
-    //       <div className="rounded-full bg-[#0276F9] px-3 py-2">#디미징찬양팀</div>
-    //     </div>
-    //   </div>
-    //   {/* 하단 네비게이션 바 */}
-    //   <div className="fixed bottom-0 left-0 flex w-full justify-between border-t bg-white pb-9">
-    //     <Link href={'/home'} className="px-6 py-3">
-    //       <Image alt="button" src={CALENDAR_ICON} />
-    //     </Link>
-    //     <Link href={'/meditation'} className="px-6 py-3">
-    //       <Image alt="button" src={MEDITATION_ICON} />
-    //     </Link>
-    //     <Link href={'/bible'} className="px-6 py-3">
-    //       <Image alt="button" src={BIBLE_ICON} />
-    //     </Link>
-    //     <Link href={'/status'} className="px-6 py-3">
-    //       <Image alt="button" src={STATUS_ICON} />
-    //     </Link>
-    //     <Link href={'/event'} className="px-6 py-3">
-    //       <Image alt="button" src={EVENT_ICON} />
-    //     </Link>
-    //   </div>
-    // </div>
+    <DashboardLayout pageName="묵상노트">
+      <div className="meditation-datepicker flex h-12 w-full items-center gap-x-2.5 px-4 py-3">
+        <span className="text-base leading-none">날짜</span>
+        <DatePicker
+          dateFormat={'MM월 dd일'}
+          locale={ko}
+          shouldCloseOnSelect
+          customInput={<PickerCustomInput />}
+          minDate={new Date('2024-07-01')}
+          selected={
+            moment(datePick, 'YYYY-MM-DD', true).isValid() ? moment(datePick, 'YYYY-MM-DD').toDate() : new Date()
+          }
+          onChange={(date) => setDatePick(moment(date).format('YYYY-MM-DD'))}
+        />
+      </div>
+      <div className="flex w-full flex-col gap-y-1 p-4">
+        <div className="flex gap-x-1">
+          <Image alt="icon" src={SPEECH_BUBBLE_ICON} />
+          <span className="text-lg leading-none">오늘의 묵상 키워드</span>
+        </div>
+        <div>나에게 와닿는 키워드를 눌러 공감을 표현해보세요!</div>
+      </div>
+      <div className="mb-7 flex h-36 w-full flex-wrap gap-2 overflow-y-scroll px-4">
+        {keywordList.length === 0 ? (
+          <div className="flex h-full w-full flex-col items-center justify-center gap-y-2">
+            <Image alt="lightup icon" src={LIGHTUP_SMALL_ICON} />
+            <span className="font-light">오늘의 묵상 키워드를 추가해보세요</span>
+          </div>
+        ) : (
+          keywordList.map((item, idx) => <Keyword key={idx} text={item.text} likeCountUser={item.likeCount} />)
+        )}
+      </div>
+      <div className="mb-5 flex w-full items-end gap-x-2 px-4 py-5">
+        <div className="h-[1.875rem] w-full border-b border-[#222]">
+          <input
+            type="text"
+            maxLength={10}
+            value={inputValue}
+            onChange={(event) => setInputValue(event.target.value)}
+            onKeyDown={(event) => activeEnter(event)}
+            className="h-full w-full p-2 outline-none"
+            placeholder="나만의 키워드를 추가해보세요"
+          />
+        </div>
+        <button className="" onClick={() => createKeyword()}>
+          <Image alt="add button" src={KEYWORD_ADD_ICON} />
+        </button>
+      </div>
+      <div className="flex w-full justify-center">
+        <span>오늘 나에게 와닿은 키워드로 10초 동안 기도해보세요</span>
+      </div>
+      <div className="flex w-full justify-center py-5">
+        <button
+          className={twMerge(
+            'h-9 w-40 rounded-full border',
+            isPrayerBtn ? 'border-[#AAA] bg-[#EEE] text-[#AAA]' : 'border-[#0276F9] bg-[#0276F9] text-white',
+          )}
+          onClick={() => handlePrayerButtonClick()}
+          disabled={isPrayerBtn}
+        >
+          기도했습니다
+        </button>
+      </div>
+    </DashboardLayout>
   )
 }
