@@ -1,15 +1,17 @@
 'use client'
 import { ko } from 'date-fns/locale'
-import { doc, getDoc } from 'firebase/firestore'
+import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import moment from 'moment'
 import Image from 'next/image'
 import { forwardRef, KeyboardEvent, useEffect, useState } from 'react'
 import DatePicker from 'react-datepicker'
+import { twMerge } from 'tailwind-merge'
 
 import { DashboardLayout } from '@/components/Layout'
 
 import { firestore } from '@/libs/firebase'
 import useBibleInfo from '@/stores/BibleInfo'
+import useFirebaseStore from '@/stores/FirebaseStore'
 
 import KEYWORD_ADD_ICON from '@icon/keyword_add_icon.svg'
 import LIGHTUP_SMALL_ICON from '@icon/lightup_small_icon.svg'
@@ -17,8 +19,9 @@ import SPEECH_BUBBLE_ICON from '@icon/speech_bubble_icon.svg'
 
 export default function Meditation() {
   const [inputValue, setInputValue] = useState<string>('')
-  const [keywordList, setKeywordList] = useState<Array<{ text: string; count: Array<string> }>>([])
+  const [keywordList, setKeywordList] = useState<Array<{ text: string; likeCount: Array<string> }>>([])
   const { datePick, setDatePick } = useBibleInfo()
+  const { firebaseInfo } = useFirebaseStore()
 
   const PickerCustomInput = forwardRef(({ value, onClick }: any, ref: any) => (
     <button className="h-full flex-grow" onClick={onClick} ref={ref}>
@@ -41,21 +44,76 @@ export default function Meditation() {
 
   const readKeywordList = async () => {
     try {
-      if (datePick === '') {
-        setDatePick(moment(new Date()).format('YYYY-MM-DD'))
-      }
-
       const keywordListRef = doc(firestore, 'meditation', datePick)
       const keywordListSnap = await getDoc(keywordListRef)
 
       if (keywordListSnap.exists()) {
-        setKeywordList(keywordListSnap.data().keywords)
+        const response: Array<{ text: string; likeCount: Array<string> }> = keywordListSnap.data().keywords
+
+        setKeywordList(response)
       } else {
         setKeywordList([])
       }
     } catch (error) {
       console.error('Error checking for keyword list:', error)
     }
+  }
+
+  const Keyword = ({ text, likeCountUser }: { text: string; likeCountUser: Array<string> }) => {
+    const keywordColor = (likeCount: number) => {
+      if (likeCount < 5) {
+        return 'bg-[#E8EEFF]'
+      } else if (likeCount < 10) {
+        return 'bg-[#A7D1FF]'
+      } else {
+        return 'bg-[#64ABFB]'
+      }
+    }
+
+    const incrementLikeCount = async () => {
+      try {
+        if (likeCountUser.includes(firebaseInfo.uid as string)) return
+
+        const meditationDocRef = doc(firestore, 'meditation', datePick)
+        const docSnapshot = await getDoc(meditationDocRef)
+
+        if (docSnapshot.exists()) {
+          const keywords = docSnapshot.data().keywords
+
+          // 특정 키워드를 찾기
+          const updatedKeywords = keywords.map((keyword: { text: string; likeCount: Array<string> }) => {
+            if (keyword.text === text) {
+              return {
+                ...keyword,
+                likeCount: [...keyword.likeCount, firebaseInfo.uid],
+              }
+            }
+
+            return keyword
+          })
+
+          // Firestore 문서 업데이트
+          await updateDoc(meditationDocRef, {
+            keywords: updatedKeywords,
+          }).then(() => readKeywordList())
+        }
+      } catch (error) {
+        console.error('Error checking for keyword like count:', error)
+      }
+    }
+
+    return (
+      <div
+        className={twMerge(
+          'flex h-[1.875rem] items-center gap-x-px rounded-full px-3',
+          keywordColor(likeCountUser.length),
+        )}
+        onClick={() => incrementLikeCount()}
+      >
+        <span># {text}</span>
+        <span>({likeCountUser.length})</span>
+      </div>
+    )
   }
 
   useEffect(() => {
@@ -92,12 +150,7 @@ export default function Meditation() {
             <span className="font-light">오늘의 묵상 키워드를 추가해보세요</span>
           </div>
         ) : (
-          keywordList.map((item, idx) => (
-            <div key={idx} className="flex h-[1.875rem] items-center gap-x-px rounded-full bg-[#E8EEFF] px-3">
-              <span># {item.text}</span>
-              <span>({item.count.length})</span>
-            </div>
-          ))
+          keywordList.map((item, idx) => <Keyword key={idx} text={item.text} likeCountUser={item.likeCount} />)
         )}
       </div>
       <div className="mb-5 flex w-full items-end gap-x-2 px-4 py-5">
