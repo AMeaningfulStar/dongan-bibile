@@ -1,12 +1,14 @@
 'use client'
 import { ko } from 'date-fns/locale'
+import { doc, getDoc } from 'firebase/firestore'
 import moment from 'moment'
 import Image from 'next/image'
-import { forwardRef, KeyboardEvent, useState } from 'react'
+import { forwardRef, KeyboardEvent, useEffect, useState } from 'react'
 import DatePicker from 'react-datepicker'
 
 import { DashboardLayout } from '@/components/Layout'
 
+import { firestore } from '@/libs/firebase'
 import useBibleInfo from '@/stores/BibleInfo'
 
 import KEYWORD_ADD_ICON from '@icon/keyword_add_icon.svg'
@@ -15,7 +17,8 @@ import SPEECH_BUBBLE_ICON from '@icon/speech_bubble_icon.svg'
 
 export default function Meditation() {
   const [inputValue, setInputValue] = useState<string>('')
-  const { datePick } = useBibleInfo()
+  const [keywordList, setKeywordList] = useState<Array<{ text: string; count: Array<string> }>>([])
+  const { datePick, setDatePick } = useBibleInfo()
 
   const PickerCustomInput = forwardRef(({ value, onClick }: any, ref: any) => (
     <button className="h-full flex-grow" onClick={onClick} ref={ref}>
@@ -36,6 +39,29 @@ export default function Meditation() {
     console.log(inputValue)
   }
 
+  const readKeywordList = async () => {
+    try {
+      if (datePick === '') {
+        setDatePick(moment(new Date()).format('YYYY-MM-DD'))
+      }
+
+      const keywordListRef = doc(firestore, 'meditation', datePick)
+      const keywordListSnap = await getDoc(keywordListRef)
+
+      if (keywordListSnap.exists()) {
+        setKeywordList(keywordListSnap.data().keywords)
+      } else {
+        setKeywordList([])
+      }
+    } catch (error) {
+      console.error('Error checking for keyword list:', error)
+    }
+  }
+
+  useEffect(() => {
+    readKeywordList()
+  }, [datePick])
+
   return (
     <DashboardLayout pageName="묵상노트">
       <div className="meditation-datepicker flex h-12 w-full items-center gap-x-2.5 px-4 py-3">
@@ -49,6 +75,7 @@ export default function Meditation() {
           selected={
             moment(datePick, 'YYYY-MM-DD', true).isValid() ? moment(datePick, 'YYYY-MM-DD').toDate() : new Date()
           }
+          onChange={(date) => setDatePick(moment(date).format('YYYY-MM-DD'))}
         />
       </div>
       <div className="flex w-full flex-col gap-y-1 p-4">
@@ -59,14 +86,19 @@ export default function Meditation() {
         <div>나에게 와닿는 키워드를 눌러 공감을 표현해보세요!</div>
       </div>
       <div className="mb-7 flex h-36 w-full flex-wrap gap-2 overflow-y-scroll px-4">
-        {/* <div className="flex h-[1.875rem] items-center gap-x-px rounded-full bg-slate-400 px-3">
-          <span># 희생하는사랑</span>
-          <span>(4)</span>
-        </div> */}
-        <div className="flex h-full w-full flex-col items-center justify-center gap-y-2">
-          <Image alt="lightup icon" src={LIGHTUP_SMALL_ICON} />
-          <span className="font-light">오늘의 묵상 키워드를 추가해보세요</span>
-        </div>
+        {keywordList.length === 0 ? (
+          <div className="flex h-full w-full flex-col items-center justify-center gap-y-2">
+            <Image alt="lightup icon" src={LIGHTUP_SMALL_ICON} />
+            <span className="font-light">오늘의 묵상 키워드를 추가해보세요</span>
+          </div>
+        ) : (
+          keywordList.map((item, idx) => (
+            <div key={idx} className="flex h-[1.875rem] items-center gap-x-px rounded-full bg-[#E8EEFF] px-3">
+              <span># {item.text}</span>
+              <span>({item.count.length})</span>
+            </div>
+          ))
+        )}
       </div>
       <div className="mb-5 flex w-full items-end gap-x-2 px-4 py-5">
         <div className="h-[1.875rem] w-full border-b border-[#222]">
