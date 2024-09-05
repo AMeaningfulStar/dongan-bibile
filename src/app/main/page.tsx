@@ -14,10 +14,10 @@ import { auth, firestore } from '@/libs/firebase'
 import useFirebaseStore from '@/stores/FirebaseStore'
 
 import { DashboardLayout } from '@/components/Layout'
+import { ConsecutiveDays } from '@/components/MainPage'
 
 import useBibleInfo from '@/stores/BibleInfo'
 import AIRPLANE_ICON from '@icon/airplane_icon.svg'
-import FIRE_ICON from '@icon/fire_icon.svg'
 import TRAFFICLIGHT_ICON from '@icon/trafficLight_icon.svg'
 
 export default function Main() {
@@ -115,14 +115,7 @@ export default function Main() {
   return (
     <DashboardLayout pageName="홈">
       {/* 청신호 연속 읽은 날짜 텍스트 */}
-      <div className="w-full px-4 py-2.5">
-        <div className="item-center flex gap-x-1 rounded-full bg-[#E8EEFF] py-2.5 pl-5">
-          <div className="text-lg font-light leading-none">
-            청신호 연속 <span className="font-medium text-[#0276F9]">{firebaseInfo.challengeStreakCount}</span> 일째
-          </div>
-          <Image alt="icon" src={FIRE_ICON} />
-        </div>
-      </div>
+      <ConsecutiveDays />
       {/* 캘린더 */}
       <div className="mb-10 flex w-full flex-col items-center px-4">
         <div className="w-full py-5 text-lg font-light leading-none">나의 말씀 읽기</div>
@@ -172,7 +165,7 @@ export default function Main() {
         </div>
       </div>
       {/* 버전 */}
-      <p className="mb-6 text-base font-normal leading-none">버전: 2.0.0</p>
+      <p className="mb-6 text-base font-normal leading-none">버전: 2.0.1</p>
       {/* 버튼 2개 */}
       {firebaseInfo.useAdmin && (
         <Link
