@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 
-import { Title } from '@/components/Text'
+import { HeaderName } from '@/components/Text'
 
 import { NavigationBar } from '@/components/Layout'
 import LIGHTUP_ICON from '@icon/lightup_icon.svg'
@@ -10,7 +10,7 @@ export default function Status() {
   return (
     <div className="flex min-h-screen w-full flex-col items-center py-14">
       <div className="fixed left-0 top-0 z-30 flex w-full items-center justify-center border-b border-[#AAAAAA] bg-white py-4">
-        <Title textColor="">이벤트</Title>
+        <HeaderName textColor="">이벤트</HeaderName>
       </div>
       {/* 이벤트 페이지 empty */}
       <div className="flex flex-grow flex-col items-center justify-center gap-y-5">
