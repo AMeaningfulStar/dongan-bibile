@@ -166,7 +166,7 @@ export default function Main() {
         </div>
       </div>
       {/* 버전 */}
-      <p className="mb-6 text-base font-normal leading-none">버전: 2.0.1</p>
+      <p className="mb-6 text-base font-normal leading-none">버전: 2.0.2</p>
       {/* 버튼 2개 */}
       {firebaseInfo.useAdmin && (
         <Link
