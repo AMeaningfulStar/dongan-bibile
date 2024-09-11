@@ -10,6 +10,7 @@ import { auth } from '@/libs/firebase'
 import useFirebaseStore from '@/stores/FirebaseStore'
 import useLoginStore from '@/stores/LoginStore'
 
+import { Version } from '@/components/Text'
 import LOGIN_BACKGROUND from '@image/Login_Background.svg'
 import LOGIN_BOTTOM from '@image/Login_Bottom.svg'
 
@@ -94,7 +95,7 @@ export default function Login() {
       >
         <span className="text-sm font-normal leading-none">로그인</span>
       </button>
-      <p className="mb-4 text-base font-normal leading-none text-white">버전: 2.0.0</p>
+      <Version marginBottom="mb-4" textColor="text-white" />
       <div className="mb-4 flex gap-x-4">
         <button className="h-8 w-32 rounded-lg bg-white">
           <span className="text-sm font-normal leading-none">비밀번호 찾기</span>

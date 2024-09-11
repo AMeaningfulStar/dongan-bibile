@@ -15,8 +15,8 @@ import useFirebaseStore from '@/stores/FirebaseStore'
 import { DashboardLayout } from '@/components/Layout'
 import { ConsecutiveDays } from '@/components/MainPage'
 
-import { Label } from '@/components/Text'
 import { ChallengeProgressBar, MyProgressBar } from '@/components/Progress'
+import { Label, Version } from '@/components/Text'
 import useBibleInfo from '@/stores/BibleInfo'
 import BIBLE_ICON from '@icon/bible.svg'
 
@@ -106,7 +106,7 @@ export default function Main() {
       {/* 나의 진행률 */}
       <MyProgressBar />
       {/* 버전 */}
-      <p className="mb-6 text-base font-normal leading-none">버전: 2.0.2</p>
+      <Version marginBottom="mb-6" textColor="text-black" />
       {/* 버튼 2개 */}
       {firebaseInfo.useAdmin && (
         <Link
