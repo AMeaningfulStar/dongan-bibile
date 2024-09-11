@@ -2,7 +2,6 @@
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import { doc, getDoc } from 'firebase/firestore'
 import moment from 'moment'
-import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
@@ -16,8 +15,10 @@ import useFirebaseStore from '@/stores/FirebaseStore'
 import { DashboardLayout } from '@/components/Layout'
 import { ConsecutiveDays } from '@/components/MainPage'
 
+import { Label } from '@/components/Text'
 import useBibleInfo from '@/stores/BibleInfo'
 import AIRPLANE_ICON from '@icon/airplane_icon.svg'
+import BIBLE_ICON from '@icon/bible.svg'
 import TRAFFICLIGHT_ICON from '@icon/trafficLight_icon.svg'
 
 export default function Main() {
@@ -118,7 +119,9 @@ export default function Main() {
       <ConsecutiveDays />
       {/* 캘린더 */}
       <div className="mb-10 flex w-full flex-col items-center px-4">
-        <div className="w-full py-5 text-lg font-light leading-none">나의 말씀 읽기</div>
+        <div className="w-full py-5">
+          <Label label="나의 말씀 읽기" imageSrc={BIBLE_ICON} imageAlt="icon" />
+        </div>
         <Calendar
           locale="ko"
           formatDay={(locale, data) => moment(data).format('DD')}
@@ -131,7 +134,7 @@ export default function Main() {
           next2Label={null}
           view="month"
           onChange={(event: any) => goToBibleReading(moment(event).format('YYYY-MM-DD'))}
-          tileClassName={({ date, view }) => {
+          tileClassName={({ date }) => {
             if (firebaseInfo.bibleReadingDates?.find((x) => x === moment(date).format('YYYY-MM-DD'))) {
               return 'react-calendar__tile--read'
             }
@@ -140,9 +143,8 @@ export default function Main() {
       </div>
       {/* 청신호 진행률 */}
       <div className="mb-3 flex w-full flex-col gap-y-3 px-4">
-        <div className="flex items-center gap-x-1 pt-5">
-          <Image alt="icon" src={TRAFFICLIGHT_ICON} />
-          <span className="text-lg font-light leading-none">청신호 진행률</span>
+        <div className="pt-5">
+          <Label label="청신호 진행률" imageSrc={TRAFFICLIGHT_ICON} imageAlt="icon" />
         </div>
         <div className="flex items-center gap-x-2">
           <div className="relative h-2 flex-grow bg-[#E8EEFF]">
@@ -153,9 +155,8 @@ export default function Main() {
       </div>
       {/* 나의 진행률 */}
       <div className="mb-16 flex w-full flex-col gap-y-3 px-4">
-        <div className="flex items-center gap-x-1 pt-5">
-          <Image alt="icon" src={AIRPLANE_ICON} />
-          <span className="text-lg font-light leading-none">나의 진행률</span>
+        <div className="pt-5">
+          <Label label="나의 진행률" imageSrc={AIRPLANE_ICON} imageAlt="icon" />
         </div>
         <div className="flex items-center gap-x-2">
           <div className="relative h-2 flex-grow bg-[#E8EEFF]">
@@ -165,7 +166,7 @@ export default function Main() {
         </div>
       </div>
       {/* 버전 */}
-      <p className="mb-6 text-base font-normal leading-none">버전: 2.0.1</p>
+      <p className="mb-6 text-base font-normal leading-none">버전: 2.0.2</p>
       {/* 버튼 2개 */}
       {firebaseInfo.useAdmin && (
         <Link

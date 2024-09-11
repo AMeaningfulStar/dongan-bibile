@@ -1,1 +1,2 @@
-export { Title } from './Title'
+export { HeaderName } from './HeaderName'
+export { Label } from './Label'

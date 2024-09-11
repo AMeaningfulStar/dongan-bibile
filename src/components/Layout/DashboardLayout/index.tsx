@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { twMerge } from 'tailwind-merge'
 
-import { Title } from '@/components/Text'
+import { HeaderName } from '@/components/Text'
 
 import useFirebaseStore from '@/stores/FirebaseStore'
 
@@ -37,7 +37,7 @@ export function DashboardLayout({ children, pageName }: LayoutType) {
   return (
     <div className="flex min-h-screen w-full flex-col items-center py-14">
       <div className="fixed left-0 top-0 z-30 flex w-full items-center justify-center border-b border-[#AAAAAA] bg-white py-4">
-        <Title textColor="">{pageName}</Title>
+        <HeaderName textColor="">{pageName}</HeaderName>
       </div>
       {children}
       <NavigationBar />
@@ -58,7 +58,7 @@ export function LoadingScreen({ pageName }: { pageName: string }) {
   return (
     <div className="flex min-h-screen w-full flex-col items-center py-14">
       <div className="fixed left-0 top-0 flex w-full items-center justify-center border-b border-[#AAAAAA] bg-white py-4">
-        <Title textColor="">{pageName}</Title>
+        <HeaderName textColor="">{pageName}</HeaderName>
       </div>
       <div className="flex flex-grow flex-col items-center justify-center gap-y-5">
         <Image alt="image" src={LIGHTUP_ICON} />
@@ -79,7 +79,7 @@ export function NoBibleData({ pageName }: { pageName: string }) {
   return (
     <div className="flex min-h-screen w-full flex-col items-center py-14">
       <div className="fixed left-0 top-0 flex w-full items-center justify-center border-b border-[#AAAAAA] bg-white py-4">
-        <Title textColor="">{pageName}</Title>
+        <HeaderName textColor="">{pageName}</HeaderName>
       </div>
       <div className="flex flex-grow flex-col items-center justify-center gap-y-5">
         <Image alt="image" src={LIGHTUP_ICON} />
