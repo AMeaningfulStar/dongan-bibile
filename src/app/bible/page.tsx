@@ -16,15 +16,17 @@ import { firestore } from '@/libs/firebase'
 import { useBibleData } from '@/libs/swr/useBibleData'
 import useBibleInfo from '@/stores/BibleInfo'
 
-import { KakaoShareBtn } from '@/components/Button'
+import { KakaoShareBtn, TextSizeAdjuster } from '@/components/Button'
 import { DashboardLayout, ErrorLayout, LoadingLayout } from '@/components/Layout'
 
+import useBibleTextSize from '@/stores/BibleTextSizeStore'
 import useFirebaseStore from '@/stores/FirebaseStore'
 import LINK_ICON from '@icon/link_icon.svg'
 
 export default function Bible() {
   const { datePick, bibleType, setBibleType, setDatePick } = useBibleInfo()
   const { firebaseInfo } = useFirebaseStore()
+  const { textSize } = useBibleTextSize()
   const { bibleData, isLoading, isError } = useBibleData(datePick, bibleType)
   const [isShowDrop, setIsShowDrop] = useState<boolean>(false)
   const route = useRouter()
@@ -166,7 +168,7 @@ export default function Bible() {
           </div>
 
           {item.verses.map((item, idx) => (
-            <div key={idx} className="flex w-full gap-x-2 px-4 leading-normal">
+            <div key={idx} className={twMerge('flex w-full gap-x-2 whitespace-pre-line px-4 leading-normal', textSize)}>
               <span>{item.verse}</span>
               <span>{item.text}</span>
             </div>
@@ -186,14 +188,7 @@ export default function Bible() {
       >
         말씀을 읽었습니다
       </button>
-      <div className="fixed bottom-20 right-3 flex gap-x-2">
-        <button className="h-10 w-10 rounded-full border-4 border-[#0276F9] border-opacity-60 bg-[#A7D2FF] bg-opacity-60 text-2xl font-bold leading-none text-[#0276F9] text-opacity-60">
-          +
-        </button>
-        <button className="h-10 w-10 rounded-full border-4 border-[#AAA] border-opacity-60 bg-[#CCC] bg-opacity-60 text-2xl font-bold leading-none text-[#AAA] text-opacity-60">
-          -
-        </button>
-      </div>
+      <TextSizeAdjuster />
     </DashboardLayout>
   )
 }
