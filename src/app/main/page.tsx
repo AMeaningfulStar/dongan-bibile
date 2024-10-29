@@ -20,6 +20,12 @@ import { Label, Version } from '@/components/Text'
 import useBibleInfo from '@/stores/BibleInfo'
 import BIBLE_ICON from '@icon/bible.svg'
 
+interface ProgressParams {
+  readingDates?: string[]
+  startDate: string
+  endDate: string
+}
+
 export default function Main() {
   const { firebaseInfo, setFirebaseUid, setFirebaseInfo, initFirebaseInfo } = useFirebaseStore()
   const { datePick, setDatePick } = useBibleInfo()
@@ -53,6 +59,26 @@ export default function Main() {
     }
   }
 
+  const calculateProgress = ({ readingDates, startDate, endDate }: ProgressParams): number => {
+    const start = new Date(startDate).getTime()
+    const end = new Date(endDate).getTime()
+    const today = new Date().getTime()
+
+    const totalDuration = (end - start) / (1000 * 60 * 60 * 24) + 1 // 전체 기간 (일 단위)
+
+    // readingDates가 있는 경우 (개인 진행률)
+    if (readingDates?.length) {
+      const validDates = readingDates.filter((date) => {
+        const currentDate = new Date(date).getTime()
+        return currentDate >= start && currentDate <= end
+      })
+      return Math.round((validDates.length / totalDuration) * 100)
+    }
+
+    // readingDates가 없는 경우 (전체 챌린지 진행률)
+    const elapsedDays = (today - start) / (1000 * 60 * 60 * 24) + 1
+    return Math.round((elapsedDays / totalDuration) * 100)
+  }
   useEffect(() => {
     onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -102,9 +128,20 @@ export default function Main() {
         />
       </div>
       {/* 청신호 진행률 */}
-      <ChallengeProgressBar />
+      <ChallengeProgressBar
+        calculateProgress={calculateProgress({
+          startDate: '2024-08-11',
+          endDate: '2024-12-21',
+        })}
+      />
       {/* 나의 진행률 */}
-      <MyProgressBar />
+      <MyProgressBar
+        calculateProgress={calculateProgress({
+          readingDates: firebaseInfo.bibleReadingDates ? firebaseInfo.bibleReadingDates : [],
+          startDate: '2024-08-11',
+          endDate: '2024-12-21',
+        })}
+      />
       {/* 버전 */}
       <Version marginBottom="mb-6" textColor="text-black" />
       {/* 버튼 2개 */}
