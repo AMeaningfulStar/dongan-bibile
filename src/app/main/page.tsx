@@ -32,11 +32,6 @@ interface ProgressResult {
   chapters: number
 }
 
-interface ProgressData {
-  challengeProgress: ProgressResult
-  personalProgress: ProgressResult
-}
-
 const TOTAL_CHAPTERS = 260 // 신약 성경 총 장수
 const CHAPTERS_PER_DAY = 2 // 하루 읽어야 할 장수
 
@@ -105,25 +100,6 @@ export default function Main() {
   }
 
   useEffect(() => {
-    // 두 진행률을 동시에 계산하고 한 번에 상태 업데이트
-    const challengeResult = calculateProgress({
-      startDate: '2024-08-11',
-      endDate: '2024-12-21',
-    })
-
-    const personalResult = calculateProgress({
-      readingDates: firebaseInfo.bibleReadingDates ? firebaseInfo.bibleReadingDates : [],
-      startDate: '2024-08-11',
-      endDate: '2024-12-21',
-    })
-
-    setProgressData({
-      challengeProgress: challengeResult,
-      personalProgress: personalResult,
-    })
-  }, [firebaseInfo.bibleReadingDates])
-
-  useEffect(() => {
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         const docRef = doc(firestore, 'users', user.uid)
@@ -172,9 +148,20 @@ export default function Main() {
         />
       </div>
       {/* 청신호 진행률 */}
-      <ChallengeProgressBar progressResult={progressData.challengeProgress} />
+      <ChallengeProgressBar
+        progressResult={calculateProgress({
+          startDate: '2024-08-11',
+          endDate: '2024-12-21',
+        })}
+      />
       {/* 나의 진행률 */}
-      <MyProgressBar progressResult={progressData.personalProgress} />
+      <MyProgressBar
+        progressResult={calculateProgress({
+          readingDates: firebaseInfo.bibleReadingDates ? firebaseInfo.bibleReadingDates : [],
+          startDate: '2024-08-11',
+          endDate: '2024-12-21',
+        })}
+      />
       {/* 버전 */}
       <Version marginBottom="mb-6" textColor="text-black" />
       {/* 버튼 2개 */}
