@@ -5,7 +5,7 @@ import { doc, getDoc } from 'firebase/firestore'
 import moment from 'moment'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import Calendar from 'react-calendar'
 
 import 'react-calendar/dist/Calendar.css'
@@ -39,10 +39,6 @@ export default function Main() {
   const { firebaseInfo, setFirebaseUid, setFirebaseInfo, initFirebaseInfo } = useFirebaseStore()
   const { datePick, setDatePick } = useBibleInfo()
   const route = useRouter()
-  const [progressData, setProgressData] = useState<ProgressData>({
-    challengeProgress: { progress: 0, chapters: 0 },
-    personalProgress: { progress: 0, chapters: 0 },
-  })
 
   const handleSignOut = () => {
     signOut(auth)
