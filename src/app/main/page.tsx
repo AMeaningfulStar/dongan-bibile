@@ -170,9 +170,6 @@ export default function Main() {
         </Link>
       )}
       <div className="mb-6 flex gap-x-4">
-        <button className="h-8 w-32 rounded-lg border border-black bg-white">
-          <span className="text-sm font-normal leading-none">비밀번호 변경</span>
-        </button>
         <button className="h-8 w-32 rounded-lg border border-black bg-white" onClick={() => handleSignOut()}>
           <span className="text-sm font-normal leading-none">로그아웃</span>
         </button>

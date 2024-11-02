@@ -96,14 +96,6 @@ export default function Login() {
         <span className="text-sm font-normal leading-none">로그인</span>
       </button>
       <Version marginBottom="mb-4" textColor="text-white" />
-      <div className="mb-4 flex gap-x-4">
-        <button className="h-8 w-32 rounded-lg bg-white">
-          <span className="text-sm font-normal leading-none">비밀번호 찾기</span>
-        </button>
-        <Link href={'/signup'} className="flex h-8 w-32 items-center justify-center rounded-lg bg-white">
-          <span className="text-sm font-normal leading-none">회원가입</span>
-        </Link>
-      </div>
       <Image alt="image" src={LOGIN_BOTTOM} />
     </div>
   )
