@@ -20,6 +20,20 @@ import { Label, Version } from '@/components/Text'
 import useBibleInfo from '@/stores/BibleInfo'
 import BIBLE_ICON from '@icon/bible.svg'
 
+interface ProgressParams {
+  readingDates?: string[]
+  startDate: string
+  endDate: string
+}
+
+interface ProgressResult {
+  progress: number
+  chapters: number
+}
+
+const TOTAL_CHAPTERS = 260 // 신약 성경 총 장수
+const CHAPTERS_PER_DAY = 2 // 하루 읽어야 할 장수
+
 export default function Main() {
   const { firebaseInfo, setFirebaseUid, setFirebaseInfo, initFirebaseInfo } = useFirebaseStore()
   const { datePick, setDatePick } = useBibleInfo()
@@ -50,6 +64,35 @@ export default function Main() {
       }
     } else {
       route.push('/bible/no-data', { scroll: false })
+    }
+  }
+
+  const calculateProgress = ({ readingDates, startDate, endDate }: ProgressParams): ProgressResult => {
+    const start = new Date(startDate).getTime()
+    const end = new Date(endDate).getTime()
+    const today = new Date().getTime()
+
+    const totalDuration = (end - start) / (1000 * 60 * 60 * 24) + 1 // 전체 기간 (일 단위)
+
+    // readingDates가 있는 경우 (개인 진행률)
+    if (readingDates?.length) {
+      const validDates = readingDates.filter((date) => {
+        const currentDate = new Date(date).getTime()
+        return currentDate >= start && currentDate <= end
+      })
+      const readChapters = validDates.length * CHAPTERS_PER_DAY
+      return {
+        progress: Math.round((readChapters / TOTAL_CHAPTERS) * 100),
+        chapters: readChapters,
+      }
+    }
+
+    // readingDates가 없는 경우 (전체 챌린지 진행률)
+    const elapsedDays = (today - start) / (1000 * 60 * 60 * 24) + 1
+    const expectedChapters = Math.min(Math.floor(elapsedDays) * CHAPTERS_PER_DAY, TOTAL_CHAPTERS)
+    return {
+      progress: Math.round((expectedChapters / TOTAL_CHAPTERS) * 100),
+      chapters: expectedChapters,
     }
   }
 
@@ -102,9 +145,20 @@ export default function Main() {
         />
       </div>
       {/* 청신호 진행률 */}
-      <ChallengeProgressBar />
+      <ChallengeProgressBar
+        progressResult={calculateProgress({
+          startDate: '2024-08-11',
+          endDate: '2024-12-21',
+        })}
+      />
       {/* 나의 진행률 */}
-      <MyProgressBar />
+      <MyProgressBar
+        progressResult={calculateProgress({
+          readingDates: firebaseInfo.bibleReadingDates ? firebaseInfo.bibleReadingDates : [],
+          startDate: '2024-08-11',
+          endDate: '2024-12-21',
+        })}
+      />
       {/* 버전 */}
       <Version marginBottom="mb-6" textColor="text-black" />
       {/* 버튼 2개 */}
