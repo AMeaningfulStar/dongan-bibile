@@ -1,8 +1,10 @@
+import { memo } from 'react'
+
 import { Label } from '@/components/Text'
 
 import AIRPLANE_ICON from '@icon/airplane_icon.svg'
 
-export function MyProgressBar({ progressResult }: { progressResult: { progress: number; chapters: number } }) {
+export const MyProgressBar = memo(({ progressResult }: { progressResult: { progress: number; chapters: number } }) => {
   return (
     <div className="mb-16 flex w-full flex-col gap-y-3 px-4">
       <div className="flex items-center gap-x-2 pt-5">
@@ -17,4 +19,4 @@ export function MyProgressBar({ progressResult }: { progressResult: { progress: 
       </div>
     </div>
   )
-}
+})

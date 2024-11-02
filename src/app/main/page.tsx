@@ -1,4 +1,5 @@
 'use client'
+
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import { doc, getDoc } from 'firebase/firestore'
 import moment from 'moment'
@@ -71,8 +72,6 @@ export default function Main() {
     const start = new Date(startDate).getTime()
     const end = new Date(endDate).getTime()
     const today = new Date().getTime()
-
-    const totalDuration = (end - start) / (1000 * 60 * 60 * 24) + 1 // 전체 기간 (일 단위)
 
     // readingDates가 있는 경우 (개인 진행률)
     if (readingDates?.length) {
