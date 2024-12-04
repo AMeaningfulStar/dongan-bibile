@@ -23,11 +23,18 @@ import useBibleTextSize from '@/stores/BibleTextSizeStore'
 import useFirebaseStore from '@/stores/FirebaseStore'
 import LINK_ICON from '@icon/link_icon.svg'
 
-export default function Bible() {
-  const { datePick, bibleType, setBibleType, setDatePick } = useBibleInfo()
+interface BiblePageProps {
+  searchParams: {
+    datePick?: string
+  }
+}
+
+export default function Bible({ searchParams }: BiblePageProps) {
+  const datePick = searchParams.datePick
+  const { bibleType, setBibleType } = useBibleInfo()
   const { firebaseInfo } = useFirebaseStore()
   const { textSize } = useBibleTextSize()
-  const { bibleData, isLoading, isError } = useBibleData(datePick, bibleType)
+  const { bibleData, isLoading, isError } = useBibleData(datePick as string, bibleType)
   const [isShowDrop, setIsShowDrop] = useState<boolean>(false)
   const route = useRouter()
 
@@ -49,7 +56,7 @@ export default function Bible() {
         if (datePickSnapshot.data().bibleInfo.length === 0) {
           route.push('/bible/no-data', { scroll: false })
         } else {
-          setDatePick(datePick)
+          route.push(`/bible?datePick=${datePick}`, { scroll: false })
         }
       } else {
         console.error('Invalid date selected:', datePick)
@@ -73,7 +80,7 @@ export default function Bible() {
       if (bibleReadSnap.exists()) {
         // 현재 날짜와 datePick 비교
         const today = new Date().setHours(0, 0, 0, 0) // 오늘 날짜를 기준으로 시간 초기화
-        const selectedDate = new Date(datePick).setHours(0, 0, 0, 0) // 선택한 날짜의 시간 초기화
+        const selectedDate = new Date(datePick as string).setHours(0, 0, 0, 0) // 선택한 날짜의 시간 초기화
 
         if (selectedDate > today) {
           alert('미리 읽기 완료는 할 수 없습니다')
@@ -157,7 +164,6 @@ export default function Bible() {
           <Image alt="icon" src={LINK_ICON} />
         </button>
       </div>
-
       {/* 말씀 타이틀 */}
       {bibleData?.data.map((item, idx) => (
         <div key={idx}>
@@ -179,11 +185,11 @@ export default function Bible() {
       <button
         className={twMerge(
           'mb-10 mt-16 h-9 w-40 rounded-full border ',
-          firebaseInfo.bibleReadingDates?.includes(datePick)
+          firebaseInfo.bibleReadingDates?.includes(datePick as string)
             ? 'border-[#CCC] bg-[#CCC] text-white'
             : 'border-[#0276F9] bg-[#0276F9] text-white',
         )}
-        disabled={firebaseInfo.bibleReadingDates?.includes(datePick)}
+        disabled={firebaseInfo.bibleReadingDates?.includes(datePick as string)}
         onClick={handleBibleRead}
       >
         말씀을 읽었습니다
