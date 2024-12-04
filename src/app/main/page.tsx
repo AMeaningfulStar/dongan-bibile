@@ -18,7 +18,6 @@ import { ConsecutiveDays } from '@/components/MainPage'
 
 import { ChallengeProgressBar, MyProgressBar } from '@/components/Progress'
 import { Label, Version } from '@/components/Text'
-import useBibleInfo from '@/stores/BibleInfo'
 import BIBLE_ICON from '@icon/bible.svg'
 
 interface ProgressParams {
@@ -37,15 +36,14 @@ const CHAPTERS_PER_DAY = 2 // 하루 읽어야 할 장수
 
 export default function Main() {
   const { firebaseInfo, setFirebaseUid, setFirebaseInfo, initFirebaseInfo } = useFirebaseStore()
-  const { datePick, setDatePick } = useBibleInfo()
-  const route = useRouter()
+  const router = useRouter()
 
   const handleSignOut = () => {
     signOut(auth)
       .then(() => {
         initFirebaseInfo()
         useFirebaseStore.persist.clearStorage()
-        route.push('/', { scroll: false })
+        router.push('/', { scroll: false })
       })
       .catch((error) => {
         console.error('Error checking for duplicate email:', error)
@@ -58,13 +56,12 @@ export default function Main() {
 
     if (datePickSnapshot.exists()) {
       if (datePickSnapshot.data().bibleInfo.length === 0) {
-        route.push('/bible/no-data', { scroll: false })
+        router.push('/bible/no-data', { scroll: false })
       } else {
-        setDatePick(datePick)
-        route.push('/bible', { scroll: false })
+        router.push(`/bible?datePick=${datePick}`, { scroll: false })
       }
     } else {
-      route.push('/bible/no-data', { scroll: false })
+      router.push('/bible/no-data', { scroll: false })
     }
   }
 
@@ -109,10 +106,6 @@ export default function Main() {
         }
       }
     })
-
-    if (datePick === '') {
-      setDatePick(moment(new Date()).format('YYYY-MM-DD'))
-    }
   }, [])
 
   return (
