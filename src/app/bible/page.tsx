@@ -3,7 +3,6 @@
 import { ko } from 'date-fns/locale'
 import { arrayUnion, doc, getDoc, updateDoc } from 'firebase/firestore'
 import moment from 'moment'
-import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { forwardRef, useState } from 'react'
 import DatePicker from 'react-datepicker'
@@ -16,12 +15,11 @@ import { firestore } from '@/libs/firebase'
 import { useBibleData } from '@/libs/swr/useBibleData'
 import useBibleInfo from '@/stores/BibleInfo'
 
-import { KakaoShareBtn, TextSizeAdjuster } from '@/components/Button'
+import { KakaoShareBtn, TextSizeAdjuster, URLCopyBtn } from '@/components/Button'
 import { DashboardLayout, ErrorLayout, LoadingLayout } from '@/components/Layout'
 
 import useBibleTextSize from '@/stores/BibleTextSizeStore'
 import useFirebaseStore from '@/stores/FirebaseStore'
-import LINK_ICON from '@icon/link_icon.svg'
 
 interface BiblePageProps {
   searchParams: {
@@ -160,9 +158,7 @@ export default function Bible({ searchParams }: BiblePageProps) {
           startBible={bibleData?.data[0] as { title: string; chapter: number }}
           endBible={bibleData?.data.at(-1) as { title: string; chapter: number }}
         />
-        <button className="flex h-6 w-6 items-center justify-center rounded-full bg-[#AAAAAA]">
-          <Image alt="icon" src={LINK_ICON} />
-        </button>
+        <URLCopyBtn />
       </div>
       {/* 말씀 타이틀 */}
       {bibleData?.data.map((item, idx) => (
