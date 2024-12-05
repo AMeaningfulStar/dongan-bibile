@@ -71,7 +71,13 @@ export default function Main() {
     const today = new Date().getTime()
 
     // readingDates가 있는 경우 (개인 진행률)
-    if (readingDates?.length) {
+    if (readingDates) {
+      if (readingDates.length === 0) {
+        return {
+          progress: 0,
+          chapters: 0,
+        }
+      }
       const validDates = readingDates.filter((date) => {
         const currentDate = new Date(date).getTime()
         return currentDate >= start && currentDate <= end
@@ -162,11 +168,13 @@ export default function Main() {
           관리자 페이지
         </Link>
       )}
-      <div className="mb-6 flex gap-x-4">
-        <button className="h-8 w-32 rounded-lg border border-black bg-white" onClick={() => handleSignOut()}>
-          <span className="text-sm font-normal leading-none">로그아웃</span>
-        </button>
-      </div>
+      {firebaseInfo.uid && (
+        <div className="mb-6 flex gap-x-4">
+          <button className="h-8 w-32 rounded-lg border border-black bg-white" onClick={() => handleSignOut()}>
+            <span className="text-sm font-normal leading-none">로그아웃</span>
+          </button>
+        </div>
+      )}
     </DashboardLayout>
   )
 }
