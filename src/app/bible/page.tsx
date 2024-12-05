@@ -1,7 +1,7 @@
 'use client'
 
 import { ko } from 'date-fns/locale'
-import { arrayUnion, doc, getDoc, updateDoc } from 'firebase/firestore'
+import { doc, getDoc } from 'firebase/firestore'
 import moment from 'moment'
 import { useRouter } from 'next/navigation'
 import { forwardRef, useState } from 'react'
@@ -15,11 +15,10 @@ import { firestore } from '@/libs/firebase'
 import { useBibleData } from '@/libs/swr/useBibleData'
 import useBibleInfo from '@/stores/BibleInfo'
 
-import { KakaoShareBtn, TextSizeAdjuster, URLCopyBtn } from '@/components/Button'
+import { BibleReadingBtn, KakaoShareBtn, TextSizeAdjuster, URLCopyBtn } from '@/components/Button'
 import { DashboardLayout, ErrorLayout, LoadingLayout } from '@/components/Layout'
 
 import useBibleTextSize from '@/stores/BibleTextSizeStore'
-import useFirebaseStore from '@/stores/FirebaseStore'
 
 interface BiblePageProps {
   searchParams: {
@@ -30,7 +29,6 @@ interface BiblePageProps {
 export default function Bible({ searchParams }: BiblePageProps) {
   const datePick = searchParams.datePick
   const { bibleType, setBibleType } = useBibleInfo()
-  const { firebaseInfo } = useFirebaseStore()
   const { textSize } = useBibleTextSize()
   const { bibleData, isLoading, isError } = useBibleData(datePick as string, bibleType)
   const [isShowDrop, setIsShowDrop] = useState<boolean>(false)
@@ -68,30 +66,6 @@ export default function Bible({ searchParams }: BiblePageProps) {
   const handleDropdown = (type: BibleType) => {
     setBibleType(type)
     setIsShowDrop(false)
-  }
-
-  const handleBibleRead = async () => {
-    try {
-      const bibleReadRef = doc(firestore, 'users', firebaseInfo.uid as string)
-      const bibleReadSnap = await getDoc(bibleReadRef)
-
-      if (bibleReadSnap.exists()) {
-        // 현재 날짜와 datePick 비교
-        const today = new Date().setHours(0, 0, 0, 0) // 오늘 날짜를 기준으로 시간 초기화
-        const selectedDate = new Date(datePick as string).setHours(0, 0, 0, 0) // 선택한 날짜의 시간 초기화
-
-        if (selectedDate > today) {
-          alert('미리 읽기 완료는 할 수 없습니다')
-          return // 미래 날짜면 함수 종료
-        }
-
-        await updateDoc(bibleReadRef, {
-          bibleReadingDates: arrayUnion(datePick),
-        }).then(() => route.push('/meditation', { scroll: false }))
-      }
-    } catch (error) {
-      console.error('Error checking for bible read:', error)
-    }
   }
 
   if (isLoading) {
@@ -177,19 +151,7 @@ export default function Bible({ searchParams }: BiblePageProps) {
           ))}
         </div>
       ))}
-
-      <button
-        className={twMerge(
-          'mb-10 mt-16 h-9 w-40 rounded-full border ',
-          firebaseInfo.bibleReadingDates?.includes(datePick as string)
-            ? 'border-[#CCC] bg-[#CCC] text-white'
-            : 'border-[#0276F9] bg-[#0276F9] text-white',
-        )}
-        disabled={firebaseInfo.bibleReadingDates?.includes(datePick as string)}
-        onClick={handleBibleRead}
-      >
-        말씀을 읽었습니다
-      </button>
+      <BibleReadingBtn datePick={datePick as string} />
       <TextSizeAdjuster />
     </DashboardLayout>
   )
