@@ -168,11 +168,20 @@ export default function Main() {
           관리자 페이지
         </Link>
       )}
-      {firebaseInfo.uid && (
+      {firebaseInfo.uid ? (
         <div className="mb-6 flex gap-x-4">
           <button className="h-8 w-32 rounded-lg border border-black bg-white" onClick={() => handleSignOut()}>
             <span className="text-sm font-normal leading-none">로그아웃</span>
           </button>
+        </div>
+      ) : (
+        <div className="mb-6 flex gap-x-4">
+          <Link
+            href={'/'}
+            className="flex h-8 w-32 items-center justify-center rounded-lg border border-black bg-white"
+          >
+            <span className="text-sm font-normal leading-none">로그인</span>
+          </Link>
         </div>
       )}
     </DashboardLayout>
