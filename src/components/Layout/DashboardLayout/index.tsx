@@ -2,13 +2,10 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import { twMerge } from 'tailwind-merge'
 
 import { HeaderName } from '@/components/Text'
-
-import useFirebaseStore from '@/stores/FirebaseStore'
 
 import CALENDAR_ICON from '@icon/calendar_icon.svg'
 import EVENT_ICON from '@icon/event_icon.svg'
@@ -26,14 +23,6 @@ interface LayoutType {
 }
 
 export function DashboardLayout({ children, pageName }: LayoutType) {
-  const route = useRouter()
-  const { firebaseInfo } = useFirebaseStore()
-
-  useEffect(() => {
-    if (!firebaseInfo.uid) {
-      route.push('/', { scroll: false })
-    }
-  }, [])
   return (
     <div className="flex min-h-screen w-full flex-col items-center py-14">
       <div className="fixed left-0 top-0 z-30 flex w-full items-center justify-center border-b border-[#AAAAAA] bg-white py-4">
@@ -46,15 +35,6 @@ export function DashboardLayout({ children, pageName }: LayoutType) {
 }
 
 export function LoadingScreen({ pageName }: { pageName: string }) {
-  const route = useRouter()
-  const { firebaseInfo } = useFirebaseStore()
-
-  useEffect(() => {
-    if (!firebaseInfo.uid) {
-      route.push('/', { scroll: false })
-    }
-  }, [])
-
   return (
     <div className="flex min-h-screen w-full flex-col items-center py-14">
       <div className="fixed left-0 top-0 flex w-full items-center justify-center border-b border-[#AAAAAA] bg-white py-4">

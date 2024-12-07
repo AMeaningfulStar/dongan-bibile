@@ -12,11 +12,13 @@ export function PrayerConfirmationButton() {
   const { firebaseInfo } = useFirebaseStore()
   const { datePick } = useBibleInfo()
 
-  const [isPrayerBtnDisabled, setIsPrayerBtnDisabled] = useState(false)
+  const [isPrayerBtnDisabled, setIsPrayerBtnDisabled] = useState(true)
 
   // 비동기 함수 내부에서 호출
   const checkDisabledState = async () => {
     try {
+      if (!firebaseInfo.uid) return
+
       const bibleReadRef = doc(firestore, 'users', firebaseInfo.uid as string)
       const bibleReadSnap = await getDoc(bibleReadRef)
 

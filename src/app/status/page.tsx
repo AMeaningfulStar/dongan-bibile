@@ -1,24 +1,51 @@
 'use client'
 import { ko } from 'date-fns/locale'
 import moment from 'moment'
+import Image from 'next/image'
+import Link from 'next/link'
 import { forwardRef } from 'react'
 import DatePicker from 'react-datepicker'
 
-import { DashboardLayout } from '@/components/Layout'
+import { DashboardLayout, NavigationBar } from '@/components/Layout'
 import { ClassReadingStatus, GlobalReadingStatus } from '@/components/StatusPage'
+import { HeaderName } from '@/components/Text'
 
 import useBibleInfo from '@/stores/BibleInfo'
+import useFirebaseStore from '@/stores/FirebaseStore'
+import LIGHTUP_ICON from '@icon/lightup_icon.svg'
 
 import 'react-datepicker/dist/react-datepicker.css'
 
 export default function Status() {
   const { datePick, setDatePick } = useBibleInfo()
+  const { firebaseInfo } = useFirebaseStore()
 
   const PickerCustomInput = forwardRef(({ value, onClick }: any, ref: any) => (
     <button className="h-full flex-grow" onClick={onClick} ref={ref}>
       {value}
     </button>
   ))
+
+  if (!firebaseInfo.uid) {
+    return (
+      <div className="flex min-h-screen w-full flex-col items-center py-14">
+        <div className="fixed left-0 top-0 z-30 flex w-full items-center justify-center border-b border-[#AAAAAA] bg-white py-4">
+          <HeaderName textColor="">읽기현황</HeaderName>
+        </div>
+        <div className="flex flex-grow flex-col items-center justify-center gap-y-5">
+          <Image alt="image" src={LIGHTUP_ICON} />
+          <div className="text-xl leading-none">로그인 시 확인 가능합니다</div>
+          <Link
+            href={'/'}
+            className="my-5 rounded-full border-2 border-[#0276F9] px-10 py-3 font-semibold text-[#0276F9]"
+          >
+            로그인 하러가기
+          </Link>
+        </div>
+        <NavigationBar />
+      </div>
+    )
+  }
 
   return (
     <DashboardLayout pageName="읽기현황">
