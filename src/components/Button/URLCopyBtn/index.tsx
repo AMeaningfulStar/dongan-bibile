@@ -14,6 +14,7 @@ export function URLCopyBtn() {
 
       setIsCopied(true)
 
+      alert('복사되었습니다')
       setTimeout(() => {
         setIsCopied(false)
       }, 3000)
