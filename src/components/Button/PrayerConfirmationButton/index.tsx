@@ -12,7 +12,7 @@ export function PrayerConfirmationButton() {
   const { firebaseInfo } = useFirebaseStore()
   const { datePick } = useBibleInfo()
 
-  const [isPrayerBtnDisabled, setIsPrayerBtnDisabled] = useState(true)
+  const [isPrayerBtnDisabled, setIsPrayerBtnDisabled] = useState(false)
 
   // 비동기 함수 내부에서 호출
   const checkDisabledState = async () => {
