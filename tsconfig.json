@@ -35,6 +35,12 @@
       "@image/*": [
         "./public/image/*"
       ],
+      "@stores/*": [
+        "./src/stores/*"
+      ],
+      "@libs/*": [
+        "./src/libs/*"
+      ],
     }
   },
   "include": [
