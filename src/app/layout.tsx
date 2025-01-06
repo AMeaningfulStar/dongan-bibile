@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 import KakaoInit from '@/components/KakaoInit'
+import Layout from '@/components/Layout'
 
 declare global {
   interface Window {
@@ -47,7 +48,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/image/512.png" />
         <KakaoInit />
       </head>
-      <body>{children}</body>
+      <Layout>{children}</Layout>
     </html>
   )
 }
