@@ -33,7 +33,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <body>
-      <div className="flex min-h-screen w-full flex-col items-center py-14">
+      <div className="flex min-h-screen w-full flex-col items-center pt-16">
         <div className="fixed left-0 top-0 z-10 w-full border-b border-gl-grayscale-base bg-gl-white-base py-4">
           <div className="flex w-full items-center justify-center">
             <span className="text-layout-20-l">{pageName()}</span>
@@ -74,7 +74,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </svg>
         </button>
         {isShow && <SideBar />}
-
         {children}
       </div>
     </body>
