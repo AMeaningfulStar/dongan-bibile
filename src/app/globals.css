@@ -9,6 +9,18 @@
   .react-calendar__month-view__weekdays {
     display: flex;
     justify-content: space-between;
+
+    .react-calendar__month-view__weekdays__weekday {
+      padding-bottom: 20px;
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 115%;
+    }
+
+    abbr:where([title]) {
+      text-decoration: none;
+    }
   }
 
   .react-calendar__tile {
@@ -18,28 +30,83 @@
   }
 
   .react-calendar__navigation {
-    width: inherit;
-    height: 3.5rem;
     display: flex;
-    text-align: center;
+    column-gap: 20px;
+    width: fit-content;
     align-items: center;
-    padding: 0 5.5rem;
+    margin-bottom: 8px;
+    margin-left: 4px;
 
     .react-calendar__navigation__label {
-      width: 5.5rem;
-      height: 1.375rem;
-      font-size: 16px;
+      font-size: 18px;
       border: none;
-      font-weight: 700;
+      font-weight: 500;
+      line-height: 100%;
       background-color: #fff;
     }
+
+    .react-calendar__navigation__arrow {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
   }
+
+  .react-calendar__navigation button {
+    min-width: 0px !important;
+  }
+
   .react-calendar__tile {
-    background: #eeeeee;
+    padding: 0;
+    padding-left: 3.5px;
+    padding-right: 3.5px;
+    display: flex;
+
+    abbr {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-grow: 1;
+      background: rgba(238, 238, 238, 1);
+      border-radius: 9999px;
+      height: 43px !important;
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 100%;
+    }
+  }
+
+  .react-calendar__tile--read {
+    background-color: transparent !important;
+    abbr {
+      background: rgba(13, 152, 0, 0.5);
+    }
+  }
+
+  .react-calendar__tile:enabled:hover {
+    background-color: transparent;
+  }
+
+  .react-calendar__tile:enabled:active {
+    background-color: transparent;
   }
 
   .react-calendar__tile--now {
-    border: 1px solid black;
+    background-color: transparent;
+    abbr {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-grow: 1;
+      border-radius: 9999px;
+      height: 43px !important;
+      border: 2px solid #0d9800;
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 100%;
+    }
   }
   .react-calendar__tile--read {
     background: #64abfb;
@@ -73,7 +140,7 @@
 .meditation-datepicker {
   .react-datepicker-popper {
     left: -8% !important;
-  
+
     .react-datepicker__triangle {
       display: none !important;
     }

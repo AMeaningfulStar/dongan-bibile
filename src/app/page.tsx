@@ -1,102 +1,79 @@
 'use client'
 
-import { signInWithEmailAndPassword } from 'firebase/auth'
+import moment from 'moment'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import Calendar from 'react-calendar'
 
-import { auth } from '@/libs/firebase'
-import useFirebaseStore from '@/stores/FirebaseStore'
-import useLoginStore from '@/stores/LoginStore'
+import 'react-calendar/dist/Calendar.css'
 
-import { Version } from '@/components/Text'
-import LOGIN_BACKGROUND from '@image/Login_Background.svg'
-import LOGIN_BOTTOM from '@image/Login_Bottom.svg'
+import { userInfoStore } from '@/stores'
 
-export default function Login() {
-  const { loginValue, initLoginValue, setUseEmail, setUsePassword, validateLoginValue } = useLoginStore()
-  const { firebaseInfo } = useFirebaseStore()
-  const [errorMessage, setErrorMessage] = useState<string>('')
-  const route = useRouter()
+import LIGHT_ICON from '@icon/light_icon.png'
+import LINK_ARROW_ICON from '@icon/link_arrow_icon.png'
+import NEXT_ARROW_ICON from '@icon/next_arrow_icon.png'
+import PREV_ARROW_ICON from '@icon/prev_arrow_icon.png'
 
-  useEffect(() => {
-    if (firebaseInfo.uid) {
-      route.push('/main', { scroll: false })
-    }
-  }, [firebaseInfo])
+import { BibleStreakBadge } from '@/components/Badges'
+import { MyTotalChallenge, TotalChallenge } from '@/components/Progress'
 
-  const handleOnSunbmit = async () => {
-    // FIXME: 추후 프로젝트의 진행 방향에 따라 수정해야함
-    const emailRegEx = /^[A-Za-z0-9]([-_.]?[A-Za-z0-9])*@[A-Za-z0-9]([-_.]?[A-Za-z0-9])*\.[A-Za-z]{2,3}$/i
-    const useId = `${loginValue.email}@dongan.com`
+export default function Main() {
+  const { userInfo } = userInfoStore()
+  const router = useRouter()
 
-    if (!emailRegEx.test(useId)) {
-      setErrorMessage('올바른 아이디 형식이 아닙니다')
-      setTimeout(() => setErrorMessage(''), 3000)
-      return
-    }
+  const NextIcon = () => {
+    return <Image alt="icon" src={NEXT_ARROW_ICON} height={16} width={12} style={{ width: 'auto', height: 'auto' }} />
+  }
 
-    if (!validateLoginValue().isError) {
-      signInWithEmailAndPassword(auth, useId, loginValue.password)
-        .then((userCredential) => {
-          if (userCredential.user) {
-            initLoginValue()
-            route.push('/main', { scroll: false })
-          }
-        })
-        .catch(() => {
-          setErrorMessage('로그인에 실패했습니다')
-          setTimeout(() => setErrorMessage(''), 3000)
-        })
-    } else {
-      setErrorMessage('아이디과 비밀번호를 확인해주세요')
-      setTimeout(() => setErrorMessage(''), 3000)
-    }
+  const PrevIcon = () => {
+    return <Image alt="icon" src={PREV_ARROW_ICON} height={16} width={12} style={{ width: 'auto', height: 'auto' }} />
   }
 
   return (
-    <div className="flex min-h-screen w-full flex-col items-center justify-between bg-black pb-9 pt-10">
-      <Image alt="backbround image" src={LOGIN_BACKGROUND} className="mb-2.5" />
-      <div className="flex flex-col gap-y-2.5">
-        <div className="flex min-w-64 items-center justify-between">
-          <label htmlFor="userID" className="w-16 text-lg font-light leading-none text-white">
-            아이디
-          </label>
-          <input
-            id="userID"
-            type="text"
-            className="h-7 flex-grow pl-1 outline-none"
-            placeholder="아이디 입력해주세요"
-            value={loginValue.email}
-            onChange={(event) => setUseEmail(event.target.value)}
-          />
-        </div>
-        <div className="flex items-center justify-between">
-          <label htmlFor="userPW" className="w-16 text-lg font-light leading-none text-white">
-            비밀번호
-          </label>
-          <input
-            id="userPW"
-            type="password"
-            className="h-7 flex-grow pl-1 outline-none"
-            placeholder="비밀번호를 입력하세요"
-            value={loginValue.password}
-            onChange={(event) => setUsePassword(event.target.value)}
-          />
+    <div className="flex flex-grow flex-col items-center pt-1.5">
+      <div className="relative mb-[30px] flex w-full items-center justify-center">
+        {/* 청신호 연속 읽은 날짜 텍스트 */}
+        <BibleStreakBadge />
+        {/* 캘린더 */}
+        <Calendar
+          locale="ko"
+          formatDay={(locale, data) => moment(data).format('DD')}
+          nextLabel={<NextIcon />}
+          prevLabel={<PrevIcon />}
+          maxDetail="month"
+          minDetail="month"
+          calendarType="gregory"
+          showNeighboringMonth={false}
+          prev2Label={null}
+          next2Label={null}
+          view="month"
+          onChange={(event: any) =>
+            router.push(`/bible?datePick=${moment(event).format('YYYY-MM-DD')}`, { scroll: false })
+          }
+          tileClassName={({ date }) => {
+            if (userInfo?.bibleReadingDates?.find((x) => x === moment(date).format('YYYY-MM-DD'))) {
+              return 'react-calendar__tile--read'
+            }
+          }}
+        />
+      </div>
+
+      {/* 공지사항 */}
+      <div className="mb-[37px] w-full px-4">
+        <div className="flex items-center gap-x-2.5 rounded-[10px] bg-gl-grayscale-base px-3 py-4">
+          <Image alt="icon" src={LIGHT_ICON} width={20} height={20} style={{ width: 'auto', height: 'auto' }} />
+          <div className="flex-grow">청신호의 새로운 소식을 전해드립니다!!</div>
+          <Link href={'#'}>
+            <Image alt="icon" src={LINK_ARROW_ICON} width={11} height={15} style={{ width: 'auto' }} />
+          </Link>
         </div>
       </div>
-      <div className="h-5">
-        <span className="text-red-500">{errorMessage}</span>
-      </div>
-      <button
-        onClick={async () => handleOnSunbmit()}
-        className="mb-5 flex h-8 w-32 items-center justify-center rounded-lg bg-white active:bg-gray-400"
-      >
-        <span className="text-sm font-normal leading-none">로그인</span>
-      </button>
-      <Version marginBottom="mb-4" textColor="text-white" />
-      <Image alt="image" src={LOGIN_BOTTOM} />
+
+      {/* 청신호 진행률 */}
+      <TotalChallenge />
+      {/* 나의 진행률 */}
+      <MyTotalChallenge />
     </div>
   )
 }
