@@ -129,7 +129,7 @@ export function SideBar() {
             <Link href={'/login'} className="underline">
               로그인
             </Link>
-            하고 청신호 켜키
+            하고 청신호 켜기
           </div>
         )}
 
@@ -148,7 +148,7 @@ export function SideBar() {
             읽기 현황
           </Link>
         </div>
-        <div className="text-navigation-14-l mb-7 flex flex-col items-center gap-y-7 text-gl-grayscale-100">
+        <div className="text-navigation-14-l mb-40 flex flex-col items-center gap-y-7 text-gl-grayscale-100">
           <span>ver 3.0.0</span>
           {userInfo ? (
             <button onClick={handleLogOutClick}>
