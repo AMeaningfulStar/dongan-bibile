@@ -3,14 +3,8 @@ import './globals.css'
 
 import Layout from '@/components/Layout'
 
-declare global {
-  interface Window {
-    Kakao: any
-  }
-}
-
 export const metadata: Metadata = {
-  title: '2024청신호',
+  title: '청신호',
   description: '청소년2부 신약일독 호우!',
   icons: [
     {
