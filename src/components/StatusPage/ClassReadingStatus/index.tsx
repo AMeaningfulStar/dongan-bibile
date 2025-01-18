@@ -5,17 +5,14 @@ import { useEffect, useState } from 'react'
 import { twMerge } from 'tailwind-merge'
 
 import { firestore } from '@/libs/firebase'
-import useBibleInfo from '@/stores/BibleInfo'
 
 interface ClassReadingRequest {
-  title: string
   classNum: number
   gradeNum: number
+  datePick: string
 }
 
-export function ClassReadingStatus({ title, gradeNum, classNum }: ClassReadingRequest) {
-  const { datePick } = useBibleInfo()
-
+export function ClassReadingStatus({ gradeNum, classNum, datePick }: ClassReadingRequest) {
   const [readCount, setReadCount] = useState<number>(0)
   const [userReadingStatus, setUserReadingStatus] = useState<Array<{ name: string; reading: boolean }>>([])
 
@@ -48,20 +45,20 @@ export function ClassReadingStatus({ title, gradeNum, classNum }: ClassReadingRe
   }, [classNum, gradeNum, datePick])
 
   return (
-    <div className="w-full">
-      <div className="flex justify-between bg-[#E8EEFF] px-4 py-2 text-lg leading-none">
-        <span className="flex-grow text-center font-light">{title}</span>
-        <span className="font-light">
+    <div className="mb-6 flex w-full flex-col gap-y-4">
+      <div className="text-caption-15-m flex justify-between bg-gl-green-opacity-30 px-5 py-2.5">
+        <span>{gradeNum === 3 && classNum === 3 ? '청소년 2부 교사' : `${gradeNum}-${classNum}`}</span>
+        <span>
           ({readCount}/{userReadingStatus.length})
         </span>
       </div>
-      <div className="grid grid-cols-4 justify-center gap-x-1.5 gap-y-2.5 px-4 py-4">
+      <div className="text-caption-14-l grid grid-cols-4 gap-x-1.5 gap-y-2.5 px-[18px]">
         {userReadingStatus.map((item, idx) => (
           <div
             key={idx}
             className={twMerge(
-              'flex  items-center justify-center rounded-lg px-4 py-2',
-              item.reading ? 'bg-[#64ABFB]' : 'bg-[#EEEEEE]',
+              'flex items-center justify-center rounded-lg px-5 py-2',
+              item.reading ? 'bg-gl-green-opacity-50' : 'bg-gl-grayscale-base',
             )}
           >
             {item.name}

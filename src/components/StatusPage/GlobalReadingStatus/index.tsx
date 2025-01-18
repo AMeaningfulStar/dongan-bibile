@@ -3,13 +3,10 @@
 import { collection, getDocs, query, where } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 
-import useBibleInfo from '@/stores/BibleInfo'
-
 import { firestore } from '@/libs/firebase'
 
-export function GlobalReadingStatus() {
+export function GlobalReadingStatus({ datePick }: { datePick: string }) {
   const [readCount, setReadCount] = useState<number>(0)
-  const { datePick } = useBibleInfo()
 
   useEffect(() => {
     const fetchData = async () => {
@@ -28,11 +25,8 @@ export function GlobalReadingStatus() {
   }, [datePick])
 
   return (
-    <div className="flex flex-grow gap-x-2.5">
-      <div className="text-base">오늘 읽은 사람</div>
-      <div className="flex flex-grow items-center justify-center rounded-md border border-black">
-        <span>{readCount}명</span>
-      </div>
+    <div className="text-caption-16-l">
+      오늘 청신호가 <span className="text-caption-18-sb text-gl-green-base">{readCount}개</span> 켜졌어요
     </div>
   )
 }
