@@ -8,7 +8,6 @@ import Calendar from 'react-calendar'
 import { firestore } from '@/libs/firebase'
 import { arrayRemove, arrayUnion, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
 
-import { DashboardLayout } from '@/components/Layout'
 import { BookOption, options } from '@/libs/bibleOption'
 
 export default function SetBible() {
@@ -115,7 +114,7 @@ export default function SetBible() {
   }, [datePick])
 
   return (
-    <DashboardLayout pageName="관리자 페이지">
+    <div>
       <div className="flex flex-col items-center gap-y-6 py-2.5">
         <Calendar
           locale="ko"
@@ -198,6 +197,6 @@ export default function SetBible() {
           <span className="text-sm font-normal leading-none">뒤로가기</span>
         </Link>
       </div>
-    </DashboardLayout>
+    </div>
   )
 }
