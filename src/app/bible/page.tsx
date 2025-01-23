@@ -172,7 +172,7 @@ export default function Bible({ searchParams }: BiblePageProps) {
       return
     }
 
-    const { keywords, isLoading, isError } = getKeyWords(datePick as string)
+    const { keywords, isLoading, isError, mutate } = getKeyWords(datePick as string)
     const [inputValue, setInputValue] = useState<string>('')
     const [isSetLoading, setIsSetLoading] = useState<boolean>(false)
 
@@ -193,6 +193,7 @@ export default function Bible({ searchParams }: BiblePageProps) {
             likes: [userInfo?.uid], // 첫 번째 좋아요 누른 사용자 UID
           })
 
+          mutate()
           alert('키워드를 등록했습니다')
           setInputValue('')
         }
@@ -214,6 +215,7 @@ export default function Bible({ searchParams }: BiblePageProps) {
         await deleteDoc(keywordDocRef)
 
         alert('키워드를 삭제했습니다')
+        mutate()
       } catch (error) {
         alert('키워드 삭제에 실패했습니다')
         console.error('Failed to delete keyword:', error)
@@ -235,10 +237,14 @@ export default function Bible({ searchParams }: BiblePageProps) {
             await updateDoc(keywordDocRef, {
               likes: arrayRemove(userInfo?.uid as string), // 날짜를 배열에 추가
             })
+
+            mutate()
           } else {
             await updateDoc(keywordDocRef, {
               likes: arrayUnion(userInfo?.uid as string), // 날짜를 배열에 추가
             })
+
+            mutate()
           }
         }
       } catch (error) {
