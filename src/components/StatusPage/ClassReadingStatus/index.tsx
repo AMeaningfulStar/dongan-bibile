@@ -47,7 +47,7 @@ export function ClassReadingStatus({ gradeNum, classNum, datePick }: ClassReadin
   return (
     <div className="mb-6 flex w-full flex-col gap-y-4">
       <div className="text-caption-15-m flex justify-between bg-gl-green-opacity-30 px-5 py-2.5">
-        <span>{gradeNum === 3 && classNum === 3 ? '청소년 2부 교사' : `${gradeNum}-${classNum}`}</span>
+        <span>{gradeNum === 4 && classNum === 4 ? '청소년 2부 교사' : `${gradeNum}-${classNum}`}</span>
         <span>
           ({readCount}/{userReadingStatus.length})
         </span>
