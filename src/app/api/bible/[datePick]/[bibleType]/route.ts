@@ -2,71 +2,58 @@ import { firestore } from '@/libs/firebase'
 import { doc, getDoc } from 'firebase/firestore'
 import { NextRequest, NextResponse } from 'next/server'
 
-interface BibleData {
-  title: string
-  chapters: Array<{
-    chapter: number
-    verses: Array<{
-      verse: number
-      text: string
-    }>
-  }>
-}
-
-// GET 함수에 대한 Next.js API 라우트
 export async function GET(req: NextRequest, { params }: { params: { datePick: string; bibleType: string } }) {
   const { datePick, bibleType } = params
+
   try {
-    // biblePlan 컬렉션에서 datePick 문서 참조
+    // 1. biblePlan에서 datePick 문서 가져오기
     const bibleInfoRef = doc(firestore, 'biblePlan', datePick)
     const bibleInfoSnap = await getDoc(bibleInfoRef)
 
-    // bibleInfoSnap이 존재하는지 확인
-    if (bibleInfoSnap.exists()) {
-      const bibleInfoList = bibleInfoSnap.data() as {
-        bibleInfo: Array<{
-          book: string
-          chapter: number
-          testament: string
-        }>
-      }
+    if (!bibleInfoSnap.exists()) {
+      return NextResponse.json({ status: 404, error: 'Bible information not found' })
+    }
 
-      const response: Array<{
-        title: string
+    const bibleInfoList = bibleInfoSnap.data() as {
+      bibleInfo: Array<{
+        book: string
         chapter: number
-        verses: Array<{
-          verse: number
-          text: string
-        }>
-      }> = []
+        testament: string
+      }>
+    }
 
-      // 모든 비동기 작업을 병렬로 처리하기 위해 Promise.all 사용
-      const promises = bibleInfoList.bibleInfo.map(async (info) => {
-        // bible 컬렉션에서 특정 바이블 데이터 참조
-        const bibleDataRef = doc(firestore, 'bible', bibleType, info.testament, info.book)
-        const bibleDataSnap = await getDoc(bibleDataRef)
+    // 2. 필요한 책 목록을 추출하고 Firestore 쿼리를 최적화
+    const bibleQueries = bibleInfoList.bibleInfo.map((info) => {
+      return doc(firestore, 'bible', bibleType, info.testament, info.book)
+    })
 
-        if (bibleDataSnap.exists()) {
-          const bibleData = bibleDataSnap.data() as BibleData
-          const chapter = bibleData.chapters[info.chapter - 1]
+    // 3. Firestore에서 데이터 가져오기
+    const bibleDataSnapshots = await Promise.all(bibleQueries.map((bibleRef) => getDoc(bibleRef)))
 
-          response.push({
-            title: bibleData.title,
-            chapter: chapter.chapter,
-            verses: chapter.verses,
-          })
-        } else {
-          return NextResponse.json({ status: 404, error: 'Bible data not found' })
+    const response = bibleDataSnapshots
+      .filter((snap) => snap.exists())
+      .map((snap, index) => {
+        const bibleData = snap.data() as {
+          title: string
+          chapters: Array<{
+            chapter: number
+            verses: Array<{
+              verse: number
+              text: string
+            }>
+          }>
+        }
+
+        const chapterInfo = bibleData.chapters[bibleInfoList.bibleInfo[index].chapter - 1]
+
+        return {
+          title: bibleData.title,
+          chapter: chapterInfo.chapter,
+          verses: chapterInfo.verses,
         }
       })
 
-      // 모든 비동기 작업 완료를 기다림
-      await Promise.all(promises)
-
-      return NextResponse.json({ status: 200, data: response })
-    } else {
-      return NextResponse.json({ status: 404, error: 'Bible information not found' })
-    }
+    return NextResponse.json({ status: 200, data: response })
   } catch (error) {
     console.error(error)
     return NextResponse.json({ status: 500, error: 'Internal Server Error' })
