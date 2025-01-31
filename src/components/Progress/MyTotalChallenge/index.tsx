@@ -21,24 +21,28 @@ export function MyTotalChallenge() {
 
   // API 요청을 useCallback으로 메모화
   const fetchProgress = useCallback(async () => {
-    try {
-      const response = await axios.get(`/api/user/progress/${userInfo?.uid}`)
-      setProgress(response.data.data)
-    } catch (error) {
-      console.error(error)
-    }
-  }, [])
+    if (!userInfo?.uid) return
 
+    try {
+      const response = await axios.get(`/api/user/progress/${userInfo.uid}`)
+      setProgress(response.data.data ?? response.data)
+    } catch (error) {
+      console.error("❌ fetchProgress error:", error)
+    }
+  }, [userInfo?.uid])
+
+  // userInfo?.uid가 바뀔 때마다 fetchProgress 실행
   useEffect(() => {
     fetchProgress()
-  }, [fetchProgress])
+  }, [userInfo?.uid])
 
   // 렌더링에 필요한 데이터를 useMemo로 계산
   const progressDisplay = useMemo(() => {
+    const percentage = progress.totalChapters > 0 ? progress.progressPercentage : 0
     return {
       chaptersText: `(${progress.totalChaptersUntilMy}장 / ${progress.totalChapters}장)`,
-      percentageText: `${progress.progressPercentage}%`,
-      barWidth: `${progress.progressPercentage}%`,
+      percentageText: `${percentage}%`,
+      barWidth: `${percentage}%`,
     }
   }, [progress])
 

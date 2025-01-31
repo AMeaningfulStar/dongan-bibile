@@ -1,6 +1,10 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
+import { auth, firestore } from '@/libs/firebase'
+import { onAuthStateChanged, signOut } from 'firebase/auth'
+import { doc, getDoc } from 'firebase/firestore'
+
 import { BibleTextSize, BibleType } from '@/utils/enum'
 
 type UserInfo = {
@@ -24,7 +28,7 @@ type UserInfoStore = {
   setBibleType: (type: BibleType) => void
   setBibleTextSize: (size: BibleTextSize) => void
   setBibleReadingDates: (newReadingDate: string) => void
-  clearUserInfo: () => void
+  logout: () => void
 }
 
 export const userInfoStore = create(
@@ -32,11 +36,7 @@ export const userInfoStore = create(
     (set, get) => ({
       userInfo: null,
 
-      setUserInfo: (userInfo: UserInfo) => {
-        set(() => ({
-          userInfo,
-        }))
-      },
+      setUserInfo: (userInfo: UserInfo) => set({ userInfo }),
 
       setBibleType: (type: BibleType) => {
         set((state: UserInfoStore) => {
@@ -83,13 +83,31 @@ export const userInfoStore = create(
         })
       },
 
-      clearUserInfo: () =>
-        set(() => ({
-          userInfo: null,
-        })),
+      logout: async () => {
+        await signOut(auth) // Firebase Auth 로그아웃
+        set({ userInfo: null }) // Zustand 상태도 초기화
+      },
     }),
     {
       name: 'user-information',
     },
   ),
 )
+
+export const initAuthListener = () => {
+  onAuthStateChanged(auth, async (firebaseUser) => {
+    if (firebaseUser) {
+      // Firestore에서 사용자 정보 가져오기
+      const userDoc = await getDoc(doc(firestore, 'users', firebaseUser.uid))
+      if (userDoc.exists()) {
+        const userData = userDoc.data() as UserInfo
+        userInfoStore.getState().setUserInfo({
+          ...userData,
+          uid: firebaseUser.uid,
+        })
+      }
+    } else {
+      userInfoStore.getState().logout()
+    }
+  })
+}
