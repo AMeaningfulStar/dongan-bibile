@@ -1,1 +1,1 @@
-export { userInfoStore } from './userInfoStore'
+export { userInfoStore, initAuthListener } from './userInfoStore'

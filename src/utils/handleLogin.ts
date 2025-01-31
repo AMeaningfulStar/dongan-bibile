@@ -7,40 +7,40 @@ import { auth, firestore } from '@/libs/firebase'
 
 import { BibleTextSize, BibleType } from './enum'
 
+type UserInfo = {
+  uid: string
+  name: string
+  id: string
+  phone: string
+  position: string
+  gradeNum: number
+  classNum: number
+  bibleReadingDates: Array<string>
+  prayerDates: Array<string>
+  bibleType: BibleType
+  bibleTextSize: BibleTextSize
+  challengeStreakCount?: number // FIXME: 추후 삭제할 수 있는 타입
+}
+
 export const handleLogin = async (useId: string, loginPassword: string) => {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, useId, loginPassword)
+    const firebaseUser = userCredential.user
 
-    if (userCredential.user) {
-      const { uid } = userCredential.user
-
-      // Firestore에서 사용자 정보 가져오기
-      const userDocRef = doc(firestore, 'users', uid)
-      const userSnapshot = await getDoc(userDocRef)
-
-      if (userSnapshot.exists()) {
-        const userData = userSnapshot.data()
-
-        // Zustand 스토어에 userInfo 저장
-        userInfoStore.setState({
-          userInfo: {
-            uid: uid,
-            name: userData.name as string,
-            id: userData.id as string,
-            phone: userData.phone as string,
-            position: userData.position as string,
-            gradeNum: userData.grade as number,
-            classNum: userData.class as number,
-            bibleType: userData.bibleType as BibleType,
-            bibleTextSize: userData.bibleTextSize as BibleTextSize,
-            bibleReadingDates: userData.bibleReadingDates as Array<string>,
-            prayerDates: userData.prayerDates as Array<string>,
-          },
-        })
-      } else {
-        console.error('사용자 문서가 존재하지 않습니다.')
-      }
+    // Firestore에서 사용자 정보 가져오기
+    const userDoc = await getDoc(doc(firestore, 'users', firebaseUser.uid))
+    if (!userDoc.exists()) {
+      throw new Error('사용자 문서가 존재하지 않습니다.')
     }
+
+    const userInfo = userDoc.data() as UserInfo
+
+    userInfoStore.getState().setUserInfo({
+      ...userInfo,
+      uid: firebaseUser.uid,
+    })
+
+    console.log('로그인 성공:', userInfo)
   } catch (error) {
     console.error('로그인 중 오류 발생:', error)
   }

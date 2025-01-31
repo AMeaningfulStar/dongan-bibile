@@ -1,15 +1,13 @@
 // eslint-disable no-document-cookie
 'use client'
 
-import { signOut } from 'firebase/auth'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { twMerge } from 'tailwind-merge'
 
-import { auth } from '@/libs/firebase'
-import { userInfoStore } from '@/stores'
+import { userInfoStore, initAuthListener } from '@/stores'
 
 import TRAFFIC_LIGHT_ICON from '@icon/traffic_light_icon.png'
 
@@ -17,6 +15,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [isShow, setIsShow] = useState<boolean>(false)
   const pathName = usePathname()
   const { userInfo } = userInfoStore()
+
+  useEffect(() => {
+    initAuthListener()
+  }, [])
 
   useEffect(() => {
     setIsShow(false)
@@ -95,25 +97,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
 export function SideBar() {
   const pathname = usePathname()
-  const { userInfo, clearUserInfo } = userInfoStore()
-
-  const deleteCookis = (name: string) => {
-    document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;`
-  }
+  const { userInfo, logout } = userInfoStore()
 
   const handleSidebarClick = (event: React.MouseEvent) => {
     event.stopPropagation()
-  }
-
-  const handleLogOutClick = () => {
-    signOut(auth)
-      .then(() => {
-        clearUserInfo()
-        deleteCookis('user-information')
-      })
-      .catch((error) => {
-        console.error('로그아웃에 실패했습니다: ', (error as Error).message)
-      })
   }
 
   return (
@@ -151,7 +138,7 @@ export function SideBar() {
         <div className="text-navigation-14-l mb-40 flex flex-col items-center gap-y-7 text-gl-grayscale-100">
           <span>ver 3.0.0</span>
           {userInfo ? (
-            <button onClick={handleLogOutClick}>
+            <button onClick={logout}>
               <span className="underline">로그아웃</span>
             </button>
           ) : (
