@@ -1,7 +1,7 @@
 'use client'
 
 import axios from 'axios'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 type ProgressResponse = {
   totalChaptersUntilToday: number
@@ -16,28 +16,25 @@ export function TotalChallenge() {
     progressPercentage: 0,
   })
 
-  // API 요청을 useCallback으로 메모화
-  const fetchProgress = useCallback(async () => {
-    try {
-      const response = await axios.get('/api/bible/progress')
-      setProgress(response.data.data)
-    } catch (error) {
-      console.error(error)
+  // API 요청을 useEffect에서 직접 실행 (useCallback 제거)
+  useEffect(() => {
+    const fetchProgress = async () => {
+      try {
+        const response = await axios.get('/api/bible/progress')
+        setProgress(response.data.data)
+      } catch (error) {
+        console.error(error)
+      }
     }
+    fetchProgress()
   }, [])
 
-  useEffect(() => {
-    fetchProgress()
-  }, [fetchProgress])
-
-  // 렌더링에 필요한 데이터를 useMemo로 계산
-  const progressDisplay = useMemo(() => {
-    return {
-      chaptersText: `(${progress.totalChaptersUntilToday}장 / ${progress.totalChapters}장)`,
-      percentageText: `${progress.progressPercentage}%`,
-      barWidth: `${progress.progressPercentage}%`,
-    }
-  }, [progress])
+  // 진행률 데이터 가공 (useMemo 유지)
+  const progressDisplay = useMemo(() => ({
+    chaptersText: `(${progress.totalChaptersUntilToday}장 / ${progress.totalChapters}장)`,
+    percentageText: `${progress.progressPercentage}%`,
+    barWidth: `${progress.progressPercentage}%`,
+  }), [progress])
 
   return (
     <div className="mb-10 flex w-full flex-col gap-y-2.5 px-4">
