@@ -27,7 +27,7 @@ export function MyTotalChallenge() {
       const response = await axios.get(`/api/user/progress/${userInfo.uid}`)
       setProgress(response.data.data ?? response.data)
     } catch (error) {
-      console.error("❌ fetchProgress error:", error)
+      console.error('❌ fetchProgress error:', error)
     }
   }, [userInfo?.uid])
 

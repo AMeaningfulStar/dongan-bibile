@@ -27,14 +27,17 @@ export function TotalChallenge() {
       }
     }
     fetchProgress()
-  }, [])
+  }, [progress])
 
   // 진행률 데이터 가공 (useMemo 유지)
-  const progressDisplay = useMemo(() => ({
-    chaptersText: `(${progress.totalChaptersUntilToday}장 / ${progress.totalChapters}장)`,
-    percentageText: `${progress.progressPercentage}%`,
-    barWidth: `${progress.progressPercentage}%`,
-  }), [progress])
+  const progressDisplay = useMemo(
+    () => ({
+      chaptersText: `(${progress.totalChaptersUntilToday}장 / ${progress.totalChapters}장)`,
+      percentageText: `${progress.progressPercentage}%`,
+      barWidth: `${progress.progressPercentage}%`,
+    }),
+    [progress],
+  )
 
   return (
     <div className="mb-10 flex w-full flex-col gap-y-2.5 px-4">

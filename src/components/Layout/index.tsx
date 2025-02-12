@@ -84,7 +84,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </button>
       {isShow && (
         <div
-          className="bg-gl-black-opacity-30 fixed left-0 top-0 z-20 h-screen w-full"
+          className="fixed left-0 top-0 z-20 h-screen w-full bg-gl-black-opacity-30"
           onClick={() => setIsShow(false)}
         >
           <SideBar />
@@ -135,7 +135,7 @@ export function SideBar() {
             읽기 현황
           </Link>
         </div>
-        <div className="text-navigation-14-l mb-40 flex flex-col items-center gap-y-7 text-gl-grayscale-100">
+        <div className="mb-40 flex flex-col items-center gap-y-7 text-navigation-14-l text-gl-grayscale-100">
           <span>ver 3.0.0</span>
           {userInfo ? (
             <button onClick={logout}>

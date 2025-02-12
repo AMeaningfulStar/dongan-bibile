@@ -90,7 +90,7 @@ export function BibleSet({ setIsShow }: BibleSetProps) {
 
   return (
     <div
-      className="bg-gl-black-opacity-30 fixed left-0 top-0 z-10 flex h-screen w-full items-center justify-center"
+      className="fixed left-0 top-0 z-10 flex h-screen w-full items-center justify-center bg-gl-black-opacity-30"
       onClick={() => setIsShow(false)}
     >
       <div
@@ -102,21 +102,21 @@ export function BibleSet({ setIsShow }: BibleSetProps) {
         <button onClick={() => setIsShow(false)} className="absolute right-4 top-4">
           <Image alt="icon" src={CLOSE_ICON} width={25} height={25} style={{ width: 'auto', height: 'auto' }} />
         </button>
-        <div className="text-caption-16-b w-full">설정</div>
+        <div className="w-full text-caption-16-b">설정</div>
         <div className="flex w-full items-center justify-between">
           <div className="text-caption-16-l">폰트 크기</div>
           <div className="flex gap-x-1.5">
             <button
-              className="border-gl-black-base flex h-9 w-9 items-center justify-center rounded-[10px] border"
+              className="flex h-9 w-9 items-center justify-center rounded-[10px] border border-gl-black-base"
               onClick={async () => await decreaseTextSize()}
             >
               -
             </button>
-            <div className="border-gl-black-base flex h-9 w-20 items-center justify-center rounded-[10px] border">
+            <div className="flex h-9 w-20 items-center justify-center rounded-[10px] border border-gl-black-base">
               {sizeMap[userInfo ? userInfo.bibleTextSize : BibleTextSize.BASE]}
             </div>
             <button
-              className="border-gl-black-base flex h-9 w-9 items-center justify-center rounded-[10px] border"
+              className="flex h-9 w-9 items-center justify-center rounded-[10px] border border-gl-black-base"
               onClick={async () => await increaseTextSize()}
             >
               +
