@@ -27,7 +27,7 @@ export function TotalChallenge() {
       }
     }
     fetchProgress()
-  }, [])
+  }, [progress])
 
   // 진행률 데이터 가공 (useMemo 유지)
   const progressDisplay = useMemo(
