@@ -7,7 +7,7 @@ import { firestore } from '@/libs/firebase'
 export async function GET(req: NextRequest) {
   try {
     const today = moment().startOf('day') // 오늘 날짜의 시작 (00:00:00)
-    
+
     const biblePlanCollection = collection(firestore, 'biblePlan')
     const snapshot = await getDocs(biblePlanCollection)
 
@@ -30,9 +30,7 @@ export async function GET(req: NextRequest) {
     })
 
     // 진행률 계산
-    const progressPercentage = totalChapters > 0 
-      ? Math.round((totalChaptersUntilToday / totalChapters) * 100)
-      : 0 // 전체 장 수가 0이면 진행률도 0%
+    const progressPercentage = totalChapters > 0 ? Math.round((totalChaptersUntilToday / totalChapters) * 100) : 0 // 전체 장 수가 0이면 진행률도 0%
 
     return NextResponse.json({
       status: 200,

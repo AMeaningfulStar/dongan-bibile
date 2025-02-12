@@ -47,7 +47,7 @@ export default function Bible({ searchParams }: BiblePageProps) {
     return (
       <button
         onClick={() => setIsDatePickModal(true)}
-        className="border-gl-black-base text-caption-16-sb rounded-[10px] border px-4 py-1"
+        className="rounded-[10px] border border-gl-black-base px-4 py-1 text-caption-16-sb"
       >
         {formatDate(datePick as string)}
       </button>
@@ -56,13 +56,13 @@ export default function Bible({ searchParams }: BiblePageProps) {
 
   const BibleReadingRange = () => {
     if (!bibleData || !bibleData.data || bibleData.data.length === 0) {
-      return <div className="text-caption-15-m flex-grow">오늘 읽을 말씀은 없습니다</div>
+      return <div className="flex-grow text-caption-15-m">오늘 읽을 말씀은 없습니다</div>
     }
 
     const { data } = bibleData
 
     return (
-      <span className="text-caption-16-b flex-grow">
+      <span className="flex-grow text-caption-16-b">
         {data.length === 1
           ? `${data[0].title} ${data[0].chapter}장`
           : `${data[0].title} ${data[0].chapter}장 - ${data.at(-1)?.title} ${data.at(-1)?.chapter}장`}
@@ -83,7 +83,7 @@ export default function Bible({ searchParams }: BiblePageProps) {
       <>
         {bibleData.data.map((item, idx) => (
           <div key={idx} className="flex flex-col p-4">
-            <div className="text-caption-16-b mb-4">
+            <div className="mb-4 text-caption-16-b">
               {item.title} {item.chapter}장
             </div>
             {item.verses.map((verse, verseIdx) => (
@@ -255,7 +255,7 @@ export default function Bible({ searchParams }: BiblePageProps) {
 
     if (isLoading) {
       return (
-        <div className="text-caption-14-l flex w-full flex-col border-t-[5px] border-gl-grayscale-base">
+        <div className="flex w-full flex-col border-t-[5px] border-gl-grayscale-base text-caption-14-l">
           정보를 불러오는 중...
         </div>
       )
@@ -263,7 +263,7 @@ export default function Bible({ searchParams }: BiblePageProps) {
 
     if (isError) {
       return (
-        <div className="text-caption-14-l flex w-full flex-col border-t-[5px] border-gl-grayscale-base">
+        <div className="flex w-full flex-col border-t-[5px] border-gl-grayscale-base text-caption-14-l">
           정보를 불러오지 못했어요
         </div>
       )
@@ -275,12 +275,12 @@ export default function Bible({ searchParams }: BiblePageProps) {
           <input
             type="text"
             placeholder="묵상 키워드를 입력하세요 (10자 이내)"
-            className="text-caption-15-l flex-grow rounded-[10px] bg-gl-grayscale-base px-3 py-2 outline-none"
+            className="flex-grow rounded-[10px] bg-gl-grayscale-base px-3 py-2 text-caption-15-l outline-none"
             onChange={(event) => setInputValue(event.target.value)}
             maxLength={10}
           />
           <button
-            className="text-caption-14-m rounded-full bg-gl-green-opacity-30 px-4 py-2 text-gl-green-base"
+            className="rounded-full bg-gl-green-opacity-30 px-4 py-2 text-caption-14-m text-gl-green-base"
             onClick={handleCreateKeyword}
             disabled={isSetLoading}
           >
@@ -298,7 +298,7 @@ export default function Bible({ searchParams }: BiblePageProps) {
                   <Image alt="icon" src={HEARTOUTLINE_ICON} width={25} style={{ width: 'auto', height: 'auto' }} />
                 )}
               </button>
-              <div className="text-caption-14-l w-6 text-center">{item.likes.length}</div>
+              <div className="w-6 text-center text-caption-14-l">{item.likes.length}</div>
             </div>
             {userInfo && item.createdBy === userInfo.uid && (
               <button onClick={async () => await handleKeywordDelete(item.id)}>

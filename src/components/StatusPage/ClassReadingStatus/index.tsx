@@ -46,13 +46,13 @@ export function ClassReadingStatus({ gradeNum, classNum, datePick }: ClassReadin
 
   return (
     <div className="mb-6 flex w-full flex-col gap-y-4">
-      <div className="text-caption-15-m flex justify-between bg-gl-green-opacity-30 px-5 py-2.5">
+      <div className="flex justify-between bg-gl-green-opacity-30 px-5 py-2.5 text-caption-15-m">
         <span>{gradeNum === 4 && classNum === 4 ? '청소년부 교사' : `${gradeNum}-${classNum}`}</span>
         <span>
           ({readCount}/{userReadingStatus.length})
         </span>
       </div>
-      <div className="text-caption-14-l grid grid-cols-4 gap-x-1.5 gap-y-2.5 px-[18px]">
+      <div className="grid grid-cols-4 gap-x-1.5 gap-y-2.5 px-[18px] text-caption-14-l">
         {userReadingStatus.map((item, idx) => (
           <div
             key={idx}

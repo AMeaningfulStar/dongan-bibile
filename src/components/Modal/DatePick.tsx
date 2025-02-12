@@ -29,7 +29,7 @@ export function DatePick({ path, setIsShow }: DatePickProps) {
 
   return (
     <div
-      className="bg-gl-black-opacity-30 fixed left-0 top-0 z-10 flex h-screen w-full items-center justify-center"
+      className="fixed left-0 top-0 z-10 flex h-screen w-full items-center justify-center bg-gl-black-opacity-30"
       onClick={() => setIsShow(false)}
     >
       <div
