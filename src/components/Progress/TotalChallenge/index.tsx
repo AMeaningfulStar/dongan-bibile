@@ -16,7 +16,6 @@ export function TotalChallenge() {
     progressPercentage: 0,
   })
 
-  // API 요청을 useEffect에서 직접 실행 (useCallback 제거)
   useEffect(() => {
     const fetchProgress = async () => {
       try {
@@ -27,7 +26,7 @@ export function TotalChallenge() {
       }
     }
     fetchProgress()
-  }, [progress])
+  }, [])
 
   // 진행률 데이터 가공 (useMemo 유지)
   const progressDisplay = useMemo(
