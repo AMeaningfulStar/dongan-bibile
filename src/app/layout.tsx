@@ -5,7 +5,7 @@ import Layout from '@/components/Layout'
 
 export const metadata: Metadata = {
   title: '청신호',
-  description: '청소년2부 신약일독 호우!',
+  description: '청소년 신약일독 호우!',
   icons: [
     {
       url: '/image/192.png',
