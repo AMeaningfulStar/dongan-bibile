@@ -75,6 +75,7 @@ export default function Status({ searchParams }: StatusPageProps) {
       <ClassReadingStatus datePick={datePick} gradeNum={3} classNum={3} />
       <ClassReadingStatus datePick={datePick} gradeNum={3} classNum={4} />
       <ClassReadingStatus datePick={datePick} gradeNum={3} classNum={5} />
+      <ClassReadingStatus datePick={datePick} gradeNum={5} classNum={5} />
       <ClassReadingStatus datePick={datePick} gradeNum={4} classNum={4} />
       {isModal && <DatePick path="status" setIsShow={setIsModal} />}
     </div>

@@ -1,7 +1,7 @@
 'use client'
 
 import { collection, getDocs, query, where } from 'firebase/firestore'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { twMerge } from 'tailwind-merge'
 
 import { firestore } from '@/libs/firebase'
@@ -13,41 +13,45 @@ interface ClassReadingRequest {
 }
 
 export function ClassReadingStatus({ gradeNum, classNum, datePick }: ClassReadingRequest) {
-  const [readCount, setReadCount] = useState<number>(0)
   const [userReadingStatus, setUserReadingStatus] = useState<Array<{ name: string; reading: boolean }>>([])
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const baseQuery = query(
-        collection(firestore, 'users'),
-        where('class', '==', classNum),
-        where('grade', '==', gradeNum),
-      )
-      const snapshot = await getDocs(baseQuery)
+  const fetchData = useCallback(async () => {
+    const baseQuery = query(
+      collection(firestore, 'users'),
+      where('class', '==', classNum),
+      where('grade', '==', gradeNum),
+    )
+    const snapshot = await getDocs(baseQuery)
 
-      const newUserReadingStatus = snapshot.docs.map((doc) => {
+    const newUserReadingStatus = snapshot.docs
+      .map((doc) => {
         const userData = doc.data()
-
         return {
           name: userData.name,
           reading: userData.bibleReadingDates?.includes(datePick) || false,
         }
       })
+      .sort((a, b) => a.name.localeCompare(b.name, 'ko'))
 
-      // 읽은 사람 수 계산
-      const readersCount = newUserReadingStatus.filter((user) => user.reading).length
-
-      setReadCount(readersCount)
-      setUserReadingStatus(newUserReadingStatus)
-    }
-
-    fetchData()
+    setUserReadingStatus(newUserReadingStatus)
   }, [classNum, gradeNum, datePick])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
+
+  const readCount = useMemo(() => userReadingStatus.filter((user) => user.reading).length, [userReadingStatus])
 
   return (
     <div className="mb-6 flex w-full flex-col gap-y-4">
       <div className="flex justify-between bg-gl-green-opacity-30 px-5 py-2.5 text-caption-15-m">
-        <span>{gradeNum === 4 && classNum === 4 ? '청소년부 교사' : `${gradeNum}-${classNum}`}</span>
+        <span>
+          {gradeNum === 4 && classNum === 4
+            ? '청소년부 교사'
+            : gradeNum === 5 && classNum === 5
+              ? '그 외'
+              : `${gradeNum}-${classNum}`}
+        </span>
         <span>
           ({readCount}/{userReadingStatus.length})
         </span>
