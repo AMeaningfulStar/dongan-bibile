@@ -270,7 +270,7 @@ export default function Bible({ searchParams }: BiblePageProps) {
     }
 
     return (
-      <div className="flex w-full flex-col border-t-[5px] border-gl-grayscale-base">
+      <div className="flex w-full flex-col border-t-[5px] border-gl-grayscale-base mb-14">
         <div className="flex items-center gap-x-1 border-b border-gl-grayscale-base px-6 py-3">
           <input
             type="text"

@@ -63,7 +63,7 @@ export default function Main() {
       <div className="mb-[37px] w-full px-4">
         <div className="flex items-center gap-x-2.5 rounded-[10px] bg-gl-grayscale-base px-3 py-4">
           <Image alt="icon" src={LIGHT_ICON} width={20} height={20} style={{ width: 'auto', height: 'auto' }} />
-          <div className="flex-grow">청신호의 새로운 소식을 전해드립니다!!</div>
+          <div className="flex-grow">[News!] 청신호 시상식 : 3/16(주일)</div>
           <Link href={'#'}>
             <Image alt="icon" src={LINK_ARROW_ICON} width={11} height={15} style={{ width: 'auto' }} />
           </Link>
