@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { twMerge } from 'tailwind-merge'
 
-import { userInfoStore, initAuthListener } from '@/stores'
+import { initAuthListener, userInfoStore } from '@/stores'
 
 import TRAFFIC_LIGHT_ICON from '@icon/traffic_light_icon.png'
 
@@ -33,7 +33,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       case '/status':
         return '읽기현황'
       default:
-        return ''
+        return '청신호'
     }
   }
 
@@ -133,6 +133,12 @@ export function SideBar() {
             className={twMerge(pathname === '/status' ? 'text-gl-black-base' : 'text-gl-grayscale-100')}
           >
             읽기 현황
+          </Link>
+          <Link
+            href={'/admin'}
+            className={twMerge(pathname === '/admin' ? 'text-gl-black-base' : 'text-gl-grayscale-100')}
+          >
+            '청신호' 관리
           </Link>
         </div>
         <div className="mb-40 flex flex-col items-center gap-y-7 text-navigation-14-l text-gl-grayscale-100">
