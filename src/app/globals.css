@@ -77,6 +77,12 @@
     }
   }
 
+  .react-calendar__tile--active {
+    abbr {
+      background: rgba(13, 152, 0, 0.5);
+    }
+  }
+
   .react-calendar__tile--read {
     background-color: transparent !important;
     abbr {
