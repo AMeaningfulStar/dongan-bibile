@@ -5,29 +5,16 @@ import { auth, firestore } from '@/libs/firebase'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import { doc, getDoc } from 'firebase/firestore'
 
-import { BibleTextSize, BibleType } from '@/utils/enum'
+import { userCommuniteStore } from './userCommuniteStroe'
 
-type UserInfo = {
-  uid: string
-  name: string
-  id: string
-  phone: string
-  position: string
-  gradeNum: number
-  classNum: number
-  bibleReadingDates: Array<string>
-  prayerDates: Array<string>
-  bibleType: BibleType
-  bibleTextSize: BibleTextSize
-  challengeStreakCount?: number // FIXME: 추후 삭제할 수 있는 타입
-}
+import { BibleTextSize, BibleType } from '@/utils/enum'
+import { UserCommunite, UserInfo } from '@/utils/type'
 
 type UserInfoStore = {
   userInfo: UserInfo | null
   setUserInfo: (userInfo: UserInfo) => void
   setBibleType: (type: BibleType) => void
   setBibleTextSize: (size: BibleTextSize) => void
-  setBibleReadingDates: (newReadingDate: string) => void
   logout: () => void
 }
 
@@ -68,24 +55,10 @@ export const userInfoStore = create(
         })
       },
 
-      setBibleReadingDates: (newReadingDate: string) => {
-        set((state: UserInfoStore) => {
-          if (!state.userInfo) {
-            return {}
-          }
-
-          return {
-            userInfo: {
-              ...state.userInfo,
-              bibleReadingDates: [...state.userInfo.bibleReadingDates, newReadingDate],
-            },
-          }
-        })
-      },
-
       logout: async () => {
         await signOut(auth) // Firebase Auth 로그아웃
         set({ userInfo: null }) // Zustand 상태도 초기화
+        userCommuniteStore.setState({ userCommunite: null })
       },
     }),
     {
@@ -105,6 +78,25 @@ export const initAuthListener = () => {
           ...userData,
           uid: firebaseUser.uid,
         })
+
+        if (userData.churchId && userData.communityId) {
+          const userCommuniteDoc = await getDoc(
+            doc(
+              firestore,
+              'churches',
+              userData.churchId,
+              'communities',
+              userData.communityId,
+              'users',
+              firebaseUser.uid,
+            ),
+          )
+          if (userCommuniteDoc.exists()) {
+            const userCommunite = userCommuniteDoc.data() as UserCommunite
+
+            userCommuniteStore.getState().setUserCommunite(userCommunite)
+          }
+        }
       }
     } else {
       userInfoStore.getState().logout()
