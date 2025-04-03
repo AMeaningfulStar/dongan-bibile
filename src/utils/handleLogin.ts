@@ -35,8 +35,6 @@ export const handleLogin = async (useId: string, loginPassword: string) => {
         userCommuniteStore.getState().setUserCommunite(userCommunite)
       }
     }
-
-    console.log('로그인 성공:', userInfo)
   } catch (error) {
     console.error('로그인 중 오류 발생:', error)
   }
