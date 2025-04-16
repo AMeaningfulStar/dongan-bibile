@@ -1,26 +1,11 @@
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { doc, getDoc } from 'firebase/firestore'
 
-import { userInfoStore } from '@/stores/userInfoStore'
+import { userCommuniteStore, userInfoStore } from '@/stores'
 
 import { auth, firestore } from '@/libs/firebase'
 
-import { BibleTextSize, BibleType } from './enum'
-
-type UserInfo = {
-  uid: string
-  name: string
-  id: string
-  phone: string
-  position: string
-  gradeNum: number
-  classNum: number
-  bibleReadingDates: Array<string>
-  prayerDates: Array<string>
-  bibleType: BibleType
-  bibleTextSize: BibleTextSize
-  challengeStreakCount?: number // FIXME: 추후 삭제할 수 있는 타입
-}
+import { UserCommunite, UserInfo } from './type'
 
 export const handleLogin = async (useId: string, loginPassword: string) => {
   try {
@@ -40,7 +25,16 @@ export const handleLogin = async (useId: string, loginPassword: string) => {
       uid: firebaseUser.uid,
     })
 
-    console.log('로그인 성공:', userInfo)
+    if (userInfo.churchId && userInfo.communityId) {
+      const userCommuniteDoc = await getDoc(
+        doc(firestore, 'churches', userInfo.churchId, 'communities', userInfo.communityId, 'users', firebaseUser.uid),
+      )
+      if (userCommuniteDoc.exists()) {
+        const userCommunite = userCommuniteDoc.data() as UserCommunite
+
+        userCommuniteStore.getState().setUserCommunite(userCommunite)
+      }
+    }
   } catch (error) {
     console.error('로그인 중 오류 발생:', error)
   }

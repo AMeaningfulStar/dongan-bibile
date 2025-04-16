@@ -18,10 +18,12 @@ export default {
         'caption-14-b': ['14px', { lineHeight: '100%', fontWeight: '700' }],
         'caption-15-l': ['15px', { lineHeight: '100%', fontWeight: '400' }],
         'caption-15-m': ['15px', { lineHeight: '100%', fontWeight: '500' }],
+        'caption-15-b': ['15px', { lineHeight: '100%', fontWeight: '700' }],
         'caption-16-l': ['15px', { lineHeight: '100%', fontWeight: '400' }],
         'caption-16-sb': ['16px', { lineHeight: '100%', fontWeight: '600' }],
         'caption-16-b': ['16px', { lineHeight: '100%', fontWeight: '700' }],
         'caption-18-sb': ['18px', { lineHeight: '100%', fontWeight: '600' }],
+        'caption-24-b': ['24px', { lineHeight: '100%', fontWeight: '700' }],
       },
 
       backgroundImage: {
@@ -38,6 +40,7 @@ export default {
           'green-opacity-30': 'rgba(13, 152, 0, 0.3)',
           'green-opacity-50': 'rgba(13, 152, 0, 0.5)',
           'red-base': 'rgba(255, 0, 0, 1)',
+          'blue-base': 'rgba(0, 123, 255, 1)',
           'white-base': 'rgba(254, 254, 254, 1)',
           'black-base': 'rgba(34, 34, 34, 1)',
           'black-opacity-30': 'rgba(34, 34, 34, 0.3)',

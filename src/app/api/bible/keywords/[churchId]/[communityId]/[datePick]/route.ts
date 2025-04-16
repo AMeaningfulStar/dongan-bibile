@@ -3,16 +3,28 @@ import { NextRequest, NextResponse } from 'next/server'
 
 import { firestore } from '@/libs/firebase'
 
-export async function GET(req: NextRequest, context: { params: { datePick: string } }) {
+export async function GET(
+  req: NextRequest,
+  context: { params: { churchId: string; communityId: string; datePick: string } },
+) {
   const { params } = context
-  const { datePick } = await params
+  const { churchId, communityId, datePick } = await params
 
-  if (!datePick) {
+  if (!datePick || !churchId || !communityId) {
     return NextResponse.json({ status: 400, error: 'Invalid request' })
   }
 
   try {
-    const keywordsRef = collection(firestore, 'keywords', datePick, 'keywords')
+    const keywordsRef = collection(
+      firestore,
+      'churches',
+      churchId,
+      'communities',
+      communityId,
+      'keywords',
+      datePick,
+      'keywords',
+    )
     const snapshot = await getDocs(keywordsRef)
 
     const keywords = snapshot.docs.map((doc) => ({
