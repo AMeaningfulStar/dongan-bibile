@@ -6,19 +6,27 @@ interface BibleResponseType {
 }
 
 interface BibleDataType {
-  title: string
+  book: string
   chapter: number
-  verses: Array<{
-    verse: number
-    text: string
-  }>
+  testament: string
+  name: string
+  texts: {
+    easy_korean: Array<{
+      text: string
+      verse: number
+    }>
+    revised_korean: Array<{
+      text: string
+      verse: number
+    }>
+  }
 }
 
-export function useBibleData(datePick: string, bibleType: string) {
+export function useBibleData(churchId: string, communityId: string, datePick: string) {
   const fetcher = (url: string) => fetch(url).then((res) => res.json())
 
   const { data, error, isLoading, mutate } = useSWR<BibleResponseType, Error>(
-    datePick && bibleType ? `/api/bible/${datePick}/${bibleType}` : null,
+    churchId && communityId && datePick ? `/api/bible/${churchId}/${communityId}/${datePick}` : null,
     fetcher,
   )
 
