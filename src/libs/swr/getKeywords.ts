@@ -11,11 +11,11 @@ interface Keywords {
   likes: Array<string>
 }
 
-export function getKeyWords(datePick: string) {
+export function getKeyWords(churchId: string, communityId: string, datePick: string) {
   const fetcher = (url: string) => fetch(url).then((res) => res.json())
 
   const { data, error, isLoading, mutate } = useSWR<KeywordsResponse, Error>(
-    datePick ? `/api/bible/keywords/${datePick}` : null,
+    churchId && communityId && datePick ? `/api/bible/keywords/${churchId}/${communityId}/${datePick}` : null,
     fetcher,
   )
 
