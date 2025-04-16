@@ -1,7 +1,12 @@
 'use client'
+
 import Link from 'next/link'
 
+import { userInfoStore } from '@/stores'
+
 export default function Admin() {
+  const { userInfo } = userInfoStore()
+
   return (
     <div className="flex flex-grow flex-col items-center px-3 pt-4">
       <div className="mb-6 max-w-xl rounded-xl bg-yellow-100 px-6 py-4 text-sm text-gray-800 shadow-md">
@@ -25,30 +30,38 @@ export default function Admin() {
       </div>
       <h2 className="mt-6 w-full max-w-xl px-2 text-base font-bold text-gray-800">📂 관리 항목</h2>
       <div className="mt-4 grid w-full max-w-xl grid-cols-2 gap-x-3 gap-y-4">
-        <Link
-          href={'/admin/churches'}
-          className="flex w-full items-center justify-center rounded-xl bg-gl-green-opacity-50 px-4 py-2.5 text-caption-15-l text-gl-black-base shadow"
-        >
-          교회 관리
-        </Link>
-        <Link
-          href={'/admin/departments'}
-          className="flex w-full items-center justify-center rounded-xl bg-gl-green-opacity-50 px-4 py-2.5 text-caption-15-l text-gl-black-base shadow"
-        >
-          부서 관리
-        </Link>
-        <Link
-          href={'/admin/season'}
-          className="flex w-full items-center justify-center rounded-xl bg-gl-green-opacity-50 px-4 py-2.5 text-caption-15-l text-gl-black-base shadow"
-        >
-          시즌 관리
-        </Link>
-        <Link
-          href={'/admin/schedule'}
-          className="flex w-full items-center justify-center rounded-xl bg-gl-green-opacity-50 px-4 py-2.5 text-caption-15-l text-gl-black-base shadow"
-        >
-          성경 일정 관리
-        </Link>
+        {userInfo && userInfo.role === 'admin' && (
+          <div className="col-span-2 flex gap-x-3">
+            <Link
+              href={'/admin/churches'}
+              className="flex w-full items-center justify-center rounded-xl bg-gl-green-opacity-50 px-4 py-2.5 text-caption-15-l text-gl-black-base shadow"
+            >
+              교회 관리
+            </Link>
+            <Link
+              href={'/admin/departments'}
+              className="flex w-full items-center justify-center rounded-xl bg-gl-green-opacity-50 px-4 py-2.5 text-caption-15-l text-gl-black-base shadow"
+            >
+              부서 관리
+            </Link>
+          </div>
+        )}
+        {userInfo && userInfo.role !== 'read_only' && (
+          <div className="col-span-2 flex gap-x-3">
+            <Link
+              href={'/admin/season'}
+              className="flex w-full items-center justify-center rounded-xl bg-gl-green-opacity-50 px-4 py-2.5 text-caption-15-l text-gl-black-base shadow"
+            >
+              시즌 관리
+            </Link>
+            <Link
+              href={'/admin/schedule'}
+              className="flex w-full items-center justify-center rounded-xl bg-gl-green-opacity-50 px-4 py-2.5 text-caption-15-l text-gl-black-base shadow"
+            >
+              성경 일정 관리
+            </Link>
+          </div>
+        )}
         <Link
           href={'/admin/overview'}
           className="flex w-full items-center justify-center rounded-xl bg-gl-green-opacity-50 px-4 py-2.5 text-caption-15-l text-gl-black-base shadow"
