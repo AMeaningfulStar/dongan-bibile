@@ -11,4 +11,4 @@ export type UserInfo = {
   bibleTextSize: BibleTextSize
 }
 
-export type Role = 'admin' | 'department_admin' | 'viewer' | 'user'
+export type Role = 'admin' | 'department_admin' | 'read_only' | 'user'
