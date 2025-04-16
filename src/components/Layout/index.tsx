@@ -134,12 +134,14 @@ export function SideBar() {
           >
             읽기 현황
           </Link>
-          <Link
-            href={'/admin'}
-            className={twMerge(pathname === '/admin' ? 'text-gl-black-base' : 'text-gl-grayscale-100')}
-          >
-            '청신호' 관리
-          </Link>
+          {userInfo && userInfo.role !== 'user' && (
+            <Link
+              href={'/admin'}
+              className={twMerge(pathname === '/admin' ? 'text-gl-black-base' : 'text-gl-grayscale-100')}
+            >
+              '청신호' 관리
+            </Link>
+          )}
         </div>
         <div className="mb-40 flex flex-col items-center gap-y-7 text-navigation-14-l text-gl-grayscale-100">
           <span>ver 3.0.0</span>
