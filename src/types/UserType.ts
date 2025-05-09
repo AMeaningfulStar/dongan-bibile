@@ -4,7 +4,7 @@ export type UserType = {
   uid: string
   name: string
   phone: string
-  role: 'admin' | 'department_admin' | 'viewer' | 'user'
+  role: 'admin' | 'department_admin' | 'read_only' | 'user'
 
   bible: {
     type: BibleType
