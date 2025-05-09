@@ -2,10 +2,10 @@
 
 import Link from 'next/link'
 
-import { userInfoStore } from '@/stores'
+import { useAuthStore } from '@/stores/useAuthStore'
 
 export default function Admin() {
-  const { userInfo } = userInfoStore()
+  const { user } = useAuthStore()
 
   return (
     <div className="flex flex-grow flex-col items-center px-3 pt-4">
@@ -30,7 +30,7 @@ export default function Admin() {
       </div>
       <h2 className="mt-6 w-full max-w-xl px-2 text-base font-bold text-gray-800">📂 관리 항목</h2>
       <div className="mt-4 grid w-full max-w-xl grid-cols-2 gap-x-3 gap-y-4">
-        {userInfo && userInfo.role === 'admin' && (
+        {user && user.role === 'admin' && (
           <div className="col-span-2 flex gap-x-3">
             <Link
               href={'/admin/churches'}
@@ -46,7 +46,7 @@ export default function Admin() {
             </Link>
           </div>
         )}
-        {userInfo && userInfo.role !== 'read_only' && (
+        {user && user.role !== 'read_only' && (
           <div className="col-span-2 flex gap-x-3">
             <Link
               href={'/admin/season'}

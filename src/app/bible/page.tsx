@@ -9,7 +9,8 @@ import { getKeyWords, useBibleData } from '@/libs/swr/'
 import { URLCopy } from '@/components/Button'
 import { BibleSet, DatePick } from '@/components/Modal'
 
-import { userCommuniteStore, userInfoStore } from '@/stores'
+import { userCommuniteStore } from '@/stores'
+import { useAuthStore } from '@/stores/useAuthStore'
 
 import { firestore } from '@/libs/firebase'
 import HEARTFILLED_ICON from '@icon/heart_filled_icon.png'
@@ -27,11 +28,11 @@ interface BiblePageProps {
 export default function Bible({ searchParams }: BiblePageProps) {
   const datePick = searchParams.datePick
 
-  const { userInfo } = userInfoStore()
+  const { user } = useAuthStore()
   const { userCommunite, setBibleReadingDates } = userCommuniteStore()
   const { bibleData, isLoading, isError } = useBibleData(
-    userInfo?.churchId as string,
-    userInfo?.communityId as string,
+    user?.church?.id as string,
+    user?.community?.id as string,
     datePick as string,
   )
 
@@ -88,12 +89,12 @@ export default function Bible({ searchParams }: BiblePageProps) {
             <div className="mb-4 text-caption-16-b">
               {item.name} {item.chapter}장
             </div>
-            {item.texts[userInfo ? userInfo.bibleType : 'easy_korean'].map((verse, verseIdx) => (
+            {item.texts[user ? user.bible.type : 'easy_korean'].map((verse, verseIdx) => (
               <div
                 key={verseIdx}
                 className={twMerge(
                   'mb-1 flex w-full gap-x-2 whitespace-pre-line font-normal leading-none',
-                  userInfo ? userInfo.bibleTextSize : 'text-base',
+                  user ? user.bible.textSize : 'text-base',
                 )}
               >
                 <span>{verse.verse}</span>
@@ -112,7 +113,7 @@ export default function Bible({ searchParams }: BiblePageProps) {
     }
 
     const handleBibleReading = async () => {
-      if (!userInfo) {
+      if (!user) {
         alert('로그인 후 가능합니다')
         return
       }
@@ -133,11 +134,11 @@ export default function Bible({ searchParams }: BiblePageProps) {
         const userDocRef = doc(
           firestore,
           'churches',
-          userInfo.churchId as string,
+          user.church?.id as string,
           'communities',
-          userInfo.communityId as string,
+          user.community?.id as string,
           'users',
-          userInfo.uid,
+          user.uid,
         )
 
         await updateDoc(userDocRef, {
@@ -178,13 +179,13 @@ export default function Bible({ searchParams }: BiblePageProps) {
   }
 
   const BibleKeyword = () => {
-    if (!bibleData || !bibleData.data || bibleData.data.length === 0 || !userInfo) {
+    if (!bibleData || !bibleData.data || bibleData.data.length === 0 || !user) {
       return
     }
 
     const { keywords, isLoading, isError, mutate } = getKeyWords(
-      userInfo?.churchId as string,
-      userInfo?.communityId as string,
+      user.church?.id as string,
+      user.community?.id as string,
       datePick as string,
     )
     const [inputValue, setInputValue] = useState<string>('')
@@ -198,9 +199,9 @@ export default function Bible({ searchParams }: BiblePageProps) {
         const keywordDocRef = doc(
           firestore,
           'churches',
-          userInfo.churchId as string,
+          user.church?.id as string,
           'communities',
-          userInfo.communityId as string,
+          user.community?.id as string,
           'keywords',
           datePick as string,
           'keywords',
@@ -213,8 +214,8 @@ export default function Bible({ searchParams }: BiblePageProps) {
           alert('이미 존재하는 키워드입니다')
         } else {
           await setDoc(keywordDocRef, {
-            createdBy: userInfo?.uid,
-            likes: [userInfo?.uid], // 첫 번째 좋아요 누른 사용자 UID
+            createdBy: user.uid,
+            likes: [user.uid], // 첫 번째 좋아요 누른 사용자 UID
           })
 
           mutate()
@@ -231,15 +232,15 @@ export default function Bible({ searchParams }: BiblePageProps) {
     const handleKeywordDelete = async (keyword: string) => {
       const confirmed = confirm('정말 삭제하실건가요?')
 
-      if (!confirmed || !userInfo) return
+      if (!confirmed || !user) return
 
       try {
         const keywordDocRef = doc(
           firestore,
           'churches',
-          userInfo.churchId as string,
+          user.church?.id as string,
           'communities',
-          userInfo.communityId as string,
+          user.community?.id as string,
           'keywords',
           datePick as string,
           'keywords',
@@ -257,7 +258,7 @@ export default function Bible({ searchParams }: BiblePageProps) {
     }
 
     const handleKeywordLike = async (createdBy: string, keyword: string) => {
-      if (userInfo?.uid === createdBy) {
+      if (user?.uid === createdBy) {
         await handleKeywordDelete(keyword)
         return
       }
@@ -266,9 +267,9 @@ export default function Bible({ searchParams }: BiblePageProps) {
         const keywordDocRef = doc(
           firestore,
           'churches',
-          userInfo.churchId as string,
+          user.church?.id as string,
           'communities',
-          userInfo.communityId as string,
+          user.community?.id as string,
           'keywords',
           datePick as string,
           'keywords',
@@ -277,15 +278,15 @@ export default function Bible({ searchParams }: BiblePageProps) {
         const keywordDoc = await getDoc(keywordDocRef)
 
         if (keywordDoc.exists()) {
-          if ((keywordDoc.data().likes as Array<string>).includes(userInfo?.uid as string)) {
+          if ((keywordDoc.data().likes as Array<string>).includes(user?.uid as string)) {
             await updateDoc(keywordDocRef, {
-              likes: arrayRemove(userInfo?.uid as string), // 날짜를 배열에 추가
+              likes: arrayRemove(user?.uid as string), // 날짜를 배열에 추가
             })
 
             mutate()
           } else {
             await updateDoc(keywordDocRef, {
-              likes: arrayUnion(userInfo?.uid as string), // 날짜를 배열에 추가
+              likes: arrayUnion(user?.uid as string), // 날짜를 배열에 추가
             })
 
             mutate()
@@ -336,7 +337,7 @@ export default function Bible({ searchParams }: BiblePageProps) {
             <div className="flex-grow"># {item.id}</div>
             <div className="flex items-center gap-x-0.5">
               <button onClick={async () => await handleKeywordLike(item.createdBy, item.id)}>
-                {userInfo && item.likes.includes(userInfo.uid) ? (
+                {user && item.likes.includes(user.uid) ? (
                   <Image alt="icon" src={HEARTFILLED_ICON} width={25} style={{ width: 'auto', height: 'auto' }} />
                 ) : (
                   <Image alt="icon" src={HEARTOUTLINE_ICON} width={25} style={{ width: 'auto', height: 'auto' }} />
@@ -344,7 +345,7 @@ export default function Bible({ searchParams }: BiblePageProps) {
               </button>
               <div className="w-6 text-center text-caption-14-l">{item.likes.length}</div>
             </div>
-            {userInfo && item.createdBy === userInfo.uid && (
+            {user && item.createdBy === user.uid && (
               <button onClick={async () => await handleKeywordDelete(item.id)}>
                 <Image alt="icon" src={RECYCLEBIN_ICON} width={22} style={{ width: 'auto', height: 'auto' }} />
               </button>

@@ -7,6 +7,8 @@ import { useEffect, useState } from 'react'
 import { firestore } from '@/libs/firebase'
 
 import { userInfoStore } from '@/stores'
+import { useAuthStore } from '@/stores/useAuthStore'
+
 import { UserInfo } from '@/utils/type'
 
 interface Church {
@@ -26,6 +28,7 @@ interface Community {
 
 export default function Admin_User() {
   const { userInfo } = userInfoStore()
+  const { user } = useAuthStore()
   const [churches, setChurches] = useState<Church[]>([])
   const [communities, setCommunities] = useState<Community[]>([])
   const [churchId, setChurchId] = useState<string>('')
@@ -36,12 +39,12 @@ export default function Admin_User() {
   const [loading, setLoading] = useState<boolean>(false)
 
   useEffect(() => {
-    if (userInfo?.role == 'admin') {
+    if (user?.role == 'admin') {
       fetchChurches()
-    } else if (userInfo?.role == 'department_admin' || userInfo?.role == 'read_only') {
+    } else if (user?.role == 'department_admin' || user?.role == 'read_only') {
       fetchUserAffiliation()
     }
-  }, [userInfo])
+  }, [user])
 
   useEffect(() => {
     if (churchId) {
@@ -61,38 +64,38 @@ export default function Admin_User() {
   }
 
   const fetchUserAffiliation = async () => {
-    if (!userInfo) {
+    if (!user) {
       return
     }
 
     try {
-      if (!userInfo.churchId) {
+      if (!user.church?.id) {
         console.warn('⚠️ 교회 ID가 없습니다.')
         return
       }
 
-      const churchRef = doc(firestore, 'churches', userInfo.churchId)
+      const churchRef = doc(firestore, 'churches', user.church.id)
       const churchSnap = await getDoc(churchRef)
       if (!churchSnap.exists()) {
         console.warn('⚠️ 해당 교회 정보가 Firestore에 존재하지 않습니다.')
         return
       }
       setChurchName(churchSnap.data()?.name || '이름 없음')
-      setChurchId(userInfo.churchId)
+      setChurchId(user.church.id)
 
-      if (!userInfo.communityId) {
+      if (!user.community?.id) {
         console.warn('⚠️ 부서 ID가 없습니다.')
         return
       }
 
-      const departmentRef = doc(firestore, 'churches', userInfo.churchId, 'communities', userInfo.communityId)
+      const departmentRef = doc(firestore, 'churches', user.church.id, 'communities', user.community.id)
       const departmentSnap = await getDoc(departmentRef)
       if (!departmentSnap.exists()) {
         console.warn('⚠️ 해당 부서 정보가 Firestore에 존재하지 않습니다.')
         return
       }
       setCommunityName(departmentSnap.data()?.name || '이름 없음')
-      setCommunityId(userInfo.communityId)
+      setCommunityId(user.community.id)
     } catch (error) {
       console.error('🚨 사용자 교회 및 부서 정보를 불러오는 중 오류 발생:', error)
     }

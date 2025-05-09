@@ -2,16 +2,15 @@
 
 import Image from 'next/image'
 
-import { userCommuniteStore, userInfoStore } from '@/stores'
+import { useAuthStore } from '@/stores/useAuthStore'
 
 import FIRE_ICON from '@icon/fire_icon.png'
 import WATER_ICON from '@icon/water_icon.png'
 
 export function BibleStreakBadge() {
-  const { userCommunite } = userCommuniteStore()
-  const { userInfo } = userInfoStore()
+  const { user } = useAuthStore()
 
-  if (!userInfo) {
+  if (!user) {
     return (
       <div className="absolute right-5 top-3 flex items-center gap-x-0.5 rounded-full bg-gl-grayscale-base px-3 py-1">
         <Image alt="icon" src={WATER_ICON} width={16} height={16} style={{ width: 'auto', height: 'auto' }} />
@@ -20,7 +19,7 @@ export function BibleStreakBadge() {
     )
   }
 
-  if (userCommunite && userCommunite.bibleReadingDates.length <= 0) {
+  if (user.bible.readingDates.length <= 0) {
     return (
       <div className="absolute right-5 top-3 flex items-center gap-x-0.5 rounded-full bg-gl-grayscale-base px-3 py-1">
         <Image alt="icon" src={WATER_ICON} width={16} height={16} style={{ width: 'auto', height: 'auto' }} />
@@ -32,7 +31,7 @@ export function BibleStreakBadge() {
   return (
     <div className="absolute right-5 top-3 flex items-center gap-x-0.5 rounded-full bg-gl-green-opacity-30 px-3 py-1">
       <Image alt="icon" src={FIRE_ICON} width={16} height={16} style={{ width: 'auto', height: 'auto' }} />
-      <span className="text-caption-13-l">연속{userCommunite?.bibleReadingDates.length}일째 성공</span>
+      <span className="text-caption-13-l">연속{user.bible.readingDates.length}일째 성공</span>
     </div>
   )
 }

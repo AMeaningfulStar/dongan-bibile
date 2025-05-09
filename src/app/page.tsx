@@ -8,7 +8,8 @@ import Calendar from 'react-calendar'
 
 import 'react-calendar/dist/Calendar.css'
 
-import { userCommuniteStore, userInfoStore } from '@/stores'
+import { userCommuniteStore } from '@/stores'
+import { useAuthStore } from '@/stores/useAuthStore'
 
 import LIGHT_ICON from '@icon/light_icon.png'
 import LINK_ARROW_ICON from '@icon/link_arrow_icon.png'
@@ -30,7 +31,7 @@ interface BibleSeason {
 
 export default function Main() {
   const { userCommunite } = userCommuniteStore()
-  const { userInfo } = userInfoStore()
+  const { user } = useAuthStore()
   const router = useRouter()
 
   const [seasons, setSeasons] = useState<BibleSeason[]>([])
@@ -38,10 +39,11 @@ export default function Main() {
 
   useEffect(() => {
     fetchSeasons()
-  }, [userInfo])
+  }, [user])
 
   const fetchSeasons = async () => {
-    if (!userInfo) {
+    if (!user?.church?.id || !user?.community?.id) {
+      // 교회 ID 또는 공동체 ID가 없으면 데이터를 가져올 수 없음
       return
     }
     try {
@@ -49,9 +51,9 @@ export default function Main() {
         collection(
           firestore,
           'churches',
-          userInfo?.churchId as string,
+          user?.church?.id as string,
           'communities',
-          userInfo?.communityId as string,
+          user?.community?.id as string,
           'bibleSeasons',
         ),
       )
@@ -150,7 +152,7 @@ export default function Main() {
           }}
         />
       </div>
-      <div className="w-full px-4 mb-4">
+      <div className="mb-4 w-full px-4">
         <div className="w-full rounded-lg border px-2">
           <select
             value={selectedSeason?.id || ''}
