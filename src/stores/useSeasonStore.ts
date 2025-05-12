@@ -1,13 +1,7 @@
 import { isWithinInterval, parseISO } from 'date-fns'
 import { create } from 'zustand'
 
-interface Season {
-  id: string
-  name: string
-  startDate: string // 'YYYY-MM-DD'
-  endDate: string // 'YYYY-MM-DD'
-  createdAt?: string
-}
+import { Season } from '@/types'
 
 interface SeasonStore {
   seasons: Season[]
