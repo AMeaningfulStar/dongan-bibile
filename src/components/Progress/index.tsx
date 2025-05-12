@@ -1,2 +1,2 @@
-export { TotalChallenge } from './TotalChallenge'
-export { MyTotalChallenge } from './MyTotalChallenge'
+export { MyProgressBar } from './MyProgressBar'
+export { TotalProgressBar } from './TotalProgressBar'

@@ -1,16 +1,18 @@
 import { User as FirebaseUser, onAuthStateChanged } from 'firebase/auth'
-import { doc, getDoc } from 'firebase/firestore'
+import { collection, doc, getDoc, getDocs } from 'firebase/firestore'
 import { useEffect } from 'react'
 
 import { auth, firestore } from '@/libs/firebase'
 
 import { useAuthStore } from '@/stores/useAuthStore'
+import { useSeasonStore } from '@/stores/useSeasonStore'
 
-import { UserType } from '@/types'
+import { Season, UserType } from '@/types'
 
 export const useAuthListener = () => {
   const setUser = useAuthStore((state) => state.setUser)
   const setIsLoading = useAuthStore((state) => state.setIsLoading)
+  const setSeasons = useSeasonStore((state) => state.setSeasons)
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
@@ -57,15 +59,27 @@ export const useAuthListener = () => {
             gradeNum: communityUser?.gradeNum,
             classNum: communityUser?.classNum,
           }
+
+          const seasonSnapshot = await getDocs(
+            collection(firestore, 'churches', churchId, 'communities', communityId, 'bibleSeasons'),
+          )
+
+          const seasonList: Season[] = seasonSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...(doc.data() as Omit<Season, 'id'>),
+          }))
+
+          setSeasons(seasonList)
         }
 
         setUser(userData)
       } else {
         setUser(null)
+        setSeasons([])
       }
       setIsLoading(false)
     })
 
     return () => unsubscribe()
-  }, [setUser, setIsLoading])
+  }, [setUser, setIsLoading, setSeasons])
 }
