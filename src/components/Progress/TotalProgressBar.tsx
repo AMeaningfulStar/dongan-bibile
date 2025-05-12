@@ -9,12 +9,12 @@ export function TotalProgressBar({
   yearProgress: number
 }) {
   return (
-    <div className="mb-10 flex w-full flex-col gap-y-2.5 px-4">
+    <div className="mb-5 flex w-full flex-col gap-y-2.5 px-4">
       <div className="ml-1 flex items-center gap-x-2">
         <div className="flex items-center gap-x-1">
           <span className="text-caption-16-l">청신호 진행률</span>
         </div>
-        <span className="text-caption-13-l">
+        <span className="text-caption-13-l text-gl-grayscale-100">
           {totalPlannedDays} 일 중 {readDatesInYear}일 통독 완료
         </span>
       </div>

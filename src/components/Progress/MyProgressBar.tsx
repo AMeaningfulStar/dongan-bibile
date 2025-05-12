@@ -15,9 +15,9 @@ export function MyProgressBar({
     <div className="mb-10 flex w-full flex-col gap-y-2.5 px-4">
       <div className="ml-1 flex items-center gap-x-2">
         <div className="flex items-center gap-x-1">
-          <span className="text-caption-16-l">[{seasonName}]</span>
+          <span className="text-caption-16-l">나의 진행률</span>
         </div>
-        <span className="text-caption-13-l">
+        <span className="text-caption-13-l text-gl-grayscale-100">
           {totalSeasonDays}일 중 {readDatesInSeason.length}일 통독 완료
         </span>
       </div>
