@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import Calendar from 'react-calendar'
 
-import { BookOption, options } from '@/libs/bibleOption'
+import { BookOption, options } from '@/utils/bibleOption'
 import { firestore } from '@/libs/firebase'
 
 import 'react-calendar/dist/Calendar.css'
