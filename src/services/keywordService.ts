@@ -1,53 +1,40 @@
 import axios from 'axios'
 
-export const createKeyword = async ({
-  datePick,
-  keyword,
-  uid,
-  churchId,
-  communityId,
-}: {
+interface KeywordParams {
   datePick: string
-  keyword: string
   uid: string
   churchId?: string
   communityId?: string
-}) => {
-  const response = await axios.post('/api/keywords', {
-    datePick,
-    keyword,
-    uid,
-    churchId,
-    communityId,
-  })
-
-  return response.data
 }
 
-export const deleteKeyword = async ({
-  datePick,
-  keywordId,
-  uid,
-  role,
-  churchId,
-  communityId,
-}: {
-  datePick: string
-  keywordId: string
-  uid: string
-  role: string // 'admin', 'department_admin', etc
-  churchId?: string
-  communityId?: string
-}) => {
-  const response = await axios.delete(`/api/keywords/${keywordId}`, {
-    params: {
-      datePick,
-      uid,
-      role,
-      churchId,
-      communityId,
-    },
-  })
+export const createKeyword = async (params: KeywordParams & { keyword: string }) => {
+  const res = await axios.post('/api/keywords', params)
+  return res.data
+}
 
-  return response.data
+export const fetchKeywords = async (params: KeywordParams) => {
+  const query = new URLSearchParams({ datePick: params.datePick, uid: params.uid })
+  if (params.churchId) query.append('churchId', params.churchId)
+  if (params.communityId) query.append('communityId', params.communityId)
+
+  const res = await axios.get(`/api/keywords?${query.toString()}`)
+  return res.data
+}
+
+export const deleteKeyword = async (keyword: string, params: KeywordParams & { role: string }) => {
+  const query = new URLSearchParams({ datePick: params.datePick, uid: params.uid, role: params.role })
+  if (params.churchId) query.append('churchId', params.churchId)
+  if (params.communityId) query.append('communityId', params.communityId)
+
+  const res = await axios.delete(`/api/keywords/${keyword}?${query.toString()}`)
+  return res.data
+}
+
+export const toggleKeywordLike = async (keyword: string, params: KeywordParams) => {
+  const query = new URLSearchParams({ datePick: params.datePick, uid: params.uid })
+  if (params.churchId) query.append('churchId', params.churchId)
+  if (params.communityId) query.append('communityId', params.communityId)
+
+  const res = await axios.patch(`/api/keywords/${keyword}/like?${query.toString()}`)
+  return res.data
 }
