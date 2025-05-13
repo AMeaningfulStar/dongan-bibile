@@ -40,3 +40,36 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ status: 500, message: '서버 오류가 발생했습니다.' })
   }
 }
+
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url)
+    const date = searchParams.get('datePick')
+    const churchId = searchParams.get('churchId')
+    const communityId = searchParams.get('communityId')
+
+    if (!date) {
+      return NextResponse.json({ status: 400, message: 'datePick은 필수입니다.' })
+    }
+
+    const basePath =
+      churchId && communityId
+        ? `churches/${churchId}/communities/${communityId}/keywords/${date}/keywords`
+        : `keywords/${date}/keywords`
+
+    const snapshot = await getDocs(collection(firestore, basePath))
+
+    const keywords = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }))
+
+    return NextResponse.json({
+      status: 200,
+      data: keywords,
+    })
+  } catch (error) {
+    console.error('키워드 목록 불러오기 오류:', error)
+    return NextResponse.json({ status: 500, message: '서버 오류가 발생했습니다.' })
+  }
+}
