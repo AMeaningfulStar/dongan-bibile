@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { useState } from 'react'
 import { twMerge } from 'tailwind-merge'
 
-import { getKeyWords, useBibleData } from '@/libs/swr/'
+import { getKeyWords } from '@/libs/swr/'
 
 import { URLCopy } from '@/components/Button'
 import { BibleSet, DatePick } from '@/components/Modal'
@@ -13,6 +13,7 @@ import { userCommuniteStore } from '@/stores'
 import { useAuthStore } from '@/stores/useAuthStore'
 
 import { firestore } from '@/libs/firebase'
+import { getBible } from '@/libs/swr/getBible'
 import HEARTFILLED_ICON from '@icon/heart_filled_icon.png'
 import HEARTOUTLINE_ICON from '@icon/heart_out_line_icon.png'
 import RECYCLEBIN_ICON from '@icon/recycle_bin_icon.png'
@@ -21,20 +22,24 @@ import { arrayRemove, arrayUnion, deleteDoc, doc, getDoc, setDoc, updateDoc } fr
 
 interface BiblePageProps {
   searchParams: {
-    datePick?: string
+    datePick: string
+    churchId?: string | null
+    communityId?: string | null
   }
 }
 
 export default function Bible({ searchParams }: BiblePageProps) {
-  const datePick = searchParams.datePick
-
+  const params = searchParams
+  const { datePick, churchId, communityId } = params
   const { user } = useAuthStore()
+
+  const { bible, isError, isLoading, mutate } = getBible({
+    datePick,
+    churchId: user && user.church ? user.church.id : churchId ?? null,
+    communityId: user && user.community ? user.community.id : communityId ?? null,
+  })
+
   const { userCommunite, setBibleReadingDates } = userCommuniteStore()
-  const { bibleData, isLoading, isError } = useBibleData(
-    user?.church?.id as string,
-    user?.community?.id as string,
-    datePick as string,
-  )
 
   const [isDatePickModal, setIsDatePickModal] = useState<boolean>(false)
   const [isSetModal, setIsSetModal] = useState<boolean>(false)
@@ -60,21 +65,21 @@ export default function Bible({ searchParams }: BiblePageProps) {
   }
 
   const BibleReadingRange = () => {
-    if (!bibleData || !bibleData.data || bibleData.data.length === 0) {
+    if (!bible || bible.length === 0) {
       return <div className="flex-grow text-caption-15-m">오늘 읽을 말씀은 없습니다</div>
     }
 
     return (
       <span className="flex-grow text-caption-16-b">
-        {bibleData.data.length === 1
-          ? `${bibleData.data[0].name} ${bibleData.data[0].chapter}장`
-          : `${bibleData.data[0].name} ${bibleData.data[0].chapter}장 - ${bibleData.data.at(-1)?.name} ${bibleData.data.at(-1)?.chapter}장`}
+        {bible.length === 1
+          ? `${bible[0].name} ${bible[0].chapter}장`
+          : `${bible[0].name} ${bible[0].chapter}장 - ${bible.at(-1)?.name} ${bible.at(-1)?.chapter}장`}
       </span>
     )
   }
 
   const BibleContent = () => {
-    if (!bibleData || !bibleData.data || bibleData.data.length === 0) {
+    if (!bible || bible.length === 0) {
       return (
         <div className="flex flex-grow items-center justify-center">
           <span className="text-caption-15-m">오늘 하나님과 동행하는 하루를 기대해봐요</span>
@@ -84,12 +89,12 @@ export default function Bible({ searchParams }: BiblePageProps) {
 
     return (
       <>
-        {bibleData.data.map((item, idx) => (
+        {bible.map((item, idx) => (
           <div key={idx} className="flex flex-col p-4">
             <div className="mb-4 text-caption-16-b">
               {item.name} {item.chapter}장
             </div>
-            {item.texts[user ? user.bible.type : 'easy_korean'].map((verse, verseIdx) => (
+            {item.texts[user ? user.bible.type : 'revised_korean'].map((verse, verseIdx) => (
               <div
                 key={verseIdx}
                 className={twMerge(
@@ -108,7 +113,7 @@ export default function Bible({ searchParams }: BiblePageProps) {
   }
 
   const BibleReadingButton = () => {
-    if (!bibleData || !bibleData.data || bibleData.data.length === 0) {
+    if (!bible || bible.length === 0) {
       return
     }
 
@@ -179,7 +184,7 @@ export default function Bible({ searchParams }: BiblePageProps) {
   }
 
   const BibleKeyword = () => {
-    if (!bibleData || !bibleData.data || bibleData.data.length === 0 || !user) {
+    if (!bible || bible.length === 0 || !user) {
       return
     }
 
