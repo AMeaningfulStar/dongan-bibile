@@ -6,6 +6,8 @@ const isProd = process.env.NODE_ENV === 'production' // 배포 버전에만 PWA 
 const pwaConfig = withPWA({
   dest: 'public',
   disable: !isProd,
+  skipWaiting: true,
+  register: true,
   runtimeCaching: [],
 })
 
