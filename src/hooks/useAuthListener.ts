@@ -37,7 +37,7 @@ export const useAuthListener = () => {
           bible: {
             type: baseUser?.bibleType,
             textSize: baseUser?.bibleTextSize,
-            readingDates: communityUser?.bibleReadingDates ?? [],
+            readingDates: baseUser?.bibleReadingDates ?? [],
           },
         }
 
@@ -59,6 +59,7 @@ export const useAuthListener = () => {
             gradeNum: communityUser?.gradeNum,
             classNum: communityUser?.classNum,
           }
+          userData.bible.readingDates = communityUser?.bibleReadingDates ?? []
 
           const seasonSnapshot = await getDocs(
             collection(firestore, 'churches', churchId, 'communities', communityId, 'bibleSeasons'),

@@ -9,14 +9,12 @@ import { BibleSet, DatePick } from '@/components/Modal'
 
 import { useAuthStore } from '@/stores/useAuthStore'
 
-import { useBible, useCreateKeyword, useDeleteKeyword, useKeywords, useLikeKeyword } from '@/hooks'
+import { useBible, useCreateKeyword, useDeleteKeyword, useKeywords, useLikeKeyword, useMarkBibleRead } from '@/hooks'
 
-import { firestore } from '@/libs/firebase'
 import HEARTFILLED_ICON from '@icon/heart_filled_icon.png'
 import HEARTOUTLINE_ICON from '@icon/heart_out_line_icon.png'
 import RECYCLEBIN_ICON from '@icon/recycle_bin_icon.png'
 import SET_ICON from '@icon/set_icon.png'
-import { arrayUnion, doc, updateDoc } from 'firebase/firestore'
 
 interface BiblePageProps {
   searchParams: {
@@ -29,7 +27,7 @@ interface BiblePageProps {
 export default function Bible({ searchParams }: BiblePageProps) {
   const params = searchParams
   const { datePick, churchId, communityId } = params
-  const { user } = useAuthStore()
+  const { user, setUser } = useAuthStore()
 
   const { bible, isError, isLoading } = useBible({
     datePick,
@@ -132,23 +130,32 @@ export default function Bible({ searchParams }: BiblePageProps) {
 
       try {
         setIsDataSetLoading(true)
-        const userDocRef = doc(
-          firestore,
-          'churches',
-          user.church?.id as string,
-          'communities',
-          user.community?.id as string,
-          'users',
-          user.uid,
-        )
+        const { markRead } = useMarkBibleRead()
 
-        await updateDoc(userDocRef, {
-          bibleReadingDates: arrayUnion(datePick), // 날짜를 배열에 추가
+        const res = await markRead({
+          datePick,
+          uid: user.uid,
+          churchId: user.church ? user.church.id : undefined,
+          communityId: user.community ? user.community.id : undefined,
         })
 
+        if (res.status !== 200) {
+          alert(res.message)
+          return
+        }
+
+        setUser({
+          ...user,
+          bible: {
+            ...user.bible,
+            readingDates: [...user.bible.readingDates, datePick as string],
+          },
+        })
+        alert(res.message)
         setIsDataSetLoading(false)
-      } catch (error) {
-        console.error('말씀 읽기 기록을 업데이트하는 중 오류 발생:', error)
+      } catch (error: any) {
+        alert(error.response?.data?.message || '오류 발생')
+        setIsDataSetLoading(false)
       }
     }
 
@@ -215,6 +222,7 @@ export default function Bible({ searchParams }: BiblePageProps) {
         setIsSetLoading(false)
       } catch (error: any) {
         alert(error.response?.data?.message || '오류 발생')
+        setIsSetLoading(false)
       }
     }
 
@@ -367,7 +375,7 @@ export default function Bible({ searchParams }: BiblePageProps) {
       <BibleReadingButton />
 
       {user && user.bible.readingDates.includes(datePick as string) && <BibleKeyword />}
-      <BibleKeyword />
+
       {/* 날짜 선택 모달 */}
       {isDatePickModal && <DatePick path="bible" setIsShow={setIsDatePickModal} />}
 

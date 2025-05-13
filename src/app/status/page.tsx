@@ -7,7 +7,7 @@ import { useState } from 'react'
 import { DatePick } from '@/components/Modal'
 import { ClassReadingStatus, GlobalReadingStatus } from '@/components/StatusPage'
 
-import { userInfoStore } from '@/stores'
+import { useAuthStore } from '@/stores/useAuthStore'
 
 interface StatusPageProps {
   searchParams: {
@@ -18,7 +18,7 @@ interface StatusPageProps {
 export default function Status({ searchParams }: StatusPageProps) {
   const datePick = searchParams.datePick || moment(new Date()).format('YYYY-MM-DD')
 
-  const { userInfo } = userInfoStore()
+  const { user } = useAuthStore()
   const [isModal, setIsModal] = useState<boolean>(false)
 
   const PickerButton = () => {
@@ -39,7 +39,7 @@ export default function Status({ searchParams }: StatusPageProps) {
     )
   }
 
-  if (!userInfo) {
+  if (!user) {
     return (
       <div className="flex h-full w-full flex-col items-center justify-center px-4">
         <div className="mb-2 text-caption-15-l">로그인 후 확인 가능합니다</div>
