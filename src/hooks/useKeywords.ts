@@ -1,3 +1,4 @@
+import { fetchKeywords } from '@/services/keywordService'
 import useSWR from 'swr'
 
 interface KeywordsResponse {
@@ -11,16 +12,14 @@ interface Keywords {
   likes: Array<string>
 }
 
-export function getKeyWords(churchId: string, communityId: string, datePick: string) {
-  const fetcher = (url: string) => fetch(url).then((res) => res.json())
-
+export const useKeywords = (params: Parameters<typeof fetchKeywords>[0]) => {
   const { data, error, isLoading, mutate } = useSWR<KeywordsResponse, Error>(
-    churchId && communityId && datePick ? `/api/bible/keywords/${churchId}/${communityId}/${datePick}` : null,
-    fetcher,
+    params.datePick ? ['/api/keywords', params] : null,
+    () => fetchKeywords(params),
   )
 
   return {
-    keywords: data,
+    keywords: data?.data ?? [],
     isLoading,
     isError: !!error,
     mutate,

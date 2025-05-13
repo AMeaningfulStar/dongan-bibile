@@ -3,11 +3,9 @@ import { persist } from 'zustand/middleware'
 
 import { userInfoStore } from './userInfoStore'
 
-import { UserCommunite } from '@/utils/type'
-
 type UserCommuniteStroe = {
-  userCommunite: UserCommunite | null
-  setUserCommunite: (userCommunite: UserCommunite) => void
+  userCommunite: any | null
+  setUserCommunite: (userCommunite: any) => void
   setBibleReadingDates: (newReadingDate: string) => void
 }
 
@@ -16,7 +14,7 @@ export const userCommuniteStore = create(
     (set, get) => ({
       userCommunite: null,
 
-      setUserCommunite: (userCommunite: UserCommunite) => set({ userCommunite }),
+      setUserCommunite: (userCommunite: any) => set({ userCommunite }),
 
       setBibleReadingDates: (newReadingDate: string) => {
         set((state: UserCommuniteStroe) => {

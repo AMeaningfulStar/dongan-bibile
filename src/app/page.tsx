@@ -61,9 +61,12 @@ export default function Main() {
           prev2Label={null}
           next2Label={null}
           view="month"
-          onChange={(event: any) =>
-            router.push(`/bible?datePick=${moment(event).format('YYYY-MM-DD')}`, { scroll: false })
-          }
+          onChange={(event: any) => {
+            const datePick = moment(event).format('YYYY-MM-DD')
+            const churchId = user?.church?.id ? `&churchId=${user.church.id}` : ''
+            const communityId = user?.community?.id ? `&communityId=${user.community.id}` : ''
+            router.push(`/bible?datePick=${datePick}${churchId}${communityId}`, { scroll: false })
+          }}
           tileClassName={({ date }) => {
             if (!selectedSeason) return null
 

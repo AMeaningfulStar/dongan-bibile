@@ -8,11 +8,10 @@ import { doc, getDoc } from 'firebase/firestore'
 import { userCommuniteStore } from './userCommuniteStroe'
 
 import { BibleTextSize, BibleType } from '@/utils/enum'
-import { UserCommunite, UserInfo } from '@/utils/type'
 
 type UserInfoStore = {
-  userInfo: UserInfo | null
-  setUserInfo: (userInfo: UserInfo) => void
+  userInfo: any | null
+  setUserInfo: (userInfo: any) => void
   setBibleType: (type: BibleType) => void
   setBibleTextSize: (size: BibleTextSize) => void
   logout: () => void
@@ -23,7 +22,7 @@ export const userInfoStore = create(
     (set, get) => ({
       userInfo: null,
 
-      setUserInfo: (userInfo: UserInfo) => set({ userInfo }),
+      setUserInfo: (userInfo: any) => set({ userInfo }),
 
       setBibleType: (type: BibleType) => {
         set((state: UserInfoStore) => {
@@ -73,7 +72,7 @@ export const initAuthListener = () => {
       // Firestore에서 사용자 정보 가져오기
       const userDoc = await getDoc(doc(firestore, 'users', firebaseUser.uid))
       if (userDoc.exists()) {
-        const userData = userDoc.data() as UserInfo
+        const userData = userDoc.data() as any
         userInfoStore.getState().setUserInfo({
           ...userData,
           uid: firebaseUser.uid,
@@ -92,7 +91,7 @@ export const initAuthListener = () => {
             ),
           )
           if (userCommuniteDoc.exists()) {
-            const userCommunite = userCommuniteDoc.data() as UserCommunite
+            const userCommunite = userCommuniteDoc.data() as any
 
             userCommuniteStore.getState().setUserCommunite(userCommunite)
           }

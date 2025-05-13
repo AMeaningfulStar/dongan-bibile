@@ -1,14 +1,14 @@
 'use client'
 
-import axios from 'axios'
 import Image from 'next/image'
 import { useState } from 'react'
 import { twMerge } from 'tailwind-merge'
 
-import { BibleTextSize, BibleType } from '@/utils/enum'
+import { BibleTextSize, BibleType } from '@/types/enums'
 
-import { userInfoStore } from '@/stores'
+import { useAuthStore } from '@/stores/useAuthStore'
 
+import { useUpdateUserSettings } from '@/hooks'
 import CLOSE_ICON from '@icon/close_icon.png'
 
 interface BibleSetProps {
@@ -25,22 +25,20 @@ export function BibleSet({ setIsShow }: BibleSetProps) {
     'text-xl': 20,
   }
 
-  const { userInfo, setBibleType, setBibleTextSize } = userInfoStore()
+  const { user } = useAuthStore()
+  const { updateSettings } = useUpdateUserSettings()
   const [textSizeIdx, setTextSizeIdx] = useState<number>(
-    textSizeOptions.indexOf(userInfo ? userInfo.bibleTextSize : BibleTextSize.BASE),
+    textSizeOptions.indexOf(user ? user.bible.textSize : BibleTextSize.BASE),
   )
 
   const updateBibleType = async (bibleType: BibleType) => {
-    if (!userInfo) {
+    if (!user) {
       alert('로그인 후 가능합니다')
       return
     }
-    try {
-      const response = await axios.post(`/api/user/bible-type/${userInfo?.uid}/${bibleType}`)
 
-      if (response.status) {
-        setBibleType(bibleType)
-      }
+    try {
+      await updateSettings({ bibleType: bibleType })
     } catch (error) {
       console.error('Error updating bibleType:', error)
       alert('성경 번역 변경 중 오류가 발생했습니다.')
@@ -48,12 +46,13 @@ export function BibleSet({ setIsShow }: BibleSetProps) {
   }
 
   const updateBibleTextSize = async (bibleTextSize: BibleTextSize) => {
-    try {
-      const response = await axios.post(`/api/user/bible-text-size/${userInfo?.uid}/${bibleTextSize}`)
+    if (!user) {
+      alert('로그인 후 가능합니다')
+      return
+    }
 
-      if (response.status) {
-        setBibleTextSize(bibleTextSize)
-      }
+    try {
+      await updateSettings({ bibleTextSize: bibleTextSize })
     } catch (error) {
       console.error('Error updating bibleType:', error)
       alert('성경 번역 변경 중 오류가 발생했습니다.')
@@ -63,7 +62,7 @@ export function BibleSet({ setIsShow }: BibleSetProps) {
   const increaseTextSize = async () => {
     const nextIndex = textSizeIdx + 1
 
-    if (!userInfo) {
+    if (!user) {
       alert('로그인 후 가능합니다')
       return
     }
@@ -77,7 +76,7 @@ export function BibleSet({ setIsShow }: BibleSetProps) {
   const decreaseTextSize = async () => {
     const prevIndex = textSizeIdx - 1
 
-    if (!userInfo) {
+    if (!user) {
       alert('로그인 후 가능합니다')
       return
     }
@@ -113,7 +112,7 @@ export function BibleSet({ setIsShow }: BibleSetProps) {
               -
             </button>
             <div className="flex h-9 w-20 items-center justify-center rounded-[10px] border border-gl-black-base">
-              {sizeMap[userInfo ? userInfo.bibleTextSize : BibleTextSize.BASE]}
+              {sizeMap[user ? user.bible.textSize : BibleTextSize.BASE]}
             </div>
             <button
               className="flex h-9 w-9 items-center justify-center rounded-[10px] border border-gl-black-base"
@@ -129,7 +128,7 @@ export function BibleSet({ setIsShow }: BibleSetProps) {
             <button
               className={twMerge(
                 'flex h-9 w-20 items-center justify-center rounded-[10px] border',
-                userInfo?.bibleType === BibleType.REVISED
+                user && user.bible.type === BibleType.REVISED
                   ? 'border-gl-green-base bg-gl-green-opacity-30 text-gl-green-base'
                   : 'border-gl-black-base ',
               )}
@@ -140,7 +139,7 @@ export function BibleSet({ setIsShow }: BibleSetProps) {
             <button
               className={twMerge(
                 'flex h-9 w-20 items-center justify-center rounded-[10px] border',
-                userInfo?.bibleType === BibleType.EASY
+                user && user.bible.type === BibleType.EASY
                   ? 'border-gl-green-base bg-gl-green-opacity-30 text-gl-green-base'
                   : 'border-gl-black-base ',
               )}
