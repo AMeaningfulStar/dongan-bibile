@@ -12,11 +12,15 @@ import { useAuthStore } from '@/stores/useAuthStore'
 interface StatusPageProps {
   searchParams: {
     datePick?: string
+    churchId?: string | null
+    communityId?: string | null
   }
 }
 
 export default function Status({ searchParams }: StatusPageProps) {
+  const params = searchParams
   const datePick = searchParams.datePick || moment(new Date()).format('YYYY-MM-DD')
+  const { churchId, communityId } = params
 
   const { user } = useAuthStore()
   const [isModal, setIsModal] = useState<boolean>(false)
