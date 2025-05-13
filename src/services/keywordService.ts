@@ -27,17 +27,23 @@ export const createKeyword = async ({
 export const deleteKeyword = async ({
   datePick,
   keywordId,
+  uid,
+  role,
   churchId,
   communityId,
 }: {
   datePick: string
   keywordId: string
+  uid: string
+  role: string // 'admin', 'department_admin', etc
   churchId?: string
   communityId?: string
 }) => {
   const response = await axios.delete(`/api/keywords/${keywordId}`, {
     params: {
       datePick,
+      uid,
+      role,
       churchId,
       communityId,
     },
