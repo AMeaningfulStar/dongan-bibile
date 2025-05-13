@@ -14,28 +14,29 @@ export interface ProgressResponse {
   }
 }
 
+interface UseProgressParams {
+  uid: string
+  churchId?: string | null
+  communityId?: string | null
+  seasonId?: string | null
+}
+
 const fetcher = (url: string) => axios.get(url).then((res) => res.data)
 
-export function getProgress({
-  uid,
-  churchId,
-  communityId,
-  seasonId,
-}: {
-  uid: string
-  churchId: string | null
-  communityId: string | null
-  seasonId: string | null
-}) {
-  const { data, error, isLoading, mutate } = useSWR<ProgressResponse, Error>(
-    uid
-      ? `/api/progress?uid=${uid}${churchId ? `&churchId=${churchId}` : ''}${communityId ? `&communityId=${communityId}` : ''}${seasonId ? `&seasonId=${seasonId}` : ''}`
-      : null,
+export const useProgress = ({ uid, churchId, communityId, seasonId }: UseProgressParams) => {
+  const query = new URLSearchParams()
+  if (uid) query.append('uid', uid)
+  if (churchId) query.append('churchId', churchId)
+  if (communityId) query.append('communityId', communityId)
+  if (seasonId) query.append('seasonId', seasonId)
+
+  const { data, error, isLoading, mutate } = useSWR<ProgressResponse>(
+    uid ? `/api/progress?${query.toString()}` : null,
     fetcher,
   )
 
   return {
-    progress: data?.status == 200 ? data.data : null,
+    progress: data?.status === 200 ? data.data : null,
     isLoading,
     isError: !!error,
     mutate,

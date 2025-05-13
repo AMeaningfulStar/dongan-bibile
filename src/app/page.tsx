@@ -17,10 +17,10 @@ import PREV_ARROW_ICON from '@icon/prev_arrow_icon.png'
 
 import { BibleStreakBadge } from '@/components/Badges'
 import { MyProgressBar, TotalProgressBar } from '@/components/Progress'
-import { getProgress } from '@/libs/swr/getProgress'
 import { useSeasonStore } from '@/stores/useSeasonStore'
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useProgress } from '@/hooks'
 
 export default function Main() {
   const { user } = useAuthStore()
@@ -28,7 +28,7 @@ export default function Main() {
 
   const { seasons, selectedSeason, selectSeason } = useSeasonStore()
 
-  const { progress } = getProgress({
+  const { progress } = useProgress({
     uid: user?.uid || '',
     churchId: user?.church?.id ?? null,
     communityId: user?.community?.id ?? null,
