@@ -9,6 +9,7 @@ import Calendar from 'react-calendar'
 import 'react-calendar/dist/Calendar.css'
 
 import { useAuthStore } from '@/stores/useAuthStore'
+import { useSeasonStore } from '@/stores/useSeasonStore'
 
 import LIGHT_ICON from '@icon/light_icon.png'
 import LINK_ARROW_ICON from '@icon/link_arrow_icon.png'
@@ -17,9 +18,8 @@ import PREV_ARROW_ICON from '@icon/prev_arrow_icon.png'
 
 import { BibleStreakBadge } from '@/components/Badges'
 import { MyProgressBar, TotalProgressBar } from '@/components/Progress'
-import { useSeasonStore } from '@/stores/useSeasonStore'
-
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+
 import { useProgress } from '@/hooks'
 
 export default function Main() {
