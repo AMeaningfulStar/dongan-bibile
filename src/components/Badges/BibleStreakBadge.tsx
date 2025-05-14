@@ -31,7 +31,7 @@ export function BibleStreakBadge() {
   return (
     <div className="absolute right-5 top-3 flex items-center gap-x-0.5 rounded-full bg-gl-green-opacity-30 px-3 py-1">
       <Image alt="icon" src={FIRE_ICON} width={16} height={16} style={{ width: 'auto', height: 'auto' }} />
-      <span className="text-caption-13-l">연속{user.bible.readingDates.length}일째 성공</span>
+      <span className="text-caption-13-l">총 {user.bible.readingDates.length}일 통독 완료</span>
     </div>
   )
 }
