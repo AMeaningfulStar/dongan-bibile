@@ -96,6 +96,7 @@ export function DatePick({ path, setIsShow }: DatePickProps) {
             const churchId = user?.church?.id ? `&churchId=${user.church.id}` : ''
             const communityId = user?.community?.id ? `&communityId=${user.community.id}` : ''
             router.push(`/${path}?datePick=${datePick}${churchId}${communityId}`, { scroll: false })
+            setIsShow(false)
           }}
           tileClassName={({ date }) => {
             if (!selectedSeason) return null
