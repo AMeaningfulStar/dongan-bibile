@@ -2,63 +2,33 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { twMerge } from 'tailwind-merge'
 
-import { handleLogin } from '@/utils'
+import { useLogin } from '@/hooks'
 
 interface LoginType {
   id: string
   password: string
 }
 
-interface InputErrorType {
-  idError: boolean
-  passwordError: boolean
-}
-
 export default function Login() {
   // 입력 값 state
-  const [login, setLogin] = useState<LoginType>({
+  const [loginValue, setLoginValue] = useState<LoginType>({
     id: '',
     password: '',
   })
-  // 입력 값이 오류 일 시, error 관리 state
-  const [inputError, setInputError] = useState<InputErrorType>({
-    idError: false,
-    passwordError: false,
-  })
+
+  const { login } = useLogin()
+
   // 에러 메세지 관리 state
   const [errorMessage, setErrorMessage] = useState<string>('')
   const router = useRouter()
 
   const handleOnSunbmit = async () => {
-    // FIXME: 추후 프로젝트의 진행 방향에 따라 수정해야함
-    const emailRegEx = /^[A-Za-z0-9]([-_.]?[A-Za-z0-9])*@[A-Za-z0-9]([-_.]?[A-Za-z0-9])*\.[A-Za-z]{2,3}$/i
-    const useId = `${login.id}@dongan.com`
-
-    if (!emailRegEx.test(useId)) {
-      setErrorMessage('올바른 아이디 형식이 아닙니다')
-      setInputError((prev) => ({ ...prev, idError: true }))
-      setTimeout(() => setErrorMessage(''), 3000)
-      return
-    }
-
-    if (login.password.length <= 5) {
-      setErrorMessage('올바른 비밀번호 형식이 아닙니다')
-      setInputError((prev) => ({ ...prev, passwordError: true }))
-      setTimeout(() => setErrorMessage(''), 3000)
-      return
-    }
-
     try {
-      await handleLogin(useId, login.password)
-
+      await login({ id: loginValue.id, password: loginValue.password })
       router.push('/', { scroll: false })
-    } catch (error) {
-      console.error('로그인 중 오류 발생:', error)
-
-      setErrorMessage('로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요')
-      setTimeout(() => setErrorMessage(''), 3000)
+    } catch (e: any) {
+      setErrorMessage(e.message)
     }
   }
 
@@ -73,11 +43,8 @@ export default function Login() {
           <input
             id="id"
             type="text"
-            className={twMerge(
-              ' w-full rounded border p-2 outline-none',
-              inputError.idError ? 'border-gl-red-base' : 'border-gl-grayscale-base focus:border-gl-grayscale-200',
-            )}
-            onChange={(event) => setLogin((prev: LoginType) => ({ ...prev, id: event.target.value }))}
+            className="w-full rounded border border-gl-grayscale-base p-2 outline-none focus:border-gl-grayscale-200"
+            onChange={(event) => setLoginValue((prev: LoginType) => ({ ...prev, id: event.target.value }))}
           />
         </div>
         <div className="flex flex-col gap-y-2">
@@ -88,7 +55,7 @@ export default function Login() {
             id="password"
             type="password"
             className="w-full rounded border border-gl-grayscale-base p-2 outline-none focus:border-gl-grayscale-200"
-            onChange={(event) => setLogin((prev: LoginType) => ({ ...prev, password: event.target.value }))}
+            onChange={(event) => setLoginValue((prev: LoginType) => ({ ...prev, password: event.target.value }))}
           />
         </div>
         <div className="h-5">

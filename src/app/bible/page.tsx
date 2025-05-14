@@ -4,36 +4,36 @@ import Image from 'next/image'
 import { useState } from 'react'
 import { twMerge } from 'tailwind-merge'
 
-import { getKeyWords, useBibleData } from '@/libs/swr/'
-
 import { URLCopy } from '@/components/Button'
 import { BibleSet, DatePick } from '@/components/Modal'
 
-import { userCommuniteStore, userInfoStore } from '@/stores'
+import { useAuthStore } from '@/stores/useAuthStore'
 
-import { firestore } from '@/libs/firebase'
+import { useBible, useCreateKeyword, useDeleteKeyword, useKeywords, useLikeKeyword, useMarkBibleRead } from '@/hooks'
+
 import HEARTFILLED_ICON from '@icon/heart_filled_icon.png'
 import HEARTOUTLINE_ICON from '@icon/heart_out_line_icon.png'
 import RECYCLEBIN_ICON from '@icon/recycle_bin_icon.png'
 import SET_ICON from '@icon/set_icon.png'
-import { arrayRemove, arrayUnion, deleteDoc, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
 
 interface BiblePageProps {
   searchParams: {
-    datePick?: string
+    datePick: string
+    churchId?: string | null
+    communityId?: string | null
   }
 }
 
 export default function Bible({ searchParams }: BiblePageProps) {
-  const datePick = searchParams.datePick
+  const params = searchParams
+  const { datePick, churchId, communityId } = params
+  const { user, setUser } = useAuthStore()
 
-  const { userInfo } = userInfoStore()
-  const { userCommunite, setBibleReadingDates } = userCommuniteStore()
-  const { bibleData, isLoading, isError } = useBibleData(
-    userInfo?.churchId as string,
-    userInfo?.communityId as string,
-    datePick as string,
-  )
+  const { bible, isError, isLoading } = useBible({
+    datePick,
+    churchId: user && user.church ? user.church.id : churchId ?? undefined,
+    communityId: user && user.community ? user.community.id : communityId ?? undefined,
+  })
 
   const [isDatePickModal, setIsDatePickModal] = useState<boolean>(false)
   const [isSetModal, setIsSetModal] = useState<boolean>(false)
@@ -59,21 +59,21 @@ export default function Bible({ searchParams }: BiblePageProps) {
   }
 
   const BibleReadingRange = () => {
-    if (!bibleData || !bibleData.data || bibleData.data.length === 0) {
+    if (!bible || bible.length === 0) {
       return <div className="flex-grow text-caption-15-m">오늘 읽을 말씀은 없습니다</div>
     }
 
     return (
       <span className="flex-grow text-caption-16-b">
-        {bibleData.data.length === 1
-          ? `${bibleData.data[0].name} ${bibleData.data[0].chapter}장`
-          : `${bibleData.data[0].name} ${bibleData.data[0].chapter}장 - ${bibleData.data.at(-1)?.name} ${bibleData.data.at(-1)?.chapter}장`}
+        {bible.length === 1
+          ? `${bible[0].name} ${bible[0].chapter}장`
+          : `${bible[0].name} ${bible[0].chapter}장 - ${bible.at(-1)?.name} ${bible.at(-1)?.chapter}장`}
       </span>
     )
   }
 
   const BibleContent = () => {
-    if (!bibleData || !bibleData.data || bibleData.data.length === 0) {
+    if (!bible || bible.length === 0) {
       return (
         <div className="flex flex-grow items-center justify-center">
           <span className="text-caption-15-m">오늘 하나님과 동행하는 하루를 기대해봐요</span>
@@ -83,17 +83,17 @@ export default function Bible({ searchParams }: BiblePageProps) {
 
     return (
       <>
-        {bibleData.data.map((item, idx) => (
+        {bible.map((item, idx) => (
           <div key={idx} className="flex flex-col p-4">
             <div className="mb-4 text-caption-16-b">
               {item.name} {item.chapter}장
             </div>
-            {item.texts[userInfo ? userInfo.bibleType : 'easy_korean'].map((verse, verseIdx) => (
+            {item.texts[user ? user.bible.type : 'revised_korean'].map((verse, verseIdx) => (
               <div
                 key={verseIdx}
                 className={twMerge(
                   'mb-1 flex w-full gap-x-2 whitespace-pre-line font-normal leading-none',
-                  userInfo ? userInfo.bibleTextSize : 'text-base',
+                  user ? user.bible.textSize : 'text-base',
                 )}
               >
                 <span>{verse.verse}</span>
@@ -107,12 +107,12 @@ export default function Bible({ searchParams }: BiblePageProps) {
   }
 
   const BibleReadingButton = () => {
-    if (!bibleData || !bibleData.data || bibleData.data.length === 0) {
+    if (!bible || bible.length === 0) {
       return
     }
 
     const handleBibleReading = async () => {
-      if (!userInfo) {
+      if (!user) {
         alert('로그인 후 가능합니다')
         return
       }
@@ -130,25 +130,32 @@ export default function Bible({ searchParams }: BiblePageProps) {
 
       try {
         setIsDataSetLoading(true)
-        const userDocRef = doc(
-          firestore,
-          'churches',
-          userInfo.churchId as string,
-          'communities',
-          userInfo.communityId as string,
-          'users',
-          userInfo.uid,
-        )
+        const { markRead } = useMarkBibleRead()
 
-        await updateDoc(userDocRef, {
-          bibleReadingDates: arrayUnion(datePick), // 날짜를 배열에 추가
+        const res = await markRead({
+          datePick,
+          uid: user.uid,
+          churchId: user.church ? user.church.id : undefined,
+          communityId: user.community ? user.community.id : undefined,
         })
 
-        // Zustand 상태 업데이트
-        setBibleReadingDates(datePick as string)
+        if (res.status !== 200) {
+          alert(res.message)
+          return
+        }
+
+        setUser({
+          ...user,
+          bible: {
+            ...user.bible,
+            readingDates: [...user.bible.readingDates, datePick as string],
+          },
+        })
+        alert(res.message)
         setIsDataSetLoading(false)
-      } catch (error) {
-        console.error('말씀 읽기 기록을 업데이트하는 중 오류 발생:', error)
+      } catch (error: any) {
+        alert(error.response?.data?.message || '오류 발생')
+        setIsDataSetLoading(false)
       }
     }
 
@@ -156,9 +163,9 @@ export default function Bible({ searchParams }: BiblePageProps) {
       <button
         className={twMerge(
           'mb-10 mt-6 flex h-9 w-44 items-center justify-center rounded-full ',
-          userCommunite?.bibleReadingDates.includes(datePick as string) ? 'bg-gl-green-opacity-30' : 'bg-gl-green-base',
+          user && user.bible.readingDates.includes(datePick as string) ? 'bg-gl-green-opacity-30' : 'bg-gl-green-base',
         )}
-        disabled={userCommunite?.bibleReadingDates.includes(datePick as string)}
+        disabled={user?.bible.readingDates.includes(datePick as string)}
         onClick={handleBibleReading}
       >
         {isDataSetLoading ? (
@@ -178,122 +185,95 @@ export default function Bible({ searchParams }: BiblePageProps) {
   }
 
   const BibleKeyword = () => {
-    if (!bibleData || !bibleData.data || bibleData.data.length === 0 || !userInfo) {
+    if (!bible || bible.length === 0 || !user) {
       return
     }
 
-    const { keywords, isLoading, isError, mutate } = getKeyWords(
-      userInfo?.churchId as string,
-      userInfo?.communityId as string,
-      datePick as string,
-    )
+    const { keywords, isLoading, isError, mutate } = useKeywords({
+      datePick,
+      uid: user.uid,
+      churchId: user.church ? user.church.id : undefined,
+      communityId: user.community ? user.community.id : undefined,
+    })
+
     const [inputValue, setInputValue] = useState<string>('')
     const [isSetLoading, setIsSetLoading] = useState<boolean>(false)
 
     const handleCreateKeyword = async () => {
-      if (inputValue.length === 0) return
-
       try {
         setIsSetLoading(true)
-        const keywordDocRef = doc(
-          firestore,
-          'churches',
-          userInfo.churchId as string,
-          'communities',
-          userInfo.communityId as string,
-          'keywords',
-          datePick as string,
-          'keywords',
-          inputValue,
-        )
+        const createKeyword = useCreateKeyword()
 
-        const keywordDoc = await getDoc(keywordDocRef)
+        const res = await createKeyword({
+          datePick,
+          keyword: inputValue,
+          uid: user.uid,
+          churchId: user.church ? user.church.id : undefined,
+          communityId: user.community ? user.community.id : undefined,
+        })
 
-        if (keywordDoc.exists()) {
-          alert('이미 존재하는 키워드입니다')
-        } else {
-          await setDoc(keywordDocRef, {
-            createdBy: userInfo?.uid,
-            likes: [userInfo?.uid], // 첫 번째 좋아요 누른 사용자 UID
-          })
-
-          mutate()
-          alert('키워드를 등록했습니다')
-          setInputValue('')
+        if (res.status !== 200) {
+          alert(res.message)
+          return
         }
+
+        alert(res.message)
+        mutate()
         setIsSetLoading(false)
-      } catch (error) {
-        alert('키워드 등록에 실패했습니다')
-        console.error('Failed to register keyword:', error)
+      } catch (error: any) {
+        alert(error.response?.data?.message || '오류 발생')
+        setIsSetLoading(false)
       }
     }
 
     const handleKeywordDelete = async (keyword: string) => {
       const confirmed = confirm('정말 삭제하실건가요?')
 
-      if (!confirmed || !userInfo) return
+      if (!confirmed || !user) return
 
       try {
-        const keywordDocRef = doc(
-          firestore,
-          'churches',
-          userInfo.churchId as string,
-          'communities',
-          userInfo.communityId as string,
-          'keywords',
-          datePick as string,
-          'keywords',
-          keyword,
-        )
+        const deleteKeyword = useDeleteKeyword()
 
-        await deleteDoc(keywordDocRef)
+        const res = await deleteKeyword(keyword, {
+          datePick,
+          uid: user.uid,
+          role: user.role,
+          churchId: user.church ? user.church.id : undefined,
+          communityId: user.community ? user.community.id : undefined,
+        })
 
-        alert('키워드를 삭제했습니다')
+        if (res.status !== 200) {
+          alert(res.message)
+          return
+        }
+
+        alert(res.message)
         mutate()
-      } catch (error) {
-        alert('키워드 삭제에 실패했습니다')
-        console.error('Failed to delete keyword:', error)
+      } catch (error: any) {
+        alert(error.response?.data?.message || '오류 발생')
       }
     }
 
-    const handleKeywordLike = async (createdBy: string, keyword: string) => {
-      if (userInfo?.uid === createdBy) {
-        await handleKeywordDelete(keyword)
-        return
-      }
-
+    const handleKeywordLike = async (keyword: string) => {
       try {
-        const keywordDocRef = doc(
-          firestore,
-          'churches',
-          userInfo.churchId as string,
-          'communities',
-          userInfo.communityId as string,
-          'keywords',
-          datePick as string,
-          'keywords',
-          keyword,
-        )
-        const keywordDoc = await getDoc(keywordDocRef)
+        const likeKeyword = useLikeKeyword()
 
-        if (keywordDoc.exists()) {
-          if ((keywordDoc.data().likes as Array<string>).includes(userInfo?.uid as string)) {
-            await updateDoc(keywordDocRef, {
-              likes: arrayRemove(userInfo?.uid as string), // 날짜를 배열에 추가
-            })
+        const ref = await likeKeyword(keyword, {
+          datePick,
+          uid: user.uid,
+          churchId: user.church ? user.church.id : undefined,
+          communityId: user.community ? user.community.id : undefined,
+        })
 
-            mutate()
-          } else {
-            await updateDoc(keywordDocRef, {
-              likes: arrayUnion(userInfo?.uid as string), // 날짜를 배열에 추가
-            })
-
-            mutate()
-          }
+        if (ref.status !== 200) {
+          alert(ref.message)
+          return
         }
-      } catch (error) {
-        alert('공감에 실패했습니다')
-        console.error('Failed to like leyword:', error)
+
+        alert(ref.message)
+        mutate()
+      } catch (error: any) {
+        alert(error.response?.data?.message || '오류 발생')
       }
     }
 
@@ -331,12 +311,12 @@ export default function Bible({ searchParams }: BiblePageProps) {
             입력
           </button>
         </div>
-        {(keywords?.data || []).map((item, idx) => (
+        {(keywords ?? []).map((item, idx) => (
           <div key={idx} className="flex h-14 items-center gap-x-4 border-b border-gl-grayscale-base px-7">
             <div className="flex-grow"># {item.id}</div>
             <div className="flex items-center gap-x-0.5">
-              <button onClick={async () => await handleKeywordLike(item.createdBy, item.id)}>
-                {userInfo && item.likes.includes(userInfo.uid) ? (
+              <button onClick={async () => await handleKeywordLike(item.id)}>
+                {user && item.likes.includes(user.uid) ? (
                   <Image alt="icon" src={HEARTFILLED_ICON} width={25} style={{ width: 'auto', height: 'auto' }} />
                 ) : (
                   <Image alt="icon" src={HEARTOUTLINE_ICON} width={25} style={{ width: 'auto', height: 'auto' }} />
@@ -344,7 +324,7 @@ export default function Bible({ searchParams }: BiblePageProps) {
               </button>
               <div className="w-6 text-center text-caption-14-l">{item.likes.length}</div>
             </div>
-            {userInfo && item.createdBy === userInfo.uid && (
+            {user && item.createdBy === user.uid && (
               <button onClick={async () => await handleKeywordDelete(item.id)}>
                 <Image alt="icon" src={RECYCLEBIN_ICON} width={22} style={{ width: 'auto', height: 'auto' }} />
               </button>
@@ -394,7 +374,7 @@ export default function Bible({ searchParams }: BiblePageProps) {
       <BibleContent />
       <BibleReadingButton />
 
-      {userCommunite && userCommunite.bibleReadingDates.includes(datePick as string) && <BibleKeyword />}
+      {user && user.bible.readingDates.includes(datePick as string) && <BibleKeyword />}
 
       {/* 날짜 선택 모달 */}
       {isDatePickModal && <DatePick path="bible" setIsShow={setIsDatePickModal} />}

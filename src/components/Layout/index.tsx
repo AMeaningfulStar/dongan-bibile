@@ -7,22 +7,22 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { twMerge } from 'tailwind-merge'
 
-import { initAuthListener, userInfoStore } from '@/stores'
+import { useAuthStore } from '@/stores/useAuthStore'
+
+import { useAuthListener, useLogout } from '@/hooks'
 
 import TRAFFIC_LIGHT_ICON from '@icon/traffic_light_icon.png'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [isShow, setIsShow] = useState<boolean>(false)
   const pathName = usePathname()
-  const { userInfo } = userInfoStore()
+  const { user } = useAuthStore()
 
-  useEffect(() => {
-    initAuthListener()
-  }, [])
+  useAuthListener()
 
   useEffect(() => {
     setIsShow(false)
-  }, [pathName, userInfo])
+  }, [pathName, user])
 
   const pageName = () => {
     switch (pathName) {
@@ -97,7 +97,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
 export function SideBar() {
   const pathname = usePathname()
-  const { userInfo, logout } = userInfoStore()
+  const { user } = useAuthStore()
+  const { logout } = useLogout()
 
   const handleSidebarClick = (event: React.MouseEvent) => {
     event.stopPropagation()
@@ -109,8 +110,8 @@ export function SideBar() {
       onClick={handleSidebarClick}
     >
       <div className="mb-2.5 flex items-center gap-x-1 pl-6">
-        {userInfo ? (
-          <span>{userInfo.name}님, 오늘도 청신호 켜기!</span>
+        {user ? (
+          <span>{user.name}님, 오늘도 청신호 켜기!</span>
         ) : (
           <div>
             <Link href={'/login'} className="underline">
@@ -134,7 +135,7 @@ export function SideBar() {
           >
             읽기 현황
           </Link>
-          {userInfo && userInfo.role !== 'user' && (
+          {user && user.role !== 'user' && (
             <Link
               href={'/admin'}
               className={twMerge(pathname === '/admin' ? 'text-gl-black-base' : 'text-gl-grayscale-100')}
@@ -145,7 +146,7 @@ export function SideBar() {
         </div>
         <div className="mb-40 flex flex-col items-center gap-y-7 text-navigation-14-l text-gl-grayscale-100">
           <span>ver 3.0.0</span>
-          {userInfo ? (
+          {user ? (
             <button onClick={logout}>
               <span className="underline">로그아웃</span>
             </button>
