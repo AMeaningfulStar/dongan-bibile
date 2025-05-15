@@ -1,15 +1,11 @@
 import axios from 'axios'
 import useSWR from 'swr'
 
-export interface Church {
-  id: string
-  name: string
-  createdAt?: string
-}
+import { ChurchType } from '@/types'
 
 interface ChurchResponse {
   status: number
-  data: Church[]
+  data: ChurchType[]
 }
 
 const fetcher = (url: string) => axios.get(url).then((res) => res.data)
