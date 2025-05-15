@@ -81,70 +81,106 @@ export default function Admin_Churches() {
 
   return (
     <div className="flex flex-grow flex-col items-center">
-      <div className="w-full max-w-xl px-4 py-8">
-        <div className="mb-6 flex w-full items-center justify-between">
-          <h2 className="text-caption-24-b">⛪ 교회 등록</h2>
-          <Link
-            href={'/admin'}
-            className="flex items-center justify-center rounded bg-gl-grayscale-200 px-4 py-2 text-caption-13-l text-gl-white-base"
-          >
-            뒤로
-          </Link>
-        </div>
+      <Link
+        href={'/admin'}
+        className="fixed right-3 top-3 z-10 flex items-center justify-center rounded bg-gl-grayscale-200 px-4 py-2 text-caption-13-l text-gl-white-base"
+      >
+        뒤로
+      </Link>
+      <div className="w-full max-w-xl px-4 py-6">
         <div className="mb-8 rounded-xl border border-gl-grayscale-200 px-3 py-4">
           <div className="mb-4">
             <label className="mb-2 block text-caption-16-sb">교회 이름</label>
-            <input
+            <Input
               type="text"
-              value={churchName}
-              onChange={(e) => setChurchName(e.target.value)}
-              className="w-full rounded border p-2"
-              placeholder="예: 동안교회"
+              placeholder="교회 이름을 입력해주세요"
+              value={church.name}
+              onChange={(e) => setChurche({ ...church, name: e.target.value })}
+              className="w-full outline-none placeholder:text-caption-14-l"
             />
           </div>
 
           <div className="mb-4">
             <label className="mb-2 block text-caption-16-sb">교회 지역/설명 (선택)</label>
-            <input
+            <Input
               type="text"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              className="w-full rounded border p-2"
-              placeholder="예: 서울 동대문구, 본당 중심"
+              placeholder="교회 지역 및 설명을 입력해주세요"
+              value={church.location}
+              onChange={(e) => setChurche({ ...church, location: e.target.value })}
+              className="w-full outline-none placeholder:text-caption-14-l"
             />
           </div>
-
-          <button
-            onClick={handleRegister}
-            disabled={loading}
-            className="w-full rounded-lg bg-gl-green-opacity-50 py-3 text-caption-15-l text-gl-white-base"
-          >
-            {loading ? (editingChurchId ? '수정 중...' : '등록 중...') : editingChurchId ? '수정하기' : '교회 등록하기'}
-          </button>
+          {isUpdated ? (
+            <>
+              <button
+                onClick={handleRegister}
+                disabled={updateIsLoading}
+                className="mb-2 w-full rounded-lg bg-gl-green-opacity-50 py-3 text-caption-15-l text-gl-white-base"
+              >
+                {updateIsLoading ? '수정 중...' : '수정하기'}
+              </button>
+              <button
+                onClick={() => {
+                  setIsUpdated(false)
+                  setChurche({ id: '', name: '', location: '', createdAt: Timestamp.now() })
+                }}
+                disabled={updateIsLoading}
+                className="w-full rounded-lg bg-gl-grayscale-base py-3 text-caption-15-l text-gl-green-opacity-50"
+              >
+                취소하기
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={handleRegister}
+              disabled={createIsLoading}
+              className="w-full rounded-lg bg-gl-green-opacity-50 py-3 text-caption-15-l text-gl-white-base"
+            >
+              {createIsLoading ? '등록 중...' : '교회 등록하기'}
+            </button>
+          )}
         </div>
 
-        <div className="mb-5 text-caption-16-b">📋 등록된 교회 목록</div>
-        <div className="flex flex-col gap-y-4">
-          {churches.map((church) => (
-            <div key={church.id} className="flex flex-col gap-y-1 rounded-xl border border-gl-green-opacity-50 p-4">
-              <div className="text-caption-16-sb">{church.name}</div>
-              <div className="text-caption-14-l text-gl-grayscale-100">{church.location}</div>
-              <div className="mt-4 grid w-full grid-cols-2 gap-x-4">
-                <button
-                  onClick={() => handleEdit(church)}
-                  className="border-gl-blue-base text-gl-blue-base rounded border bg-gl-white-base py-2"
-                >
-                  수정하기
-                </button>
-                <button
-                  onClick={() => handleDelete(church.id)}
-                  className="rounded border border-gl-red-base bg-gl-white-base py-2 text-gl-red-base"
-                >
-                  삭제하기
-                </button>
-              </div>
+        <div className="mb-3 text-caption-16-b">등록된 교회 목록</div>
+        <div className="h-full w-full">
+          {getIsLoading ? (
+            <div className="my-5 flex h-full w-full items-center justify-center">
+              <svg fill="none" className="h-7 w-7 animate-spin" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  clipRule="evenodd"
+                  d="M15.165 8.53a.5.5 0 01-.404.58A7 7 0 1023 16a.5.5 0 011 0 8 8 0 11-9.416-7.874.5.5 0 01.58.404z"
+                  fill="currentColor"
+                  fillRule="evenodd"
+                />
+              </svg>
+              <p className="text-caption-18-sb">등록된 교회 정보 불러오는 중...</p>
             </div>
-          ))}
+          ) : (
+            <Accordion type="single" collapsible className="w-full">
+              {churches.map((church) => (
+                <AccordionItem key={church.id} value={`item-${church.id}`}>
+                  <AccordionTrigger className="text-caption-16-sb">{church.name}</AccordionTrigger>
+                  <AccordionContent>
+                    <div className="text-caption-14-l text-gl-grayscale-100">{church.location}</div>
+                    <div className="mt-4 grid w-full grid-cols-2 gap-x-2">
+                      <button
+                        onClick={() => handleEdit(church)}
+                        className="rounded border border-gl-blue-base bg-gl-white-base py-1.5 text-gl-blue-base"
+                      >
+                        수정하기
+                      </button>
+                      <button
+                        onClick={() => handleDelete(church.id)}
+                        className="rounded border border-gl-red-base bg-gl-white-base py-1.5 text-gl-red-base"
+                      >
+                        삭제하기
+                      </button>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          )}
         </div>
       </div>
     </div>
