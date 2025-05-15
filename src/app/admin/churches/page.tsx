@@ -1,11 +1,10 @@
 'use client'
 
-import { firestore } from '@/libs/firebase'
-import { deleteDoc, doc, Timestamp } from 'firebase/firestore'
+import { Timestamp } from 'firebase/firestore'
 import Link from 'next/link'
 import { useState } from 'react'
 
-import { useChurches, useCreateChurch, useUpdateChurch } from '@/hooks'
+import { useChurches, useCreateChurch, useDeleteChurch, useUpdateChurch } from '@/hooks'
 
 import { ChurchType } from '@/types'
 
@@ -16,8 +15,8 @@ export default function Admin_Churches() {
   const { churches, isLoading: getIsLoading } = useChurches()
   const { createChurch, isLoading: createIsLoading, error: createError } = useCreateChurch()
   const { updateChurch, isLoading: updateIsLoading, error: updateError } = useUpdateChurch()
+  const { deleteChurchById, error: deleteError } = useDeleteChurch()
 
-  const [loading, setLoading] = useState<boolean>(false)
   const [isUpdated, setIsUpdated] = useState<boolean>(false)
   const [church, setChurche] = useState<ChurchType>({
     id: '',
@@ -32,7 +31,6 @@ export default function Admin_Churches() {
       return
     }
 
-    setLoading(true)
     try {
       if (isUpdated) {
         const update_res = await updateChurch('church_abc123', {
@@ -58,7 +56,7 @@ export default function Admin_Churches() {
 
       setChurche({ id: '', name: '', location: '', createdAt: Timestamp.now() })
     } catch (error) {
-      console.error('오류 발생:', error)
+      console.error('오류 발생:', createError || updateError)
       alert('처리 중 오류가 발생했어요 😢')
     }
   }
@@ -72,11 +70,13 @@ export default function Admin_Churches() {
     const confirm = window.confirm('정말 이 교회를 삭제하시겠어요?')
     if (!confirm) return
     try {
-      await deleteDoc(doc(firestore, 'churches', churchId))
-      alert('교회가 삭제되었습니다.')
-      fetchChurches()
+      const success = await deleteChurchById(churchId)
+
+      if (success) {
+        alert('삭제 완료!')
+      }
     } catch (error) {
-      console.error('삭제 실패:', error)
+      console.error('오류 발생:', deleteError)
       alert('삭제 중 오류가 발생했어요 😢')
     }
   }
