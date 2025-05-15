@@ -1,69 +1,71 @@
 'use client'
 
 import { firestore } from '@/libs/firebase'
-import { addDoc, collection, deleteDoc, doc, getDocs, Timestamp, updateDoc } from 'firebase/firestore'
+import { deleteDoc, doc, Timestamp } from 'firebase/firestore'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
-interface Church {
-  id: string
-  name: string
-  location?: string
-  createdAt?: Timestamp
-}
+import { useChurches, useCreateChurch, useUpdateChurch } from '@/hooks'
+
+import { ChurchType } from '@/types'
+
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import { Input } from '@/components/ui/input'
 
 export default function Admin_Churches() {
-  const [churchName, setChurchName] = useState<string>('')
-  const [location, setLocation] = useState<string>('')
+  const { churches, isLoading: getIsLoading } = useChurches()
+  const { createChurch, isLoading: createIsLoading, error: createError } = useCreateChurch()
+  const { updateChurch, isLoading: updateIsLoading, error: updateError } = useUpdateChurch()
+
   const [loading, setLoading] = useState<boolean>(false)
-  const [churches, setChurches] = useState<Church[]>([])
-  const [editingChurchId, setEditingChurchId] = useState<string | null>(null)
-
-  useEffect(() => {
-    fetchChurches()
-  }, [])
-
-  const fetchChurches = async () => {
-    const querySnapshot = await getDocs(collection(firestore, 'churches'))
-    const churchList = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
-    setChurches(churchList as any)
-  }
+  const [isUpdated, setIsUpdated] = useState<boolean>(false)
+  const [church, setChurche] = useState<ChurchType>({
+    id: '',
+    name: '',
+    location: '',
+    createdAt: Timestamp.now(),
+  })
 
   const handleRegister = async () => {
-    if (!churchName.trim()) {
+    if (!church.name.trim()) {
       alert('교회 이름을 입력해주세요.')
       return
     }
+
     setLoading(true)
     try {
-      if (editingChurchId) {
-        const churchRef = doc(firestore, 'churches', editingChurchId)
-        await updateDoc(churchRef, { name: churchName, location })
-        alert('교회 정보가 수정되었습니다!')
-        setEditingChurchId(null)
-      } else {
-        await addDoc(collection(firestore, 'churches'), {
-          name: churchName,
-          location,
-          createdAt: Timestamp.now(),
+      if (isUpdated) {
+        const update_res = await updateChurch('church_abc123', {
+          name: '새로운 교회 이름',
+          location: '서울시 종로구',
         })
-        alert('교회가 등록되었습니다!')
+
+        if (update_res) {
+          alert('정보가 수정되었습니다!')
+        }
+
+        setIsUpdated(false)
+      } else {
+        const create_res = await createChurch({
+          name: church.name,
+          location: church.location,
+        })
+
+        if (create_res) {
+          alert('교회가 등록되었습니다!')
+        }
       }
-      setChurchName('')
-      setLocation('')
-      fetchChurches()
+
+      setChurche({ id: '', name: '', location: '', createdAt: Timestamp.now() })
     } catch (error) {
-      console.error('등록 실패:', error)
+      console.error('오류 발생:', error)
       alert('처리 중 오류가 발생했어요 😢')
-    } finally {
-      setLoading(false)
     }
   }
 
-  const handleEdit = (church: Church) => {
-    setChurchName(church.name)
-    setLocation(church.location || '')
-    setEditingChurchId(church.id)
+  const handleEdit = (church: ChurchType) => {
+    setChurche(church)
+    setIsUpdated(true)
   }
 
   const handleDelete = async (churchId: string) => {
