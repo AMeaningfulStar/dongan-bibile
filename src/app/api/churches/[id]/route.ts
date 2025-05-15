@@ -1,5 +1,5 @@
 import { firestore } from '@/libs/firebase'
-import { deleteDoc, doc } from 'firebase/firestore'
+import { deleteDoc, doc, updateDoc } from 'firebase/firestore'
 import { NextRequest, NextResponse } from 'next/server'
 
 interface Params {
@@ -22,5 +22,27 @@ export async function DELETE(_: NextRequest, { params }: Params) {
   } catch (error) {
     console.error('교회 삭제 오류:', error)
     return NextResponse.json({ status: 500, message: '교회 삭제에 실패했습니다.' })
+  }
+}
+
+export async function PATCH(req: NextRequest, { params }: Params) {
+  try {
+    const { id } = params
+    const { name, location } = await req.json()
+
+    if (!id || !name) {
+      return NextResponse.json({ status: 400, message: 'ID와 이름은 필수입니다.' })
+    }
+
+    const ref = doc(firestore, 'churches', id)
+    await updateDoc(ref, {
+      name,
+      location: location || null,
+    })
+
+    return NextResponse.json({ status: 200, message: '교회 정보가 수정되었습니다.' })
+  } catch (error) {
+    console.error('교회 수정 오류:', error)
+    return NextResponse.json({ status: 500, message: '교회 수정에 실패했습니다.' })
   }
 }

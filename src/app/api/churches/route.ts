@@ -37,21 +37,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ status: 500, message: '교회 등록에 실패했습니다.' })
   }
 }
-
-export async function PATCH(req: NextRequest) {
-  try {
-    const { churchId, name, location } = await req.json()
-
-    if (!name || typeof name !== 'string') {
-      return NextResponse.json({ status: 400, message: '이름이 유효하지 않습니다.' })
-    }
-    const churchRef = doc(firestore, 'churches', churchId)
-
-    await updateDoc(churchRef, { name: name, location })
-
-    return NextResponse.json({ status: 201, message: '교회 정보가 수정되었습니다.' })
-  } catch (error) {
-    console.error('교회 등록 오류:', error)
-    return NextResponse.json({ status: 500, message: '교회 정보 수정을 실패했습니다.' })
-  }
-}
