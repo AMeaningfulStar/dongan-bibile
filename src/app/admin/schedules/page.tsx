@@ -2,18 +2,23 @@
 
 import { collection, doc, getDoc, getDocs, setDoc, Timestamp, updateDoc } from 'firebase/firestore'
 import moment from 'moment'
-import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import Calendar from 'react-calendar'
 
-import { BookOption, options } from '@/utils/bibleOption'
 import { firestore } from '@/libs/firebase'
+import { BookOption, options } from '@/utils/bibleOption'
 
 import 'react-calendar/dist/Calendar.css'
 
-import NEXT_ARROW_ICON from '@icon/next_arrow_icon.png'
-import PREV_ARROW_ICON from '@icon/prev_arrow_icon.png'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import { Button } from '@/components/ui/button'
+import { Calendar } from '@/components/ui/calendar'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { cn } from '@/utils/utils'
+import { format } from 'date-fns'
+import { ko } from 'date-fns/locale'
+import { CalendarIcon } from 'lucide-react'
 
 interface Church {
   id: string
@@ -39,7 +44,7 @@ interface Season {
 
 interface BibleInfoInput {
   book: BookOption | null
-  chapter: number
+  chapter: number | null
 }
 
 type BibleInfo = {
@@ -58,13 +63,15 @@ export default function Admin_Schedule() {
   const [selectedSeason, setSelectedSeason] = useState<Season | null>(null)
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedChapter, setSelectedChapter] = useState<number | null>(null)
-  const [bibleInfo, setBibleInfo] = useState<BibleInfoInput>({ book: null, chapter: 1 })
+  const [bibleInfo, setBibleInfo] = useState<BibleInfoInput>({ book: null, chapter: null })
   const [existingBibleInfo, setExistingBibleInfo] = useState<BibleInfo[]>([])
 
   const [churches, setChurches] = useState<Church[]>([])
   const [churchId, setChurchId] = useState<string | null>(null)
   const [communities, setCommunities] = useState<Community[]>([])
   const [communitiesId, setCommunitiesId] = useState<string | null>(null)
+
+  const [open, setOpen] = useState<boolean>(false)
 
   useEffect(() => {
     fetchChurches()
@@ -228,183 +235,191 @@ export default function Admin_Schedule() {
     setExistingBibleInfo(newBibleInfo)
   }
 
-  const NextIcon = () => {
-    return <Image alt="icon" src={NEXT_ARROW_ICON} height={16} width={12} style={{ width: 'auto', height: 'auto' }} />
-  }
-
-  const PrevIcon = () => {
-    return <Image alt="icon" src={PREV_ARROW_ICON} height={16} width={12} style={{ width: 'auto', height: 'auto' }} />
-  }
-
   return (
     <div className="flex flex-grow flex-col items-center">
-      <div className="w-full max-w-xl px-4 py-8">
-        <div className="mb-6 flex w-full items-center justify-between">
-          <h2 className="text-caption-24-b">📖 성경 일정 관리</h2>
-          <Link
-            href={'/admin'}
-            className="flex items-center justify-center rounded bg-gl-grayscale-200 px-4 py-2 text-caption-13-l text-gl-white-base"
-          >
-            뒤로
-          </Link>
-        </div>
-        <div className="mb-8 rounded-xl border border-gl-grayscale-200 px-3 py-4">
-          {/* 교회 선택 */}
-          <div className="mb-4">
-            <label className="mb-2 block text-caption-16-sb">교회 선택</label>
-            <div className="w-full rounded border px-2">
-              <select
-                value={churchId || ''}
-                onChange={(e) => setChurchId(e.target.value)}
-                className="w-full py-2 outline-none"
-              >
-                <option value="">교회을 선택하세요</option>
-                {churches.map((church) => (
-                  <option key={church.id} value={church.id}>
-                    {church.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
+      <Link
+        href={'/admin'}
+        className="fixed right-3 top-3 z-10 flex items-center justify-center rounded bg-gl-grayscale-200 px-4 py-2 text-caption-13-l text-gl-white-base"
+      >
+        뒤로
+      </Link>
+      <div className="w-full max-w-xl px-4 py-6">
+        <Accordion type="single" collapsible className="w-full">
+          <AccordionItem value="item-1">
+            <AccordionTrigger>기본 정보 입력</AccordionTrigger>
+            <AccordionContent>
+              <div className="mb-5 rounded-xl border border-gl-grayscale-200 px-3 py-4">
+                {/* 교회 선택 */}
+                <div className="mb-4">
+                  <label className="mb-2 block text-caption-16-sb">소속 교회</label>
+                  <Select value={churchId || ''} onValueChange={(value) => setChurchId(value)}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="교회를 선택하세요" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {churches.map((church) => (
+                        <SelectItem key={church.id} value={church.id}>
+                          {church.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-          {/* 부서 선택 */}
-          <div className="mb-4">
-            <label className="mb-2 block text-caption-16-sb">부서 선택</label>
-            <div className="w-full rounded border px-2">
-              <select
-                value={communitiesId || ''}
-                onChange={(e) => setCommunitiesId(e.target.value)}
-                className="w-full py-2 outline-none"
-              >
-                <option value="">부서를 선택하세요</option>
-                {communities.map((community) => (
-                  <option key={community.id} value={community.id}>
-                    {community.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
+                {/* 부서 선택 */}
+                <div className="mb-4">
+                  <label className="mb-2 block text-caption-16-sb">부서 선택</label>
+                  <Select value={communitiesId || ''} onValueChange={(value) => setCommunitiesId(value)}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="부서를 선택하세요" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {communities.map((community) => (
+                        <SelectItem key={community.id} value={community.id}>
+                          {community.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-          {/* 시즌 선택 */}
-          <div className="mb-4">
-            <label className="mb-2 block text-caption-16-sb">시즌 선택</label>
-            <div className="w-full rounded border px-2">
-              <select
-                value={selectedSeason?.id || ''}
-                onChange={(e) => {
-                  const selected = seasons.find((s) => s.id === e.target.value) || null
-                  setSelectedSeason(selected)
-                }}
-                className="w-full py-2 outline-none"
-              >
-                <option value="">시즌을 선택하세요</option>
-                {seasons.map((season) => (
-                  <option key={season.id} value={season.id}>
-                    {season.name} ({season.startDate} ~ {season.endDate})
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
+                {/* 시즌 선택 */}
+                <div className="mb-4">
+                  <label className="mb-2 block text-caption-16-sb">시즌 선택</label>
+                  <Select
+                    value={selectedSeason?.id || ''}
+                    onValueChange={(value) => {
+                      const selected = seasons.find((s) => s.id === value) || null
+                      setSelectedSeason(selected)
+                    }}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="시즌을 선택하세요" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {seasons.map((season) => (
+                        <SelectItem key={season.id} value={season.id}>
+                          {season.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-        {/* 날짜 선택 */}
-        {selectedSeason && (
-          <div className="mb-6 flex w-full flex-col items-center justify-center gap-2">
-            <div className="mb-2 w-full text-caption-16-sb">날짜 선택</div>
-            <Calendar
-              locale="ko"
-              formatDay={(locale, data) => moment(data).format('DD')}
-              nextLabel={<NextIcon />}
-              prevLabel={<PrevIcon />}
-              maxDetail="month"
-              minDetail="month"
-              calendarType="gregory"
-              showNeighboringMonth={false}
-              prev2Label={null}
-              next2Label={null}
-              value={selectedDate}
-              view="month"
-              onChange={(date) => setSelectedDate(date as Date)}
-              tileDisabled={({ date }) => !isDateInSeason(date)}
-            />
-          </div>
-        )}
+                {/* 날짜 선택 */}
+                <div className="">
+                  <label className="mb-2 block text-caption-16-sb">날짜 선택</label>
+                  <Popover open={open} onOpenChange={setOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={'outline'}
+                        className={cn(
+                          'w-full justify-start text-left font-normal',
+                          !selectedDate && 'text-muted-foreground',
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {selectedDate ? (
+                          format(new Date(selectedDate), 'yyyy년 MM월 dd일')
+                        ) : (
+                          <span>날짜를 선택해주세요</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        locale={ko}
+                        mode="single"
+                        selected={selectedDate ? new Date(selectedDate) : undefined}
+                        onSelect={(date) => {
+                          if (!isDateInSeason(date as Date)) {
+                            alert('선택한 날짜는 시즌 기간이 아닙니다.')
+                            return
+                          }
+                          setSelectedDate(date as Date)
+                          setOpen(false)
+                        }}
+                        disabled={(date) => !isDateInSeason(date)}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
 
         {/* 성경 정보 입력 */}
-        {selectedDate && (
-          <div className="mb-6 rounded-xl border border-gl-grayscale-200 px-3 py-4">
-            <h3 className="text-caption-15-b mb-4">📘 성경 정보 입력</h3>
-            <div className="mb-6 w-full rounded border border-gl-grayscale-200 px-2">
-              <select
-                value={JSON.stringify(bibleInfo.book) || ''}
-                onChange={(e) => {
-                  setBibleInfo({ ...bibleInfo, book: JSON.parse(e.target.value) })
-                  setSelectedChapter(JSON.parse(e.target.value).chapters)
-                }}
-                className="w-full py-2 outline-none"
-              >
-                <option value="">성경서를 선택하세요</option>
-                {options.map((option, index) => (
-                  <option key={index} value={JSON.stringify(option)}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            {bibleInfo.book && (
-              <div className="mb-6 w-full rounded border border-gl-grayscale-200 px-2">
-                <select
-                  value={bibleInfo.chapter || ''}
-                  onChange={(e) => setBibleInfo({ ...bibleInfo, chapter: parseInt(e.target.value, 10) || 1 })}
-                  className="w-full py-2 outline-none"
+        <Accordion type="single" collapsible className="w-full">
+          <AccordionItem value="item-1">
+            <AccordionTrigger>성경 정보 입력</AccordionTrigger>
+            <AccordionContent>
+              <div className="mb-6 rounded-xl border border-gl-grayscale-200 px-3 py-4">
+                <h3 className="mb-4 text-caption-15-b">성경 정보 입력</h3>
+                <Select
+                  value={bibleInfo.book ? JSON.stringify(bibleInfo.book) : undefined}
+                  onValueChange={(value) => {
+                    setBibleInfo({ ...bibleInfo, book: JSON.parse(value) })
+                    setSelectedChapter(JSON.parse(value).chapters)
+                  }}
                 >
-                  <option value="">장을 선택하세요</option>
-                  {[...Array<BookOption>(selectedChapter as number).keys()].map((_, index) => (
-                    <option key={index + 1} value={index + 1}>
-                      {index + 1}장
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger className="mb-4 w-full">
+                    <SelectValue placeholder="성경서를 선택하세요" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {options.map((option, index) => (
+                      <SelectItem key={index} value={JSON.stringify(option)}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={bibleInfo.chapter ? bibleInfo.chapter.toString() : undefined}
+                  onValueChange={(value) => setBibleInfo({ ...bibleInfo, chapter: parseInt(value, 10) })}
+                >
+                  <SelectTrigger className="mb-4 w-full">
+                    <SelectValue placeholder="장을 선택하세요" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: selectedChapter || 0 }, (_, index) => (
+                      <SelectItem key={index + 1} value={(index + 1).toString()}>
+                        {index + 1}장
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <button
+                  onClick={handleSaveBiblePlan}
+                  className="w-full rounded-lg bg-gl-green-opacity-50 py-3 text-caption-15-l text-gl-white-base"
+                >
+                  저장하기
+                </button>
               </div>
-            )}
-            <button
-              onClick={handleSaveBiblePlan}
-              style={{
-                padding: '0.6rem 1.2rem',
-                backgroundColor: '#4caf50',
-                color: 'white',
-                border: 'none',
-                borderRadius: 6,
-              }}
-            >
-              저장하기
-            </button>
-          </div>
-        )}
-        {selectedDate && (
-          <div className="mt-4 rounded-xl border bg-gray-50 p-4">
-            <h3 className="mb-2 text-lg font-semibold">
-              📅 {moment(selectedDate).format('YYYY년 MM월 DD일')} 저장된 성경 정보
-            </h3>
-            {existingBibleInfo.length > 0 ? (
-              <ul className="space-y-1">
-                {existingBibleInfo.map((item, idx) => (
-                  <li key={idx} className="text-sm text-gray-700">
-                    📖 <strong>{item.name}</strong> {item.chapter}장
-                    <button onClick={() => handleDelete(idx)} style={{ marginLeft: '0.5rem', color: 'red' }}>
-                      삭제
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-sm text-gray-500">아직 저장된 성경 정보가 없습니다.</p>
-            )}
-          </div>
-        )}
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+
+        <div className="mt-4 rounded-xl border bg-gray-50 p-4">
+          <h3 className="mb-2 text-lg font-semibold">
+            📅 {selectedDate ? moment(selectedDate).format('YYYY년 MM월 DD일') : '0000년 00월 00일'} 저장된 성경 정보
+          </h3>
+          {existingBibleInfo.length > 0 ? (
+            <ul className="space-y-1">
+              {existingBibleInfo.map((item, idx) => (
+                <li key={idx} className="text-sm text-gray-700">
+                  📖 <strong>{item.name}</strong> {item.chapter}장
+                  <button onClick={() => handleDelete(idx)} style={{ marginLeft: '0.5rem', color: 'red' }}>
+                    삭제
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-gray-500">아직 저장된 성경 정보가 없습니다.</p>
+          )}
+        </div>
       </div>
     </div>
   )
