@@ -32,13 +32,38 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         return '말씀읽기'
       case '/status':
         return '읽기현황'
+      case '/login':
+        return '로그인'
+      case '/admin':
+        return '청신호 관리'
+      case '/admin/churches':
+        return '교회 관리'
+      case '/admin/communities':
+        return '공동체 관리'
+      case '/admin/seasons':
+        return '시즌 관리'
+      case '/admin/schedules':
+        return '성경 일정 관리'
+      case '/admin/reading-status':
+        return '읽기 현황 관리'
+      case '/admin/users':
+        return '사용자 관리'
       default:
         return '청신호'
     }
   }
 
   if (pathName === '/login') {
-    return <div>{children}</div>
+    return (
+      <div className="flex h-screen w-full">
+        <div className="fixed left-0 top-0 z-10 w-full border-b border-gl-grayscale-base bg-gl-white-base py-4">
+          <div className="flex w-full items-center justify-center">
+            <span className="text-layout-20-l">{pageName()}</span>
+          </div>
+        </div>
+        {children}
+      </div>
+    )
   }
 
   return (
