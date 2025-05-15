@@ -1,7 +1,16 @@
 'use client'
 
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import { Button } from '@/components/ui/button'
+import { Calendar } from '@/components/ui/calendar'
+import { Input } from '@/components/ui/input'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { firestore } from '@/libs/firebase'
+import { cn } from '@/utils/utils'
+import { format } from 'date-fns'
 import { addDoc, collection, deleteDoc, doc, getDocs, serverTimestamp, Timestamp, updateDoc } from 'firebase/firestore'
+import { CalendarIcon } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
@@ -158,72 +167,104 @@ export default function Admin_Season() {
 
   return (
     <div className="flex flex-grow flex-col items-center">
-      <div className="w-full max-w-xl px-4 py-8">
-        <div className="mb-6 flex w-full items-center justify-between">
-          <h2 className="text-caption-24-b">📅 "청신호" 시즌 관리</h2>
-          <Link
-            href={'/admin'}
-            className="flex items-center justify-center rounded bg-gl-grayscale-200 px-4 py-2 text-caption-13-l text-gl-white-base"
-          >
-            뒤로
-          </Link>
-        </div>
-
+      <Link
+        href={'/admin'}
+        className="fixed right-3 top-3 z-10 flex items-center justify-center rounded bg-gl-grayscale-200 px-4 py-2 text-caption-13-l text-gl-white-base"
+      >
+        뒤로
+      </Link>
+      <div className="w-full max-w-xl px-4 py-6">
         <div className="mb-8 rounded-xl border border-gl-grayscale-200 px-3 py-4">
           <div className="mb-4">
             <label className="mb-2 block text-caption-16-sb">소속 교회</label>
-            <div className="w-full rounded border px-2">
-              <select
-                value={inputChurchId}
-                onChange={(e) => setInputChurchId(e.target.value)}
-                className="w-full py-2 outline-none"
-              >
-                <option value="">교회를 선택하세요</option>
+            <Select value={inputChurchId} onValueChange={(value) => setInputChurchId(value)}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="교회를 선택하세요" />
+              </SelectTrigger>
+              <SelectContent>
                 {churches.map((church) => (
-                  <option key={church.id} value={church.id}>
+                  <SelectItem key={church.id} value={church.id}>
                     {church.name}
-                  </option>
+                  </SelectItem>
                 ))}
-              </select>
-            </div>
+              </SelectContent>
+            </Select>
           </div>
           <div className="mb-4">
             <label className="mb-2 block text-caption-16-sb">소속 부서</label>
-            <div className="w-full rounded border px-2">
-              <select
-                value={inputCommunitieId}
-                onChange={(e) => setInputCommunitieId(e.target.value)}
-                className="w-full py-2 outline-none"
-              >
-                <option value="">부서를 선택하세요</option>
+            <Select value={inputCommunitieId} onValueChange={(value) => setInputCommunitieId(value)}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="부서를 선택하세요" />
+              </SelectTrigger>
+              <SelectContent>
                 {communities.map((community) => (
-                  <option key={community.id} value={community.id}>
+                  <SelectItem key={community.id} value={community.id}>
                     {community.name}
-                  </option>
+                  </SelectItem>
                 ))}
-              </select>
-            </div>
+              </SelectContent>
+            </Select>
           </div>
           <label className="mb-2 block text-caption-16-sb">새 시즌 추가</label>
-          <input
+          <Input
             type="text"
-            placeholder="시즌 이름"
+            placeholder="시즌 이름을 입력해주세요"
             value={newSeason.name}
             onChange={(e) => setNewSeason({ ...newSeason, name: e.target.value })}
-            className="mb-4 block w-full rounded border p-2 outline-none"
+            className="mb-4 w-full outline-none placeholder:text-caption-14-l"
           />
-          <input
-            type="date"
-            value={newSeason.startDate}
-            onChange={(e) => setNewSeason({ ...newSeason, startDate: e.target.value })}
-            className="mb-4 block w-full rounded border p-2 outline-none"
-          />
-          <input
-            type="date"
-            value={newSeason.endDate}
-            onChange={(e) => setNewSeason({ ...newSeason, endDate: e.target.value })}
-            className="mb-8 block w-full rounded border p-2 outline-none"
-          />
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant={'outline'}
+                className={cn(
+                  'mb-4 w-full justify-start text-left font-normal',
+                  !newSeason.startDate && 'text-muted-foreground',
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {newSeason.startDate ? (
+                  format(new Date(newSeason.startDate), 'yyyy년 MM월 dd일') + ' 시작일'
+                ) : (
+                  <span>시작일을 선택해주세요</span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={newSeason.startDate ? new Date(newSeason.startDate) : undefined}
+                onSelect={(date) => setNewSeason({ ...newSeason, startDate: date?.toISOString().split('T')[0] || '' })}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant={'outline'}
+                className={cn(
+                  'mb-5 w-full justify-start text-left font-normal',
+                  !newSeason.endDate && 'text-muted-foreground',
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {newSeason.endDate ? (
+                  format(new Date(newSeason.endDate), 'yyyy년 MM월 dd일') + ' 종료일'
+                ) : (
+                  <span>종료일을 선택해주세요</span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={newSeason.endDate ? new Date(newSeason.endDate) : undefined}
+                onSelect={(date) => setNewSeason({ ...newSeason, endDate: date?.toISOString().split('T')[0] || '' })}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
 
           {editingSeasonId ? (
             <button
@@ -243,67 +284,63 @@ export default function Admin_Season() {
         </div>
 
         <div className="mb-5 text-caption-16-b">📋 시즌 목록</div>
-        <div className="mb-4 w-full rounded border px-2">
-          <select
-            value={selectedChurchId}
-            onChange={(e) => setSelectedChurchId(e.target.value)}
-            className="w-full py-2 outline-none"
-          >
-            <option value="">교회를 선택하세요</option>
+        <Select value={selectedChurchId} onValueChange={(value) => setSelectedChurchId(value)}>
+          <SelectTrigger className="mb-4 w-full">
+            <SelectValue placeholder="조회할 교회를 선택하세요" />
+          </SelectTrigger>
+          <SelectContent>
             {churches.map((church) => (
-              <option key={church.id} value={church.id}>
+              <SelectItem key={church.id} value={church.id}>
                 {church.name}
-              </option>
+              </SelectItem>
             ))}
-          </select>
-        </div>
-        <div className="mb-4 w-full rounded border px-2">
-          <select
-            value={selectedCommunityId}
-            onChange={(e) => setSelectedCommunityId(e.target.value)}
-            className="w-full py-2 outline-none"
-          >
-            <option value="">부서를 선택하세요</option>
+          </SelectContent>
+        </Select>
+        <Select value={selectedCommunityId} onValueChange={(value) => setSelectedCommunityId(value)}>
+          <SelectTrigger className="mb-4 w-full">
+            <SelectValue placeholder="조회할 부서를 선택하세요" />
+          </SelectTrigger>
+          <SelectContent>
             {selectedCommunity.map((community) => (
-              <option key={community.id} value={community.id}>
+              <SelectItem key={community.id} value={community.id}>
                 {community.name}
-              </option>
+              </SelectItem>
             ))}
-          </select>
-        </div>
-        <div className="flex flex-col gap-y-4">
+          </SelectContent>
+        </Select>
+        <Accordion type="single" collapsible className="w-full px-2">
           {seasons.map((season) => (
-            <div key={season.id} className="flex flex-col gap-y-1 rounded-xl border border-gl-green-opacity-50 p-4">
-              <div className="text-caption-16-sb">{season.name}</div>
-              <div className="text-caption-14-l text-gl-grayscale-100">
+            <AccordionItem key={season.id} value={`item-${season.id}`}>
+              <AccordionTrigger>{season.name}</AccordionTrigger>
+              <AccordionContent>
                 {season.startDate} ~ {season.endDate}
-              </div>
-              <div className="mt-4 grid w-full grid-cols-2 gap-x-4">
-                <button
-                  onClick={() => {
-                    setEditingSeasonId(season.id ?? null)
-                    setNewSeason({
-                      name: season.name,
-                      startDate: season.startDate,
-                      endDate: season.endDate,
-                    })
-                    setInputChurchId(selectedChurchId)
-                    setInputCommunitieId(selectedCommunityId)
-                  }}
-                  className="border-gl-blue-base text-gl-blue-base rounded border bg-gl-white-base py-2"
-                >
-                  수정
-                </button>
-                <button
-                  onClick={() => handleDeleteSeason(season.id!)}
-                  className="rounded border border-gl-red-base bg-gl-white-base py-2 text-gl-red-base"
-                >
-                  삭제
-                </button>
-              </div>
-            </div>
+                <div className="mt-4 grid w-full grid-cols-2 gap-x-2">
+                  <button
+                    onClick={() => {
+                      setEditingSeasonId(season.id ?? null)
+                      setNewSeason({
+                        name: season.name,
+                        startDate: season.startDate,
+                        endDate: season.endDate,
+                      })
+                      setInputChurchId(selectedChurchId)
+                      setInputCommunitieId(selectedCommunityId)
+                    }}
+                    className="rounded border border-gl-blue-base bg-gl-white-base py-1.5 text-gl-blue-base"
+                  >
+                    수정
+                  </button>
+                  <button
+                    onClick={() => handleDeleteSeason(season.id!)}
+                    className="rounded border border-gl-red-base bg-gl-white-base py-1.5 text-gl-red-base"
+                  >
+                    삭제
+                  </button>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
           ))}
-        </div>
+        </Accordion>
       </div>
     </div>
   )
