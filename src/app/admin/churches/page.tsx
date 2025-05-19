@@ -82,14 +82,14 @@ export default function Admin_Churches() {
   }
 
   return (
-    <div className="flex flex-grow flex-col items-center">
+    <div className="flex h-full flex-grow flex-col items-center">
       <Link
         href={'/admin'}
         className="fixed right-3 top-3 z-10 flex items-center justify-center rounded bg-gl-grayscale-200 px-4 py-2 text-caption-13-l text-gl-white-base"
       >
         뒤로
       </Link>
-      <div className="w-full max-w-xl px-4 py-6">
+      <div className="flex w-full max-w-xl flex-grow flex-col px-4 py-6">
         <div className="mb-8 rounded-xl border border-gl-grayscale-200 px-3 py-4">
           <div className="mb-4">
             <label className="mb-2 block text-caption-16-sb">교회 이름</label>
@@ -144,7 +144,7 @@ export default function Admin_Churches() {
         </div>
 
         <div className="mb-3 text-caption-16-b">등록된 교회 목록</div>
-        <div className="h-full w-full">
+        <div className="w-full flex-grow">
           {getIsLoading ? (
             <div className="my-5 flex h-full w-full items-center justify-center">
               <svg fill="none" className="h-7 w-7 animate-spin" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
