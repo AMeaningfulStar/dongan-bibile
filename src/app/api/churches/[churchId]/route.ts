@@ -4,19 +4,19 @@ import { NextRequest, NextResponse } from 'next/server'
 
 interface Params {
   params: {
-    id: string
+    churchId: string
   }
 }
 
 export async function DELETE(_: NextRequest, { params }: Params) {
   try {
-    const { id } = params
+    const { churchId } = params
 
-    if (!id) {
+    if (!churchId) {
       return NextResponse.json({ status: 400, message: '교회 ID가 필요합니다.' })
     }
 
-    await deleteDoc(doc(firestore, 'churches', id))
+    await deleteDoc(doc(firestore, 'churches', churchId))
 
     return NextResponse.json({ status: 200, message: '교회가 삭제되었습니다.' })
   } catch (error) {
@@ -27,14 +27,14 @@ export async function DELETE(_: NextRequest, { params }: Params) {
 
 export async function PATCH(req: NextRequest, { params }: Params) {
   try {
-    const { id } = params
+    const { churchId } = params
     const { name, location } = await req.json()
 
-    if (!id || !name) {
+    if (!churchId || !name) {
       return NextResponse.json({ status: 400, message: 'ID와 이름은 필수입니다.' })
     }
 
-    const ref = doc(firestore, 'churches', id)
+    const ref = doc(firestore, 'churches', churchId)
     await updateDoc(ref, {
       name,
       location: location || null,
