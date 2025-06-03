@@ -5,11 +5,11 @@ export const useDeleteChurch = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const deleteChurchById = async (id: string) => {
+  const deleteChurchById = async (churchId: string) => {
     setIsLoading(true)
     setError(null)
     try {
-      await axios.delete(`/api/churches/${id}`)
+      await axios.delete(`/api/churches/${churchId}`)
       return true
     } catch (err: any) {
       console.error('교회 삭제 오류:', err)
