@@ -1,105 +1,63 @@
 'use client'
+import { addDoc, collection, deleteDoc, doc, Timestamp, updateDoc } from 'firebase/firestore'
+import Link from 'next/link'
+import { useState } from 'react'
 
+import { useChurches, useCommunities } from '@/hooks'
+import { firestore } from '@/libs/firebase'
+import { CommunityType } from '@/types'
+
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useChurches } from '@/hooks'
-import { firestore } from '@/libs/firebase'
-import { addDoc, collection, deleteDoc, doc, getDocs, Timestamp, updateDoc } from 'firebase/firestore'
-import Link from 'next/link'
-import { useEffect, useState } from 'react'
-
-interface Church {
-  id: string
-  name: string
-  location?: string
-  createdAt?: Timestamp
-}
-
-interface Community {
-  id: string
-  name: string
-  description?: string
-  churchId: string
-  createdAt?: Timestamp
-}
 
 export default function Admin_Departments() {
-  const { churches, isLoading: getIsLoading } = useChurches()
+  const { churches, isLoading: getChurchesIsLoading } = useChurches()
 
   const [churchId, setChurchId] = useState<string>('')
   const [isUpdated, setIsUpdated] = useState<boolean>(false)
-  const [community, setCommunity] = useState<Community>({
+  const [community, setCommunity] = useState<CommunityType>({
     id: '',
     name: '',
     description: '',
-    churchId: '',
     createdAt: Timestamp.now(),
   })
 
   const [selectedchurchId, setSelectedChurchId] = useState<string>('')
+  const { communities, isLoading: getCommunitiesIsLoading } = useCommunities(selectedchurchId)
 
-  const [communities, setCommunities] = useState<Community[]>([])
-  const [communityName, setCommunityName] = useState<string>('')
-  const [description, setDescription] = useState<string>('')
-  const [churcshes, setChurches] = useState<Church[]>([])
-  const [editingCommunityId, setEditingCommunityId] = useState<string | null>(null)
   const [loading, setLoading] = useState<boolean>(false)
 
-  useEffect(() => {
-    fetchChurches()
-  }, [])
-
-  useEffect(() => {
-    if (selectedchurchId !== '') {
-      fetchCommunities()
-    } else {
-      setCommunities([])
-    }
-  }, [selectedchurchId])
-
-  const fetchChurches = async () => {
-    const querySnapshot = await getDocs(collection(firestore, 'churches'))
-    const churchList: Church[] = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...(doc.data() as Omit<Church, 'id'>),
-    }))
-    setChurches(churchList)
+  // 공동체 수정 버튼 이벤트 핸들러
+  const handleEdit = (community: CommunityType) => {
+    setIsUpdated(true)
+    setCommunity(community)
+    setChurchId(selectedchurchId)
   }
 
-  const fetchCommunities = async () => {
-    const querySnapshot = await getDocs(collection(firestore, 'churches', selectedchurchId, 'communities'))
-    const communityList: Community[] = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...(doc.data() as Omit<Community, 'id'>),
-    }))
-    setCommunities(communityList)
-  }
-
+  // 공동체 등록/수정 이벤트 핸들러
   const handleRegister = async () => {
-    if (!communityName.trim() || !churchId) {
+    if (!community.name.trim() || !churchId) {
       alert('공동체 이름과 교회를 선택해주세요.')
       return
     }
     setLoading(true)
     try {
-      if (editingCommunityId) {
-        const communityRef = doc(firestore, 'churches', churchId, 'communities', editingCommunityId)
-        await updateDoc(communityRef, { name: communityName, description, churchId })
+      if (isUpdated) {
+        const communityRef = doc(firestore, 'churches', churchId, 'communities', community.id)
+        await updateDoc(communityRef, { name: community.name, description: community.description || '', churchId })
         alert('공동체가 수정되었습니다!')
-        setEditingCommunityId(null)
+        setIsUpdated(false)
       } else {
         await addDoc(collection(firestore, 'churches', churchId, 'communities'), {
-          name: communityName,
-          description,
+          name: community.name,
+          description: community.description || '',
           churchId,
-          createdAt: Timestamp.now(),
+          createdAt: community.createdAt,
         })
         alert('공동체가 등록되었습니다!')
       }
-      setCommunityName('')
-      setDescription('')
-      setChurchId('')
-      fetchCommunities()
+      setCommunity({ id: '', name: '', description: '', createdAt: Timestamp.now() })
     } catch (error) {
       console.error('등록 실패:', error)
       alert('처리 중 오류가 발생했어요 😢')
@@ -108,19 +66,11 @@ export default function Admin_Departments() {
     }
   }
 
-  const handleEdit = (community: Community) => {
-    setCommunityName(community.name)
-    setDescription(community.description || '')
-    setChurchId(community.churchId)
-    setEditingCommunityId(community.id)
-  }
-
   const handleDelete = async (communityId: string) => {
     if (confirm('정말로 삭제하시겠어요?')) {
       try {
         await deleteDoc(doc(firestore, 'churches', churchId, 'communities', communityId))
         alert('공동체가 삭제되었습니다.')
-        fetchCommunities()
       } catch (error) {
         console.error('삭제 실패:', error)
         alert('삭제 중 오류가 발생했어요 😢')
@@ -128,7 +78,7 @@ export default function Admin_Departments() {
     }
   }
 
-  if (getIsLoading) {
+  if (getChurchesIsLoading) {
     return (
       <div className="flex h-full w-full items-center justify-center">
         <svg fill="none" className="h-7 w-7 animate-spin" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
@@ -204,7 +154,11 @@ export default function Admin_Departments() {
                 {loading ? '수정 중...' : '수정하기'}
               </button>
               <button
-                onClick={() => {}}
+                onClick={() => {
+                  setIsUpdated(false)
+                  setCommunity({ id: '', name: '', description: '', createdAt: Timestamp.now() })
+                  setChurchId('')
+                }}
                 disabled={loading}
                 className="w-full rounded-lg bg-gl-grayscale-base py-3 text-caption-15-l text-gl-green-opacity-50"
               >
@@ -223,7 +177,24 @@ export default function Admin_Departments() {
         </div>
         <div className="mb-3 text-caption-16-b">등록된 교회 목록</div>
         <div className="w-full flex-grow">
-          {/* {getIsLoading ? (
+          <Select
+            value={selectedchurchId || ''}
+            onValueChange={(value) => {
+              setSelectedChurchId(value)
+            }}
+          >
+            <SelectTrigger className="mb-4 w-full outline-none">
+              <SelectValue placeholder="교회를 선택하세요" />
+            </SelectTrigger>
+            <SelectContent>
+              {churches.map((church) => (
+                <SelectItem key={church.id} value={church.id}>
+                  {church.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {getCommunitiesIsLoading ? (
             <div className="my-5 flex h-full w-full items-center justify-center">
               <svg fill="none" className="h-7 w-7 animate-spin" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
                 <path
@@ -233,24 +204,24 @@ export default function Admin_Departments() {
                   fillRule="evenodd"
                 />
               </svg>
-              <p className="text-caption-18-sb">등록된 교회 정보 불러오는 중...</p>
+              <p className="text-caption-18-sb">등록된 공동체 정보 불러오는 중...</p>
             </div>
           ) : (
-            <Accordion type="single" collapsible className="w-full">
-              {churches.map((church) => (
-                <AccordionItem key={church.id} value={`item-${church.id}`}>
-                  <AccordionTrigger className="text-caption-16-sb">{church.name}</AccordionTrigger>
+            <Accordion type="single" collapsible className="w-full px-2">
+              {communities.map((community) => (
+                <AccordionItem key={community.id} value={`item-${community.id}`}>
+                  <AccordionTrigger className="text-caption-16-sb">{community.name}</AccordionTrigger>
                   <AccordionContent>
-                    <div className="text-caption-14-l text-gl-grayscale-100">{church.location}</div>
+                    <div className="text-caption-14-l text-gl-grayscale-100">{community.description}</div>
                     <div className="mt-4 grid w-full grid-cols-2 gap-x-2">
                       <button
-                        onClick={() => handleEdit(church)}
+                        onClick={() => handleEdit(community)}
                         className="rounded border border-gl-blue-base bg-gl-white-base py-1.5 text-gl-blue-base"
                       >
                         수정하기
                       </button>
                       <button
-                        onClick={() => handleDelete(church.id)}
+                        onClick={() => handleDelete(community.id)}
                         className="rounded border border-gl-red-base bg-gl-white-base py-1.5 text-gl-red-base"
                       >
                         삭제하기
@@ -260,7 +231,7 @@ export default function Admin_Departments() {
                 </AccordionItem>
               ))}
             </Accordion>
-          )} */}
+          )}
         </div>
       </div>
     </div>
