@@ -1,16 +1,11 @@
 import axios from 'axios'
 import useSWR from 'swr'
 
-export interface Community {
-  id: string
-  name: string
-  description: string
-  createdAt?: string
-}
+import { CommunityType } from '@/types'
 
 interface CommunityResponse {
   status: number
-  data: Community[]
+  data: CommunityType[]
 }
 
 const fetcher = (url: string) => axios.get(url).then((res) => res.data)
