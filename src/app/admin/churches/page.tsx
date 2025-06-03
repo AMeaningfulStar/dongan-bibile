@@ -56,7 +56,7 @@ export default function Admin_Churches() {
 
       setChurche({ id: '', name: '', location: '', createdAt: Timestamp.now() })
     } catch (error) {
-      console.error('오류 발생:', createError || updateError)
+      console.error('오류 발생:', createError || updateError || error)
       alert('처리 중 오류가 발생했어요 😢')
     }
   }

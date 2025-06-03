@@ -1,10 +1,9 @@
 'use client'
-import { addDoc, collection, deleteDoc, doc, Timestamp, updateDoc } from 'firebase/firestore'
+import { Timestamp } from 'firebase/firestore'
 import Link from 'next/link'
 import { useState } from 'react'
 
-import { useChurches, useCommunities } from '@/hooks'
-import { firestore } from '@/libs/firebase'
+import { useChurches, useCommunities, useCreateCommunity, useDeleteCommunity, useUpdateCommunity } from '@/hooks'
 import { CommunityType } from '@/types'
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
@@ -13,6 +12,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 export default function Admin_Departments() {
   const { churches, isLoading: getChurchesIsLoading } = useChurches()
+  const { createCommunity, isLoading: createIsLoading, error: createError } = useCreateCommunity()
+  const { updateCommunity, isLoading: updateIsLoading, error: updateError } = useUpdateCommunity()
+  const { deleteCommunity, error: deleteError } = useDeleteCommunity()
 
   const [churchId, setChurchId] = useState<string>('')
   const [isUpdated, setIsUpdated] = useState<boolean>(false)
@@ -25,8 +27,6 @@ export default function Admin_Departments() {
 
   const [selectedchurchId, setSelectedChurchId] = useState<string>('')
   const { communities, isLoading: getCommunitiesIsLoading } = useCommunities(selectedchurchId)
-
-  const [loading, setLoading] = useState<boolean>(false)
 
   // 공동체 수정 버튼 이벤트 핸들러
   const handleEdit = (community: CommunityType) => {
@@ -41,38 +41,46 @@ export default function Admin_Departments() {
       alert('공동체 이름과 교회를 선택해주세요.')
       return
     }
-    setLoading(true)
+
     try {
       if (isUpdated) {
-        const communityRef = doc(firestore, 'churches', churchId, 'communities', community.id)
-        await updateDoc(communityRef, { name: community.name, description: community.description || '', churchId })
-        alert('공동체가 수정되었습니다!')
+        const success = await updateCommunity(churchId, {
+          id: community.id,
+          name: community.name,
+          description: community.description,
+        })
+
+        if (success) {
+          alert('공동체가 수정되었습니다!')
+        }
+
         setIsUpdated(false)
       } else {
-        await addDoc(collection(firestore, 'churches', churchId, 'communities'), {
+        const success = await createCommunity(churchId, {
           name: community.name,
-          description: community.description || '',
-          churchId,
-          createdAt: community.createdAt,
+          description: community.description,
         })
-        alert('공동체가 등록되었습니다!')
+        if (success) {
+          alert('공동체가 등록되었습니다!')
+        }
       }
+
       setCommunity({ id: '', name: '', description: '', createdAt: Timestamp.now() })
     } catch (error) {
-      console.error('등록 실패:', error)
+      console.error('등록 실패:', createError || updateError || error)
       alert('처리 중 오류가 발생했어요 😢')
-    } finally {
-      setLoading(false)
     }
   }
 
   const handleDelete = async (communityId: string) => {
     if (confirm('정말로 삭제하시겠어요?')) {
       try {
-        await deleteDoc(doc(firestore, 'churches', churchId, 'communities', communityId))
-        alert('공동체가 삭제되었습니다.')
+        const success = await deleteCommunity(selectedchurchId, communityId)
+        if (success) {
+          alert('공동체가 삭제되었습니다.')
+        }
       } catch (error) {
-        console.error('삭제 실패:', error)
+        console.error('삭제 실패:', error || deleteError)
         alert('삭제 중 오류가 발생했어요 😢')
       }
     }
@@ -148,10 +156,10 @@ export default function Admin_Departments() {
             <>
               <button
                 onClick={handleRegister}
-                disabled={loading}
+                disabled={updateIsLoading}
                 className="mb-2 w-full rounded-lg bg-gl-green-opacity-50 py-3 text-caption-15-l text-gl-white-base"
               >
-                {loading ? '수정 중...' : '수정하기'}
+                {updateIsLoading ? '수정 중...' : '수정하기'}
               </button>
               <button
                 onClick={() => {
@@ -159,7 +167,7 @@ export default function Admin_Departments() {
                   setCommunity({ id: '', name: '', description: '', createdAt: Timestamp.now() })
                   setChurchId('')
                 }}
-                disabled={loading}
+                disabled={updateIsLoading}
                 className="w-full rounded-lg bg-gl-grayscale-base py-3 text-caption-15-l text-gl-green-opacity-50"
               >
                 취소하기
@@ -168,10 +176,10 @@ export default function Admin_Departments() {
           ) : (
             <button
               onClick={handleRegister}
-              disabled={loading}
+              disabled={createIsLoading}
               className="w-full rounded-lg bg-gl-green-opacity-50 py-3 text-caption-15-l text-gl-white-base"
             >
-              {loading ? '등록 중...' : '교회 등록하기'}
+              {createIsLoading ? '등록 중...' : '교회 등록하기'}
             </button>
           )}
         </div>

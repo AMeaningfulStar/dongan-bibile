@@ -1,18 +1,18 @@
 import axios from 'axios'
 import { useState } from 'react'
 
-export const useDeleteChurch = () => {
+export const useDeleteCommunity = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const deleteChurchById = async (churchId: string) => {
+  const deleteCommunity = async (churchId: string, communityId: string): Promise<boolean> => {
     setIsLoading(true)
     setError(null)
     try {
-      await axios.delete(`/api/churches/${churchId}`)
+      await axios.delete(`/api/churches/${churchId}/communities/${communityId}`)
       return true
     } catch (err: any) {
-      console.error('교회 삭제 오류:', err)
+      console.error('공동체 삭제 오류:', err)
       setError(err.response?.data?.message || '삭제에 실패했습니다.')
       return false
     } finally {
@@ -20,5 +20,5 @@ export const useDeleteChurch = () => {
     }
   }
 
-  return { deleteChurchById, isLoading, error }
+  return { deleteCommunity, isLoading, error }
 }
