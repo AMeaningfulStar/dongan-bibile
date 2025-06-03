@@ -1,11 +1,12 @@
-- 제목 : feat(issue 번호): 기능명
-  ex) feat(17): pull request template 작성
+# 제목 : feat(issue 번호): 기능명
+
+ex) feat(17): pull request template 작성
 
 ## 🔘Part
 
-- [] API
-- [] UI
-- [] Other
+- [ ] API
+- [ ] UI
+- [ ] Other
 
 <br/>
 
