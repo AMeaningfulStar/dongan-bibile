@@ -1,5 +1,5 @@
 import { firestore } from '@/libs/firebase'
-import { addDoc, collection, doc, getDocs, Timestamp, updateDoc } from 'firebase/firestore'
+import { addDoc, collection, getDocs, Timestamp } from 'firebase/firestore'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET() {
