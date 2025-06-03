@@ -39,23 +39,23 @@ export default function Admin() {
               교회 관리
             </Link>
             <Link
-              href={'/admin/departments'}
+              href={'/admin/communities'}
               className="flex w-full items-center justify-center rounded-xl bg-gl-green-opacity-50 px-4 py-2.5 text-caption-15-l text-gl-black-base shadow"
             >
-              부서 관리
+              공동체 관리
             </Link>
           </div>
         )}
         {user && user.role !== 'read_only' && (
           <div className="col-span-2 flex gap-x-3">
             <Link
-              href={'/admin/season'}
+              href={'/admin/seasons'}
               className="flex w-full items-center justify-center rounded-xl bg-gl-green-opacity-50 px-4 py-2.5 text-caption-15-l text-gl-black-base shadow"
             >
               시즌 관리
             </Link>
             <Link
-              href={'/admin/schedule'}
+              href={'/admin/schedules'}
               className="flex w-full items-center justify-center rounded-xl bg-gl-green-opacity-50 px-4 py-2.5 text-caption-15-l text-gl-black-base shadow"
             >
               성경 일정 관리
@@ -63,10 +63,10 @@ export default function Admin() {
           </div>
         )}
         <Link
-          href={'/admin/overview'}
+          href={'/admin/reading-status'}
           className="flex w-full items-center justify-center rounded-xl bg-gl-green-opacity-50 px-4 py-2.5 text-caption-15-l text-gl-black-base shadow"
         >
-          현황 관리
+          읽기 현황 관리
         </Link>
         <Link
           href={'/admin/users'}
