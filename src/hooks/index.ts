@@ -1,6 +1,7 @@
 export { useAuthListener } from './useAuthListener'
 export { useBible } from './useBible'
 export { useChurches } from './useChurches'
+export { useCommunities } from './useCommunities'
 export { useCreateChurch } from './useCreateChurch'
 export { useCreateKeyword } from './useCreateKeyword'
 export { useDeleteChurch } from './useDeleteChurch'
