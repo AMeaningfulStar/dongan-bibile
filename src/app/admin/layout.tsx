@@ -11,7 +11,7 @@ export default function AdminLayout({
 }>) {
   const { user } = useAuthStore()
 
-  if (!user || (user.role !== 'admin' && user.role !== 'department_admin')) {
+  if (!user || (user.role !== 'admin' && user.role !== 'department_admin' && user.role !== 'read_only')) {
     return (
       <div className="flex h-full w-full flex-col items-center justify-center px-4">
         <div className="mb-2 text-caption-15-l">접근 권한이 없습니다</div>
