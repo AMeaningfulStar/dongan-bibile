@@ -1,60 +1,44 @@
 // src/features/admin/layout/AdminSidebar.tsx
 'use client'
 
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { ADMIN_NAV } from '../navigation/admin-menu'
+import Image from 'next/image'
 
-export function AdminSidebar() {
-  const pathname = usePathname()
+import { NavMain } from '@features/admin/navigation/NavMain'
+import { ADMIN_NAV } from '@features/admin/navigation/admin-menu'
 
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from '@components/ui/sidebar'
+
+import LogoIcon from '@public/logo.svg'
+
+export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <aside className="w-64 border-r p-4">
-      <h2 className="mb-4 font-bold">Admin</h2>
-
-      <nav className="space-y-2">
-        {ADMIN_NAV.map((item) => {
-          const isActive =
-            item.href === '/admin'
-              ? pathname === '/admin'
-              : pathname === item.href || pathname.startsWith(item.href + '/')
-
-          return (
-            <div key={item.key}>
-              {/* 상위 메뉴 */}
-              <Link
-                href={item.href}
-                className={`block rounded px-3 py-2 text-sm ${
-                  isActive ? 'bg-muted font-medium' : 'text-muted-foreground hover:bg-muted'
-                }`}
-              >
-                {item.label}
-              </Link>
-
-              {/* 하위 메뉴 */}
-              {item.children && (
-                <div className="ml-4 mt-1 space-y-1">
-                  {item.children.map((child) => {
-                    const isChildActive = pathname === child.href || pathname.startsWith(child.href + '/')
-
-                    return (
-                      <Link
-                        key={child.key}
-                        href={child.href}
-                        className={`block rounded px-3 py-1.5 text-sm ${
-                          isChildActive ? 'bg-muted font-medium' : 'text-muted-foreground hover:bg-muted'
-                        }`}
-                      >
-                        {child.label}
-                      </Link>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
-          )
-        })}
-      </nav>
-    </aside>
+    <Sidebar collapsible="offcanvas" {...props}>
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
+              <a href="/admin">
+                <Image alt="logo" src={LogoIcon} width={20} height={20} className="h-5 w-5" />
+                <span className="text-base font-semibold">하루빛:관리자</span>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+      <SidebarContent>
+        <NavMain items={ADMIN_NAV} />
+      </SidebarContent>
+      <SidebarFooter>
+        <div className="px-2 py-1 text-sm text-muted-foreground">admin@placeholder</div>
+      </SidebarFooter>
+    </Sidebar>
   )
 }

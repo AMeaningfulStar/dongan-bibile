@@ -1,14 +1,22 @@
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { AdminHeader } from './AdminHeader'
 import { AdminSidebar } from './AdminSidebar'
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen">
+    <SidebarProvider
+      style={
+        {
+          '--sidebar-width': '18rem',
+          '--header-height': '3rem',
+        } as React.CSSProperties
+      }
+    >
       <AdminSidebar />
-      <div className="flex flex-1 flex-col">
+      <SidebarInset>
         <AdminHeader />
-        <main className="flex-1 p-6">{children}</main>
-      </div>
-    </div>
+        {children}
+      </SidebarInset>
+    </SidebarProvider>
   )
 }

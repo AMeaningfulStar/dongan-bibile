@@ -1,9 +1,5 @@
-import type { LucideIcon } from "lucide-react"
-import {
-  CalendarRange,
-  LayoutDashboard,
-  NotebookPen,
-} from "lucide-react"
+import type { LucideIcon } from 'lucide-react'
+import { CalendarCog, House, NotebookPen } from 'lucide-react'
 
 // export type AdminRole =
 //   | "mainAdmin"
@@ -22,32 +18,32 @@ export type AdminNavItem = {
 
 export const ADMIN_NAV: AdminNavItem[] = [
   {
-    key: "dashboard",
-    label: "관리자 홈",
-    href: "/admin",
-    icon: LayoutDashboard,
+    key: 'dashboard',
+    label: '관리자 홈',
+    href: '/admin',
+    icon: House,
   },
   {
-    key: "seasons",
-    label: "시즌 관리",
-    href: "/admin/seasons",
-    icon: CalendarRange
+    key: 'seasons',
+    label: '시즌 관리',
+    href: '/admin/seasons',
+    icon: CalendarCog,
   },
   {
-    key: "plans",
-    label: "성경 일정 관리",
-    href: "/admin/plans",
+    key: 'plans',
+    label: '성경 일정 관리',
+    href: '/admin/plans',
     icon: NotebookPen,
     children: [
       {
-        key: "plans-seasons",
-        label: "시즌 기준 관리",
-        href: "/admin/plans/seasons",
+        key: 'plans-seasons',
+        label: '시즌 기준 관리',
+        href: '/admin/plans/seasons',
       },
       {
-        key: "plans-dates",
-        label: "날짜 기준 관리",
-        href: "/admin/plans/dates",
+        key: 'plans-dates',
+        label: '날짜 기준 관리',
+        href: '/admin/plans/dates',
       },
     ],
   },
