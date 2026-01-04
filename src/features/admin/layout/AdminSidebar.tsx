@@ -1,4 +1,3 @@
-// src/features/admin/layout/AdminSidebar.tsx
 'use client'
 
 import Image from 'next/image'
