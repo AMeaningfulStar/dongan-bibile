@@ -2,6 +2,7 @@ import { cookies } from 'next/headers'
 
 import { adminAuth } from '@libs/firebase-admin'
 
+import { ForbiddenError, UnauthorizedError } from '@/features/admin/auth/errors'
 import type { AdminRole } from '../navigation/admin-menu'
 
 export type AdminSession = {
@@ -15,7 +16,7 @@ export async function requireAdmin(allowedRoles: AdminRole[] = ['mainAdmin', 'su
 
   // 1) __session 쿠키 존재 확인
   if (!sessionCookie) {
-    throw new Error('UNAUTHORIZED: missing session')
+    throw new UnauthorizedError()
   }
 
   // 2) Firebase Admin으로 session cookie 검증
@@ -26,11 +27,11 @@ export async function requireAdmin(allowedRoles: AdminRole[] = ['mainAdmin', 'su
   const role = decoded.adminRole as AdminRole | undefined
 
   if (!role) {
-    throw new Error('FORBIDDEN: missing adminRole')
+    throw new ForbiddenError()
   }
 
   if (!allowedRoles.includes(role)) {
-    throw new Error('FORBIDDEN: insufficient role')
+    throw new ForbiddenError()
   }
 
   return {
