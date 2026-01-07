@@ -1,9 +1,7 @@
 import type { LucideIcon } from 'lucide-react'
 import { CalendarCog, House, NotebookPen } from 'lucide-react'
 
-// export type AdminRole =
-//   | "mainAdmin"
-//   | "subAdmin"
+export type AdminRole = 'mainAdmin' | 'subAdmin'
 //   | "communityAdmin"
 //   | "groupAdmin"
 
