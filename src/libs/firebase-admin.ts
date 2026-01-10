@@ -10,4 +10,7 @@ const app =
     }),
   })
 
-export const adminAuth = admin.auth(app)
+const adminAuth = admin.auth(app)
+const adminDb = admin.firestore(app)
+
+export { adminAuth, adminDb }
