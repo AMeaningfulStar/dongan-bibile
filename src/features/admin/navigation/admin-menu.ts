@@ -22,9 +22,9 @@ export const ADMIN_NAV: AdminNavItem[] = [
     icon: House,
   },
   {
-    key: 'seasons',
-    label: '시즌 관리',
-    href: '/admin/seasons',
+    key: 'courses',
+    label: '커스텀 코스 관리',
+    href: '/admin/courses',
     icon: CalendarCog,
   },
   {

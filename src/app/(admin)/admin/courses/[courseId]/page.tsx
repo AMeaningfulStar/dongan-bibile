@@ -1,14 +1,14 @@
-import { getSeason, updateSeason } from '@/features/admin/seasons/actions'
+import { getSeason, updateSeason } from '@/features/admin/courses/actions'
 import { notFound, redirect } from 'next/navigation'
 
 type Props = {
-  params: { seasonId: string }
+  params: { courseId: string }
 }
 
-async function updateSeasonAction(seasonId: string, formData: FormData) {
+async function updateSeasonAction(courseId: string, formData: FormData) {
   'use server'
 
-  await updateSeason(seasonId, {
+  await updateSeason(courseId, {
     name: formData.get('name'),
     startDate: formData.get('startDate'),
     endDate: formData.get('endDate'),
@@ -19,14 +19,14 @@ async function updateSeasonAction(seasonId: string, formData: FormData) {
 }
 
 export default async function AdminSeasonEditPage({ params }: Props) {
-  const season = await getSeason(params.seasonId)
+  const season = await getSeason(params.courseId)
   if (!season) return notFound()
 
   return (
     <div className="max-w-md space-y-6">
       <h1 className="text-lg font-semibold">시즌 수정</h1>
 
-      <form action={updateSeasonAction.bind(null, params.seasonId)} className="space-y-4">
+      <form action={updateSeasonAction.bind(null, params.courseId)} className="space-y-4">
         <div>
           <label className="text-sm">시즌 이름</label>
           <input name="name" defaultValue={season.name} className="mt-1 w-full rounded border px-3 py-2 text-sm" />

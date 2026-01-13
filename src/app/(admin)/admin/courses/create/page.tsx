@@ -1,4 +1,4 @@
-import { createSeason } from '@/features/admin/seasons/actions'
+import { createSeason } from '@/features/admin/courses/actions'
 import { redirect } from 'next/navigation'
 
 async function createSeasonAction(formData: FormData) {
