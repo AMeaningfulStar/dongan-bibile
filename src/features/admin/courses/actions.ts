@@ -72,7 +72,7 @@ export async function getCourse(courseId: string): Promise<CourseDTO | null> {
 }
 
 // 커스텀 코스 생성 (MVP)
-export async function createSeason(input: unknown): Promise<{ id: string }> {
+export async function createCourse(input: unknown): Promise<{ id: string }> {
   const admin = await requireAdmin(['mainAdmin', 'subAdmin'])
   const parsed = createCourseSchema.parse(input)
 

@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
-import { CalendarCog, House, NotebookPen } from 'lucide-react'
+import { CalendarCog, House } from 'lucide-react'
 
 export type AdminRole = 'mainAdmin' | 'subAdmin'
 //   | "communityAdmin"
@@ -26,23 +26,5 @@ export const ADMIN_NAV: AdminNavItem[] = [
     label: '커스텀 코스 관리',
     href: '/admin/courses',
     icon: CalendarCog,
-  },
-  {
-    key: 'plans',
-    label: '성경 일정 관리',
-    href: '/admin/plans',
-    icon: NotebookPen,
-    children: [
-      {
-        key: 'plans-seasons',
-        label: '시즌 기준 관리',
-        href: '/admin/plans/seasons',
-      },
-      {
-        key: 'plans-dates',
-        label: '날짜 기준 관리',
-        href: '/admin/plans/dates',
-      },
-    ],
   },
 ]

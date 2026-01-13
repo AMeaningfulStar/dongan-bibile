@@ -1,27 +1,27 @@
-import { createSeason } from '@/features/admin/courses/actions'
+import { createCourse } from '@/features/admin/courses/actions'
 import { redirect } from 'next/navigation'
 
-async function createSeasonAction(formData: FormData) {
+async function createCourseAction(formData: FormData) {
   'use server'
 
-  await createSeason({
+  await createCourse({
     name: formData.get('name'),
     startDate: formData.get('startDate'),
     endDate: formData.get('endDate'),
     isActive: formData.get('isActive') === 'on',
   })
 
-  redirect('/admin/seasons')
+  redirect('/admin/courses')
 }
 
-export default function AdminSeasonCreatePage() {
+export default function AdminCourseCreatePage() {
   return (
     <div className="max-w-md space-y-6">
-      <h1 className="text-lg font-semibold">시즌 생성</h1>
+      <h1 className="text-lg font-semibold">커스텀 코스 생성</h1>
 
-      <form action={createSeasonAction} className="space-y-4">
+      <form action={createCourseAction} className="space-y-4">
         <div>
-          <label className="text-sm">시즌 이름</label>
+          <label className="text-sm">코스 이름</label>
           <input name="name" required className="mt-1 w-full rounded border px-3 py-2 text-sm" />
         </div>
 
@@ -44,7 +44,7 @@ export default function AdminSeasonCreatePage() {
           <button type="submit" className="rounded bg-black px-4 py-2 text-sm text-white">
             저장
           </button>
-          <a href="/admin/seasons" className="rounded border px-4 py-2 text-sm">
+          <a href="/admin/courses" className="rounded border px-4 py-2 text-sm">
             취소
           </a>
         </div>
