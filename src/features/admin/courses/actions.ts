@@ -3,13 +3,13 @@
 import { Timestamp } from 'firebase-admin/firestore'
 
 import { requireAdmin } from '@features/admin/auth/guard'
-import { createSeasonSchema, updateSeasonSchema } from './schema'
+import { createCourseSchema, updateCourseSchema } from './schema'
 
 import { adminDb } from '@libs/firebase-admin'
 
-const SEASONS_COL = 'seasons' as const
+const COURSES_COL = 'courses' as const
 
-export type SeasonDTO = {
+export type CourseDTO = {
   id: string
   name: string
   startDate: string // ISO
@@ -29,13 +29,12 @@ function toTimestamp(date: Date) {
   return Timestamp.fromDate(date)
 }
 
-// 시즌 목록 조회 (MVP)
-export async function listSeasons(): Promise<SeasonDTO[]> {
+// 커스텀 코스 목록 조회 (MVP)
+export async function listCourses(): Promise<CourseDTO[]> {
   await requireAdmin(['mainAdmin', 'subAdmin'])
 
-  // 최신 시즌이 위로 오도록 startDate desc 정렬
-  const snap = await adminDb.collection(SEASONS_COL).orderBy('startDate', 'desc').get()
-
+  // 최신 커스텀 코스 위로 오도록 startDate desc 정렬
+  const snap = await adminDb.collection(COURSES_COL).orderBy('startDate', 'desc').get()
   return snap.docs.map((doc) => {
     const d = doc.data() as any
     return {
@@ -51,11 +50,11 @@ export async function listSeasons(): Promise<SeasonDTO[]> {
   })
 }
 
-// 시즌 단건 조회 (수정 페이지 초기값용)
-export async function getSeason(seasonId: string): Promise<SeasonDTO | null> {
+// 커스텀 코스 단건 조회 (수정 페이지 초기값용)
+export async function getCourse(courseId: string): Promise<CourseDTO | null> {
   await requireAdmin(['mainAdmin', 'subAdmin'])
 
-  const ref = adminDb.collection(SEASONS_COL).doc(seasonId)
+  const ref = adminDb.collection(COURSES_COL).doc(courseId)
   const doc = await ref.get()
   if (!doc.exists) return null
 
@@ -72,10 +71,10 @@ export async function getSeason(seasonId: string): Promise<SeasonDTO | null> {
   }
 }
 
-// 시즌 생성 (MVP)
+// 커스텀 코스 생성 (MVP)
 export async function createSeason(input: unknown): Promise<{ id: string }> {
   const admin = await requireAdmin(['mainAdmin', 'subAdmin'])
-  const parsed = createSeasonSchema.parse(input)
+  const parsed = createCourseSchema.parse(input)
 
   const now = Timestamp.now()
 
@@ -90,15 +89,15 @@ export async function createSeason(input: unknown): Promise<{ id: string }> {
     createdBy: admin.uid,
   }
 
-  const ref = await adminDb.collection(SEASONS_COL).add(payload)
+  const ref = await adminDb.collection(COURSES_COL).add(payload)
   return { id: ref.id }
 }
 
-// 시즌 수정 (MVP)
-export async function updateSeason(seasonId: string, input: unknown): Promise<{ ok: true }> {
+// 커스텀 코스 수정 (MVP)
+export async function updateCourse(courseId: string, input: unknown): Promise<{ ok: true }> {
   await requireAdmin(['mainAdmin', 'subAdmin'])
 
-  const parsed = updateSeasonSchema.parse(input)
+  const parsed = updateCourseSchema.parse(input)
 
   const patch: Record<string, any> = {
     updatedAt: Timestamp.now(),
@@ -110,6 +109,6 @@ export async function updateSeason(seasonId: string, input: unknown): Promise<{ 
   if (parsed.endDate instanceof Date) patch.endDate = toTimestamp(parsed.endDate)
   if (typeof parsed.isActive === 'boolean') patch.isActive = parsed.isActive
 
-  await adminDb.collection(SEASONS_COL).doc(seasonId).update(patch)
+  await adminDb.collection(COURSES_COL).doc(courseId).update(patch)
   return { ok: true }
 }

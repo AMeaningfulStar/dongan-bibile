@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const seasonBaseSchema = {
+export const courseBaseSchema = {
   name: z.string().trim().min(1, '시즌 이름을 입력해주세요.').max(50, '시즌 이름은 50자 이내여야 합니다.'),
 
   startDate: z.coerce.date().refine((val) => !isNaN(val.getTime()), {
@@ -14,13 +14,13 @@ export const seasonBaseSchema = {
   isActive: z.boolean().default(false),
 }
 
-export const createSeasonSchema = z.object(seasonBaseSchema).refine((data) => data.startDate <= data.endDate, {
+export const createCourseSchema = z.object(courseBaseSchema).refine((data) => data.startDate <= data.endDate, {
   message: '종료일은 시작일 이후(또는 동일)여야 합니다.',
   path: ['endDate'],
 })
 
-export const updateSeasonSchema = z
-  .object(seasonBaseSchema)
+export const updateCourseSchema = z
+  .object(courseBaseSchema)
   .partial()
   .refine(
     (data) => {
@@ -34,5 +34,5 @@ export const updateSeasonSchema = z
     },
   )
 
-export type CreateSeasonInput = z.infer<typeof createSeasonSchema>
-export type UpdateSeasonInput = z.infer<typeof updateSeasonSchema>
+export type CreateCourseInput = z.infer<typeof createCourseSchema>
+export type UpdateCourseInput = z.infer<typeof updateCourseSchema>
