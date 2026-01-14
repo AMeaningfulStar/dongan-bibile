@@ -3,7 +3,8 @@
 import { Timestamp } from 'firebase-admin/firestore'
 
 import { requireAdmin } from '@features/admin/auth/guard'
-import { createCourseSchema, updateCourseSchema } from './schema'
+
+import { courseCreateSchema, courseUpdateSchema } from './schema'
 
 import { adminDb } from '@libs/firebase-admin'
 
@@ -11,12 +12,22 @@ const COURSES_COL = 'courses' as const
 
 export type CourseDTO = {
   id: string
-  name: string
-  startDate: string // ISO
-  endDate: string // ISO
-  isActive: boolean
-  createdAt: string // ISO
-  updatedAt: string // ISO
+  title: string
+  startDate: string
+  // endDate는 computed에서 내려줌
+  endDate: string
+  daysOfWeek: number[]
+  scopeType: 'testament' | 'books'
+  testament?: { old: boolean; new: boolean }
+  books?: string[]
+  periodType: 'days'
+  periodDays: number
+  totalChapters: number
+  chaptersPerReadingDay: number
+  summaryText: string
+  status: 'draft' | 'active'
+  createdAt: string
+  updatedAt: string
   createdBy: string
 }
 
@@ -24,25 +35,38 @@ function toISO(ts?: Timestamp | null) {
   if (!ts) return new Date(0).toISOString()
   return ts.toDate().toISOString()
 }
-
 function toTimestamp(date: Date) {
   return Timestamp.fromDate(date)
 }
 
-// 커스텀 코스 목록 조회 (MVP)
+// 목록
 export async function listCourses(): Promise<CourseDTO[]> {
   await requireAdmin(['mainAdmin', 'subAdmin'])
 
-  // 최신 커스텀 코스 위로 오도록 startDate desc 정렬
   const snap = await adminDb.collection(COURSES_COL).orderBy('startDate', 'desc').get()
   return snap.docs.map((doc) => {
     const d = doc.data() as any
+    const computed = d.computed ?? {}
     return {
       id: doc.id,
-      name: d.name ?? '',
+      title: d.title ?? '',
       startDate: toISO(d.startDate),
-      endDate: toISO(d.endDate),
-      isActive: Boolean(d.isActive),
+      endDate: computed.endDate ? toISO(computed.endDate) : new Date(0).toISOString(),
+
+      daysOfWeek: d.daysOfWeek ?? [],
+      scopeType: d.scopeType,
+      testament: d.testament,
+      books: d.books,
+
+      periodType: d.periodType ?? 'days',
+      periodDays: d.periodDays ?? 0,
+
+      totalChapters: d.totalChapters ?? 0,
+      chaptersPerReadingDay: computed.chaptersPerReadingDay ?? 0,
+      summaryText: computed.summaryText ?? '',
+
+      status: d.status ?? 'draft',
+
       createdAt: toISO(d.createdAt),
       updatedAt: toISO(d.updatedAt),
       createdBy: d.createdBy ?? '',
@@ -50,7 +74,7 @@ export async function listCourses(): Promise<CourseDTO[]> {
   })
 }
 
-// 커스텀 코스 단건 조회 (수정 페이지 초기값용)
+// 단건
 export async function getCourse(courseId: string): Promise<CourseDTO | null> {
   await requireAdmin(['mainAdmin', 'subAdmin'])
 
@@ -59,30 +83,65 @@ export async function getCourse(courseId: string): Promise<CourseDTO | null> {
   if (!doc.exists) return null
 
   const d = doc.data() as any
+  const computed = d.computed ?? {}
+
   return {
     id: doc.id,
-    name: d.name ?? '',
+    title: d.title ?? '',
     startDate: toISO(d.startDate),
-    endDate: toISO(d.endDate),
-    isActive: Boolean(d.isActive),
+    endDate: computed.endDate ? toISO(computed.endDate) : new Date(0).toISOString(),
+
+    daysOfWeek: d.daysOfWeek ?? [],
+    scopeType: d.scopeType,
+    testament: d.testament,
+    books: d.books,
+
+    periodType: d.periodType ?? 'days',
+    periodDays: d.periodDays ?? 0,
+
+    totalChapters: d.totalChapters ?? 0,
+    chaptersPerReadingDay: computed.chaptersPerReadingDay ?? 0,
+    summaryText: computed.summaryText ?? '',
+
+    status: d.status ?? 'draft',
+
     createdAt: toISO(d.createdAt),
     updatedAt: toISO(d.updatedAt),
     createdBy: d.createdBy ?? '',
   }
 }
 
-// 커스텀 코스 생성 (MVP)
+// 생성
+// TODO: (커밋 2: 계산은 아직 임시값)
 export async function createCourse(input: unknown): Promise<{ id: string }> {
   const admin = await requireAdmin(['mainAdmin', 'subAdmin'])
-  const parsed = createCourseSchema.parse(input)
+  const parsed = courseCreateSchema.parse(input)
 
   const now = Timestamp.now()
 
   const payload = {
-    name: parsed.name,
+    title: parsed.title,
     startDate: toTimestamp(parsed.startDate),
-    endDate: toTimestamp(parsed.endDate),
-    isActive: Boolean(parsed.isActive),
+    daysOfWeek: parsed.daysOfWeek,
+
+    scopeType: parsed.scopeType,
+    testament: parsed.scopeType === 'testament' ? parsed.testament : null,
+    books: parsed.scopeType === 'books' ? parsed.books : null,
+
+    periodType: parsed.periodType,
+    periodDays: parsed.periodDays,
+
+    // TODO: 커밋 3~5에서 서버 계산으로 채우기
+    totalChapters: 0,
+    computed: {
+      durationDays: parsed.periodDays,
+      endDate: toTimestamp(parsed.startDate), // 임시
+      readingDays: 0,
+      chaptersPerReadingDay: 0,
+      summaryText: '',
+    },
+
+    status: parsed.status ?? 'draft',
 
     createdAt: now,
     updatedAt: now,
@@ -93,21 +152,29 @@ export async function createCourse(input: unknown): Promise<{ id: string }> {
   return { id: ref.id }
 }
 
-// 커스텀 코스 수정 (MVP)
+// 수정
 export async function updateCourse(courseId: string, input: unknown): Promise<{ ok: true }> {
   await requireAdmin(['mainAdmin', 'subAdmin'])
-
-  const parsed = updateCourseSchema.parse(input)
+  const parsed = courseUpdateSchema.parse(input)
 
   const patch: Record<string, any> = {
     updatedAt: Timestamp.now(),
   }
 
-  // partial update 지원
-  if (typeof parsed.name === 'string') patch.name = parsed.name
+  if (typeof parsed.title === 'string') patch.title = parsed.title
   if (parsed.startDate instanceof Date) patch.startDate = toTimestamp(parsed.startDate)
-  if (parsed.endDate instanceof Date) patch.endDate = toTimestamp(parsed.endDate)
-  if (typeof parsed.isActive === 'boolean') patch.isActive = parsed.isActive
+  if (Array.isArray(parsed.daysOfWeek)) patch.daysOfWeek = parsed.daysOfWeek
+
+  if (parsed.scopeType) patch.scopeType = parsed.scopeType
+  if (parsed.testament) patch.testament = parsed.testament
+  if (parsed.books) patch.books = parsed.books
+
+  if (parsed.periodType) patch.periodType = parsed.periodType
+  if (typeof parsed.periodDays === 'number') patch.periodDays = parsed.periodDays
+
+  if (parsed.status) patch.status = parsed.status
+
+  // TODO: 커밋 5에서 totalChapters/computed 재계산 후 patch에 반영
 
   await adminDb.collection(COURSES_COL).doc(courseId).update(patch)
   return { ok: true }
