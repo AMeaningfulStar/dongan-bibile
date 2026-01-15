@@ -72,9 +72,14 @@ export const courseCreateSchema = z
     }
   })
 
-export const courseUpdateSchema = courseCreateSchema.partial().extend({
-  id: z.string().min(1),
-})
+export const courseUpdateSchema = z
+  .object(courseCreateSchema)
+  .partial()
+  .extend({
+    id: z.string().min(1),
+  })
 
-export type CreateCourseInput = z.infer<typeof courseCreateSchema>
-export type UpdateCourseInput = z.infer<typeof courseUpdateSchema>
+export type CreateCourseInput = z.input<typeof courseCreateSchema>
+export type CreateCourseOutput = z.output<typeof courseCreateSchema>
+export type UpdateCourseInput = z.input<typeof courseUpdateSchema>
+export type UpdateCourseOutput = z.output<typeof courseUpdateSchema>
