@@ -1,4 +1,4 @@
-import { CourseCreateForm } from "@/features/admin/courses/components/CourseCreateForm"
+import { CourseCreateForm } from '@/features/admin/courses/components/CourseCreateForm'
 
 export default function AdminCourseCreatePage() {
   return (
@@ -10,7 +10,7 @@ export default function AdminCourseCreatePage() {
         </p>
       </div>
 
-      <CourseCreateForm />
+      <CourseCreateForm mode="create" />
     </div>
   )
 }
