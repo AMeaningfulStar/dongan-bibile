@@ -26,7 +26,7 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
             <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
               <a href="/admin">
                 <Image alt="logo" src={LogoIcon} width={20} height={20} className="h-5 w-5" />
-                <span className="text-base font-semibold">하루빛:관리자</span>
+                <span className="text-base font-semibold">청신호:관리자</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
