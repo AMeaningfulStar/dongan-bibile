@@ -14,7 +14,6 @@ import {
   type CreateCourseTemplateInput,
   type CreateCourseTemplateOutput,
   type UpdateCourseTemplateInput,
-  type UpdateCourseTemplateOutput,
 } from './schema'
 
 import type { CourseTemplateDTO } from './types'
@@ -28,29 +27,6 @@ function toISO(ts?: Timestamp | null) {
 
 function toTimestamp(date: Date) {
   return Timestamp.fromDate(date)
-}
-
-/**
- * Template에서 computed를 만들기 위한 서버 계산
- * - Template 자체는 startDate가 없으므로 "생성 시점(now)" 기준으로 안내용 computed 생성
- * - 실제 실행 코스(CourseInstance)에서는 startDate가 확정되므로 그쪽 computed가 정답
- */
-function computeTemplateDerived(params: {
-  totalChapters: number
-  periodDays: number
-  defaultDaysOfWeek: number[]
-  // Template엔 startDate가 없지만, 계산을 위해 기준일을 받는다.
-  // create/update 시점에 now로 넣는다.
-  baseStartDate: Date
-}) {
-  const { totalChapters, periodDays, defaultDaysOfWeek, baseStartDate } = params
-
-  return computeCoursePreview({
-    startDate: baseStartDate,
-    periodDays,
-    daysOfWeek: defaultDaysOfWeek,
-    totalChapters,
-  })
 }
 
 /**
@@ -104,41 +80,39 @@ export async function listCourseTemplates(): Promise<CourseTemplateDTO[]> {
 export async function getCourseTemplate(templateId: string): Promise<CourseTemplateDTO | null> {
   await requireAdmin(['mainAdmin', 'subAdmin'])
 
-  const ref = adminDb.collection(COURSE_TEMPLATES_COL).doc(templateId)
-  const doc = await ref.get()
+  const doc = await adminDb.collection(COURSE_TEMPLATES_COL).doc(templateId).get()
   if (!doc.exists) return null
 
   const d = doc.data() as any
-  const c = d.computed ?? undefined
 
   return {
     id: doc.id,
-    title: d.title ?? '',
-    description: d.description ?? '',
+    title: d.title,
+    description: d.description,
 
     scopeType: d.scopeType,
-    testament: d.testament ?? undefined,
-    books: Array.isArray(d.books) ? d.books : undefined,
+    testament: d.testament,
+    books: d.books,
 
-    periodType: d.periodType ?? 'days',
-    periodDays: Number(d.periodDays ?? 0),
-    defaultDaysOfWeek: Array.isArray(d.defaultDaysOfWeek) ? d.defaultDaysOfWeek : [],
+    periodType: d.periodType,
+    periodDays: d.periodDays,
+    defaultDaysOfWeek: d.defaultDaysOfWeek,
 
-    status: d.status ?? 'draft',
-    isDefault: Boolean(d.isDefault),
-    isArchived: Boolean(d.isArchived),
+    status: d.status,
+    isDefault: d.isDefault,
+    isArchived: d.isArchived,
 
-    computed: c
-      ? {
-          totalChapters: Number(c.totalChapters ?? 0),
-          estimatedChaptersPerReadingDay: Number(c.chaptersPerReadingDay ?? c.estimatedChaptersPerReadingDay ?? 0) || 0,
-          summaryText: String(c.summaryText ?? ''),
-        }
-      : undefined,
+    computed: {
+      totalChapters: d.computed?.totalChapters ?? 0,
+      readingDays: d.computed?.readingDays ?? 0,
+      chaptersPerReadingDay: d.computed?.chaptersPerReadingDay ?? 0,
+      endDate: d.computed?.endDate ? toISO(d.computed.endDate) : '',
+      summaryText: d.computed?.summaryText ?? '',
+    },
 
     createdAt: toISO(d.createdAt),
     updatedAt: toISO(d.updatedAt),
-    createdBy: d.createdBy ?? '',
+    createdBy: d.createdBy,
   }
 }
 
@@ -163,12 +137,12 @@ export async function createCourseTemplate(input: CreateCourseTemplateInput): Pr
   }
 
   // 2) computed (Template는 startDate가 없으므로 now 기준 안내용)
-  const baseStartDate = new Date()
-  const derived = computeTemplateDerived({
+  const startDate = new Date()
+  const computedPreview = computeCoursePreview({
     totalChapters,
     periodDays: parsed.periodDays,
-    defaultDaysOfWeek: parsed.defaultDaysOfWeek,
-    baseStartDate,
+    daysOfWeek: parsed.defaultDaysOfWeek,
+    startDate,
   })
 
   const now = Timestamp.now()
@@ -192,10 +166,10 @@ export async function createCourseTemplate(input: CreateCourseTemplateInput): Pr
     // computed 저장
     computed: {
       totalChapters,
-      readingDays: derived.readingDays,
-      chaptersPerReadingDay: derived.chaptersPerReadingDay,
-      endDate: toTimestamp(derived.endDate), // 안내용 endDate
-      summaryText: derived.summaryText,
+      readingDays: computedPreview.readingDays,
+      chaptersPerReadingDay: computedPreview.chaptersPerReadingDay,
+      endDate: toTimestamp(computedPreview.endDate), // 안내용 endDate
+      summaryText: computedPreview.summaryText,
     },
 
     createdAt: now,
@@ -212,53 +186,39 @@ export async function createCourseTemplate(input: CreateCourseTemplateInput): Pr
  * - partial update 지원
  * - 변경 후 "현재 값" 기준으로 computed 재계산해서 patch에 반영
  */
-export async function updateCourseTemplate(input: UpdateCourseTemplateInput): Promise<{ ok: true }> {
+export async function updateCourseTemplate(
+  templateId: string,
+  input: UpdateCourseTemplateInput,
+): Promise<{ ok: true }> {
   await requireAdmin(['mainAdmin', 'subAdmin'])
 
-  const parsed: UpdateCourseTemplateOutput = courseTemplateUpdateSchema.parse(input)
+  const parsed = courseTemplateUpdateSchema.parse(input)
 
-  const ref = adminDb.collection(COURSE_TEMPLATES_COL).doc(parsed.id)
-  const doc = await ref.get()
-  if (!doc.exists) throw new Error('NOT_FOUND')
+  const ref = adminDb.collection(COURSE_TEMPLATES_COL).doc(templateId)
+  const snap = await ref.get()
+  if (!snap.exists) throw new Error('NOT_FOUND')
 
-  const prev = doc.data() as any
+  const prev = snap.data() as any
 
-  // 1) patch (원본 업데이트)
-  const patch: Record<string, any> = {
-    updatedAt: Timestamp.now(),
-  }
-
-  if (typeof parsed.title === 'string') patch.title = parsed.title
-  if (typeof parsed.description === 'string') patch.description = parsed.description
-
-  if (parsed.scopeType) patch.scopeType = parsed.scopeType
-  if (parsed.testament) patch.testament = parsed.testament
-  if (parsed.books) patch.books = parsed.books
-
-  if (parsed.periodType) patch.periodType = parsed.periodType
-  if (typeof parsed.periodDays === 'number') patch.periodDays = parsed.periodDays
-  if (Array.isArray(parsed.defaultDaysOfWeek)) patch.defaultDaysOfWeek = parsed.defaultDaysOfWeek
-
-  if (parsed.status) patch.status = parsed.status
-  if (typeof parsed.isDefault === 'boolean') patch.isDefault = parsed.isDefault
-  if (typeof parsed.isArchived === 'boolean') patch.isArchived = parsed.isArchived
-
-  // 2) 재계산용 current (= 업데이트 반영된 값 우선, 없으면 prev)
+  /* 1️⃣ prev + parsed → current 상태 구성 */
   const current = {
-    scopeType: (parsed.scopeType ?? prev.scopeType) as 'testament' | 'books',
-    testament: (parsed.testament ?? prev.testament ?? { old: false, new: false }) as { old: boolean; new: boolean },
-    books: (parsed.books ?? prev.books ?? []) as string[],
+    title: parsed.title ?? prev.title,
+    description: parsed.description ?? prev.description,
 
-    periodDays: (typeof parsed.periodDays === 'number' ? parsed.periodDays : prev.periodDays) as number,
-    defaultDaysOfWeek: (Array.isArray(parsed.defaultDaysOfWeek)
-      ? parsed.defaultDaysOfWeek
-      : prev.defaultDaysOfWeek) as number[],
+    scopeType: parsed.scopeType ?? prev.scopeType,
+    testament: parsed.testament ?? prev.testament,
+    books: parsed.books ?? prev.books ?? [],
 
-    // Template는 startDate가 없으므로 update 시점 now 기준으로 computed 갱신
-    baseStartDate: new Date(),
+    periodType: parsed.periodType ?? prev.periodType,
+    periodDays: parsed.periodDays ?? prev.periodDays,
+    defaultDaysOfWeek: parsed.defaultDaysOfWeek ?? prev.defaultDaysOfWeek,
+
+    status: parsed.status ?? prev.status,
+    isDefault: parsed.isDefault ?? prev.isDefault,
+    isArchived: parsed.isArchived ?? prev.isArchived,
   }
 
-  // 3) totalChapters 재계산
+  /* 2️⃣ totalChapters 재계산 */
   const totalChapters =
     current.scopeType === 'testament'
       ? getTotalChaptersByTestament(current.testament)
@@ -268,20 +228,28 @@ export async function updateCourseTemplate(input: UpdateCourseTemplateInput): Pr
     throw new Error('INVALID_TOTAL_CHAPTERS')
   }
 
-  // 4) computed 재계산
-  const derived = computeTemplateDerived({
-    totalChapters,
+  /* 3️⃣ 서버 기준 재계산 (startDate는 가상) */
+  const startDate = new Date()
+  const computedPreview = computeCoursePreview({
+    startDate,
     periodDays: current.periodDays,
-    defaultDaysOfWeek: current.defaultDaysOfWeek,
-    baseStartDate: current.baseStartDate,
+    daysOfWeek: current.defaultDaysOfWeek,
+    totalChapters,
   })
 
-  patch.computed = {
-    totalChapters,
-    readingDays: derived.readingDays,
-    chaptersPerReadingDay: derived.chaptersPerReadingDay,
-    endDate: toTimestamp(derived.endDate),
-    summaryText: derived.summaryText,
+  /* 4️⃣ patch 구성 */
+  const patch = {
+    ...current,
+
+    computed: {
+      totalChapters,
+      readingDays: computedPreview.readingDays,
+      chaptersPerReadingDay: computedPreview.chaptersPerReadingDay,
+      endDate: toTimestamp(computedPreview.endDate),
+      summaryText: computedPreview.summaryText,
+    },
+
+    updatedAt: Timestamp.now(),
   }
 
   await ref.update(patch)

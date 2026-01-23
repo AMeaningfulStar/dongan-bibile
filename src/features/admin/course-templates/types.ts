@@ -64,6 +64,9 @@ export type CourseTemplateDTO = {
   // computed (있으면 표시)
   computed?: {
     totalChapters: number
+    readingDays?: number
+    chaptersPerReadingDay?: number
+    endDate?: string // ISO
     estimatedChaptersPerReadingDay?: number
     summaryText?: string
   }
