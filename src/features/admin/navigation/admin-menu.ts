@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
-import { CalendarCog, House } from 'lucide-react'
+import { House, LandPlot } from 'lucide-react'
 
 export type AdminRole = 'mainAdmin' | 'subAdmin'
 //   | "communityAdmin"
@@ -22,9 +22,9 @@ export const ADMIN_NAV: AdminNavItem[] = [
     icon: House,
   },
   {
-    key: 'courses',
-    label: '커스텀 코스 관리',
-    href: '/admin/courses',
-    icon: CalendarCog,
+    key: 'course-templates',
+    label: '코스 템플릿 관리',
+    href: '/admin/course-templates',
+    icon: LandPlot,
   },
 ]
