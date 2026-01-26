@@ -6,7 +6,7 @@ import { useWatch, type Control } from 'react-hook-form'
 import { getTotalChaptersByBooks, getTotalChaptersByTestament } from '@/lib/reading/bible-chapters'
 import { computeCoursePreview } from '@/lib/reading/compute-course-preview'
 
-import { Separator } from '@/components/ui/separator'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 
 export type CourseTemplateFormValues = {
   title: string
@@ -91,50 +91,51 @@ export function CourseTemplatePreview({ control }: Props) {
   ])
 
   return (
-    <div className="rounded-lg border p-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold">계산 미리보기</h3>
-        <span className="text-xs text-muted-foreground">* 오늘 시작 기준</span>
-      </div>
+    <Card size="sm" className="pt-3">
+      <CardHeader>
+        <CardTitle>코스 템플릿 계산 미리보기</CardTitle>
+        <CardDescription>입력값을 기준으로 계산된 결과가 표시됩니다.</CardDescription>
+      </CardHeader>
 
-      <Separator className="my-3" />
+      <CardContent>
+        {!computed ? (
+          <p className="text-sm text-muted-foreground">입력값을 채우면 계산 결과가 표시됩니다.</p>
+        ) : 'error' in computed ? (
+          <p className="text-sm text-destructive">{computed.error}</p>
+        ) : (
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">총 장수</span>
+              <span className="font-medium">{computed.totalChapters}장</span>
+            </div>
 
-      {!computed ? (
-        <p className="text-sm text-muted-foreground">입력값을 채우면 계산 결과가 표시됩니다.</p>
-      ) : 'error' in computed ? (
-        <p className="text-sm text-destructive">{computed.error}</p>
-      ) : (
-        <div className="space-y-2 text-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">총 장수</span>
-            <span className="font-medium">{computed.totalChapters}장</span>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">달력 기간</span>
+              <span className="font-medium">{Number(values?.periodDays ?? 0)}일</span>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">읽는 날 수(요일 반영)</span>
+              <span className="font-medium">{computed.readingDays}일</span>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">완료 예상일</span>
+              <span className="font-medium">{yyyyMmDd(computed.endDate)}</span>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">읽는 날 기준 하루 분량</span>
+              <span className="font-medium">{computed.chaptersPerReadingDay}장/일</span>
+            </div>
           </div>
-
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">달력 기간</span>
-            <span className="font-medium">{Number(values?.periodDays ?? 0)}일</span>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">읽는 날 수(요일 반영)</span>
-            <span className="font-medium">{computed.readingDays}일</span>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">완료 예상일</span>
-            <span className="font-medium">{yyyyMmDd(computed.endDate)}</span>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">읽는 날 기준 하루 분량</span>
-            <span className="font-medium">{computed.chaptersPerReadingDay}장/일</span>
-          </div>
-
-          <Separator className="my-2" />
-
+        )}
+      </CardContent>
+      <CardFooter>
+        {computed && !('error' in computed) && (
           <div className="text-xs text-muted-foreground">{computed.summaryText}</div>
-        </div>
-      )}
-    </div>
+        )}
+      </CardFooter>
+    </Card>
   )
 }

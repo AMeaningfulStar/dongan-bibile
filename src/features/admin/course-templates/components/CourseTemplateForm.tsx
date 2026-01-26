@@ -5,8 +5,12 @@ import { useRouter } from 'next/navigation'
 import { useMemo, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 
-import { createCourseTemplate } from '@/features/admin/course-templates/actions'
-import { courseTemplateCreateSchema, type CreateCourseTemplateInput } from '@/features/admin/course-templates/schema'
+import { createCourseTemplate, updateCourseTemplate } from '@/features/admin/course-templates/actions'
+import {
+  courseTemplateCreateSchema,
+  UpdateCourseTemplateInput,
+  type CreateCourseTemplateInput,
+} from '@/features/admin/course-templates/schema'
 
 import { options as bibleOptions } from '@/features/admin/bible/bible-option'
 
@@ -15,14 +19,14 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 
+import { Checkbox } from '@/components/ui/checkbox'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { CourseTemplatePreview, type CourseTemplateFormValues } from './CourseTemplatePreview'
 
 type Props = {
   mode: 'create' | 'edit'
   templateId?: string
   initialValues?: Partial<CreateCourseTemplateInput>
-  /** create 후 이동 경로: 기본은 상세로 이동, 원하면 목록으로 바꿔도 됨 */
-  redirectTo?: 'detail' | 'list'
 }
 
 const DOW = [
@@ -53,7 +57,7 @@ const DEFAULT_VALUES: CreateCourseTemplateInput = {
   isArchived: false,
 }
 
-export function CourseTemplateForm({ mode, initialValues, redirectTo = 'detail' }: Props) {
+export function CourseTemplateForm({ mode, templateId, initialValues }: Props) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
 
@@ -76,21 +80,29 @@ export function CourseTemplateForm({ mode, initialValues, redirectTo = 'detail' 
 
   const scopeType = form.watch('scopeType')
   const daysOfWeek = form.watch('defaultDaysOfWeek')
+  const isDefault = form.watch('isDefault')
+  const status = form.watch('status')
 
   const onSubmit = (values: CreateCourseTemplateInput) => {
     startTransition(async () => {
       try {
         if (mode === 'create') {
-          const { id } = await createCourseTemplate(values)
-          if (redirectTo === 'list') {
-            router.push('/admin/course-templates')
-          } else {
-            router.push(`/admin/course-templates/${id}`)
-          }
+          await createCourseTemplate(values)
+          router.push('/admin/course-templates')
           return
         }
 
-        alert('edit 모드는 커밋 5/6에서 연결 권장입니다. (updateCourseTemplate)')
+        if (!templateId) {
+          throw new Error('MISSING_TEMPLATE_ID')
+        }
+
+        const payload: UpdateCourseTemplateInput = {
+          ...values,
+          id: templateId,
+        }
+
+        await updateCourseTemplate(templateId, payload)
+        router.push('/admin/course-templates')
       } catch (e) {
         console.error(e)
         alert('코스 템플릿 저장에 실패했습니다.')
@@ -103,27 +115,24 @@ export function CourseTemplateForm({ mode, initialValues, redirectTo = 'detail' 
 
   return (
     <div className="space-y-6">
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         {/* 제목 */}
         <div className="space-y-2">
           <Label htmlFor="title">코스 템플릿 이름</Label>
           <Input id="title" placeholder="예: 1년 1독 / 100일 구약 통독" {...form.register('title')} />
-          {form.formState.errors.title?.message && (
-            <p className="text-sm text-destructive">{String(form.formState.errors.title.message)}</p>
-          )}
+          <div className="h-5 text-sm text-destructive">
+            {form.formState.errors.title?.message && String(form.formState.errors.title.message)}
+          </div>
         </div>
-
         {/* 설명 */}
         <div className="space-y-2">
           <Label htmlFor="description">설명(선택)</Label>
           <Input id="description" placeholder="예: 하루 3~4장 수준" {...form.register('description')} />
-          {form.formState.errors.description?.message && (
-            <p className="text-sm text-destructive">{String(form.formState.errors.description.message)}</p>
-          )}
+          <div className="h-5 text-sm text-destructive">
+            {form.formState.errors.description?.message && String(form.formState.errors.description.message)}
+          </div>
         </div>
-
         <Separator />
-
         {/* 기간 */}
         <div className="space-y-2">
           <Label htmlFor="periodDays">기간(일수)</Label>
@@ -134,27 +143,25 @@ export function CourseTemplateForm({ mode, initialValues, redirectTo = 'detail' 
             max={2000}
             {...form.register('periodDays', { valueAsNumber: true })}
           />
-          {form.formState.errors.periodDays?.message && (
-            <p className="text-sm text-destructive">{String(form.formState.errors.periodDays.message)}</p>
-          )}
+          <div className="h-5 text-sm text-destructive">
+            {form.formState.errors.periodDays?.message && String(form.formState.errors.periodDays.message)}{' '}
+          </div>
         </div>
-
         <Separator />
-
         {/* 요일 선택 */}
         <div className="space-y-2">
           <Label>읽을 요일(기본값)</Label>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-4 rounded-lg border p-4">
             {DOW.map((d) => {
               const checked = (daysOfWeek ?? []).includes(d.value)
               return (
-                <label key={d.value} className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
+                <div key={d.value} className="flex items-center gap-2 text-sm">
+                  <Checkbox
+                    id={`day-${d.value}`}
                     checked={checked}
-                    onChange={(e) => {
+                    onCheckedChange={(value: boolean) => {
                       const next = new Set(daysOfWeek ?? [])
-                      if (e.target.checked) next.add(d.value)
+                      if (value) next.add(d.value)
                       else next.delete(d.value)
                       form.setValue(
                         'defaultDaysOfWeek',
@@ -166,75 +173,65 @@ export function CourseTemplateForm({ mode, initialValues, redirectTo = 'detail' 
                       )
                     }}
                   />
-                  {d.label}
-                </label>
+                  <Label htmlFor={`day-${d.value}`}>{d.label}</Label>
+                </div>
               )
             })}
           </div>
-          {form.formState.errors.defaultDaysOfWeek?.message && (
-            <p className="text-sm text-destructive">{String(form.formState.errors.defaultDaysOfWeek.message)}</p>
-          )}
+          <div className="h-5 text-sm text-destructive">
+            {form.formState.errors.defaultDaysOfWeek?.message &&
+              String(form.formState.errors.defaultDaysOfWeek.message)}
+          </div>
         </div>
-
         <Separator />
-
         {/* 분량 설정 */}
-        <div className="space-y-3">
+        <div className="space-y-2">
           <Label>분량 설정</Label>
 
-          <div className="flex items-center gap-6 text-sm">
-            <label className="flex items-center gap-2">
-              <input
-                type="radio"
-                value="testament"
-                checked={scopeType === 'testament'}
-                onChange={() => form.setValue('scopeType', 'testament', { shouldValidate: true })}
-              />
-              구약/신약 단위
-            </label>
-
-            <label className="flex items-center gap-2">
-              <input
-                type="radio"
-                value="books"
-                checked={scopeType === 'books'}
-                onChange={() => form.setValue('scopeType', 'books', { shouldValidate: true })}
-              />
-              성경 권별 설정
-            </label>
-          </div>
+          <RadioGroup
+            value={scopeType}
+            onValueChange={(value: 'testament' | 'books') =>
+              form.setValue('scopeType', value, {
+                shouldDirty: true,
+                shouldValidate: true,
+              })
+            }
+            className="flex gap-4"
+          >
+            <div className="flex items-center gap-2">
+              <RadioGroupItem value="testament" id="testament" />
+              <Label htmlFor="testament">구약/신약 단위</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <RadioGroupItem value="books" id="books" />
+              <Label htmlFor="books">성경 권별 설정</Label>
+            </div>
+          </RadioGroup>
 
           {scopeType === 'testament' && (
-            <div className="space-y-2 rounded-lg border p-4">
-              <div className="flex items-center gap-6 text-sm">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={!!form.watch('testament')?.old}
-                    onChange={(e) => {
-                      const curr = form.getValues('testament') ?? { old: false, new: false }
-                      form.setValue('testament', { ...curr, old: e.target.checked }, { shouldValidate: true })
-                    }}
-                  />
-                  구약
-                </label>
-
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={!!form.watch('testament')?.new}
-                    onChange={(e) => {
-                      const curr = form.getValues('testament') ?? { old: false, new: false }
-                      form.setValue('testament', { ...curr, new: e.target.checked }, { shouldValidate: true })
-                    }}
-                  />
-                  신약
-                </label>
+            <div className="flex flex-wrap gap-4 rounded-lg border p-4">
+              <div className="flex items-center gap-2 text-sm">
+                <Checkbox
+                  id={`testament-old`}
+                  checked={!!form.watch('testament')?.old}
+                  onCheckedChange={(value: boolean) => {
+                    const curr = form.getValues('testament') ?? { old: false, new: false }
+                    form.setValue('testament', { ...curr, old: value }, { shouldValidate: true })
+                  }}
+                />
+                <Label htmlFor={`testament-old`}>구약</Label>
               </div>
-
-              {form.formState.errors.testament?.message && (
-                <p className="text-sm text-destructive">{String(form.formState.errors.testament.message)}</p>
-              )}
+              <div className="flex items-center gap-2 text-sm">
+                <Checkbox
+                  id={`testament-new`}
+                  checked={!!form.watch('testament')?.new}
+                  onCheckedChange={(value: boolean) => {
+                    const curr = form.getValues('testament') ?? { old: false, new: false }
+                    form.setValue('testament', { ...curr, new: value }, { shouldValidate: true })
+                  }}
+                />
+                <Label htmlFor={`testament-new`}>신약</Label>
+              </div>
             </div>
           )}
 
@@ -277,43 +274,71 @@ export function CourseTemplateForm({ mode, initialValues, redirectTo = 'detail' 
               )}
             </div>
           )}
+          <div className="h-5 text-sm text-destructive">
+            {scopeType === 'testament' &&
+              form.formState.errors.testament?.message &&
+              String(form.formState.errors.testament.message)}
+            {scopeType === 'books' &&
+              form.formState.errors.books?.message &&
+              String(form.formState.errors.books.message)}
+          </div>
         </div>
-
         <Separator />
+        {/* 기본 코스  */}
+        <div className="space-y-2">
+          <Label>기본 코스 여부</Label>
 
+          <RadioGroup
+            value={String(isDefault)} // boolean → string
+            onValueChange={(value) =>
+              form.setValue('isDefault', value === 'true', {
+                shouldDirty: true,
+                shouldValidate: true,
+              })
+            }
+            className="flex gap-4"
+          >
+            <div className="flex items-center gap-2">
+              <RadioGroupItem value="true" id="default-true" />
+              <Label htmlFor="default-true">기본 통독 코스</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <RadioGroupItem value="false" id="default-false" />
+              <Label htmlFor="default-false">선택형 / 추천형 / 특수 목적 코스</Label>
+            </div>
+          </RadioGroup>
+        </div>
+        <Separator />
         {/* 상태 */}
         <div className="space-y-2">
           <Label>상태</Label>
-          <div className="flex items-center gap-6 text-sm">
-            <label className="flex items-center gap-2">
-              <input
-                type="radio"
-                value="draft"
-                checked={form.watch('status') === 'draft'}
-                onChange={() => form.setValue('status', 'draft', { shouldValidate: true })}
-              />
-              임시 저장/초안
-            </label>
-            <label className="flex items-center gap-2">
-              <input
-                type="radio"
-                value="active"
-                checked={form.watch('status') === 'published'}
-                onChange={() => form.setValue('status', 'published', { shouldValidate: true })}
-              />
-              게시/발행
-            </label>
-          </div>
+
+          <RadioGroup
+            value={status}
+            onValueChange={(value: 'draft' | 'published') =>
+              form.setValue('status', value, {
+                shouldDirty: true,
+                shouldValidate: true,
+              })
+            }
+            className="flex gap-4"
+          >
+            <div className="flex items-center gap-2">
+              <RadioGroupItem value="draft" id="draft" />
+              <Label htmlFor="draft">임시 저장/초안</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <RadioGroupItem value="published" id="published" />
+              <Label htmlFor="published">게시/발행</Label>
+            </div>
+          </RadioGroup>
         </div>
+        <Separator />
 
         {/* 미리보기 */}
         <CourseTemplatePreview control={previewControl} />
-
         {/* 제출 */}
-        <div className="flex items-center gap-2">
-          <Button type="submit" disabled={isPending || !form.formState.isValid}>
-            {isPending ? '저장 중...' : mode === 'create' ? '템플릿 생성' : '템플릿 저장'}
-          </Button>
+        <div className="flex items-center justify-end gap-2">
           <Button
             type="button"
             variant="outline"
@@ -321,6 +346,9 @@ export function CourseTemplateForm({ mode, initialValues, redirectTo = 'detail' 
             disabled={isPending}
           >
             취소
+          </Button>
+          <Button type="submit" disabled={isPending || !form.formState.isValid}>
+            {isPending ? '저장 중...' : mode === 'create' ? '템플릿 생성' : '템플릿 저장'}
           </Button>
         </div>
       </form>
