@@ -2,6 +2,8 @@ import { firestore } from '@/libs/firebase'
 import { addDoc, collection, getDocs, serverTimestamp } from 'firebase/firestore'
 import { NextRequest, NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 interface Params {
   params: {
     churchId: string

@@ -165,7 +165,7 @@ export function SideBar() {
               href={'/admin'}
               className={twMerge(pathname === '/admin' ? 'text-gl-black-base' : 'text-gl-grayscale-100')}
             >
-              '청신호' 관리
+              &apos;청신호&apos; 관리
             </Link>
           )}
         </div>

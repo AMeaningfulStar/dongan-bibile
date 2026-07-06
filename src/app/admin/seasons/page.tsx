@@ -12,7 +12,7 @@ import { format } from 'date-fns'
 import { addDoc, collection, deleteDoc, doc, getDocs, serverTimestamp, Timestamp, updateDoc } from 'firebase/firestore'
 import { CalendarIcon } from 'lucide-react'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 interface BibleSeason {
   id?: string
@@ -48,7 +48,9 @@ export default function Admin_Season() {
   const [selectedCommunityId, setSelectedCommunityId] = useState<string>('')
   const [selectedCommunity, setSelectedCommunity] = useState<Community[]>([])
 
-  const fetchSeasons = async () => {
+  const fetchSeasons = useCallback(async () => {
+    if (selectedChurchId === '' || selectedCommunityId === '') return
+
     const snapshot = await getDocs(
       collection(firestore, 'churches', selectedChurchId, 'communities', selectedCommunityId, 'bibleSeasons'),
     )
@@ -61,7 +63,7 @@ export default function Admin_Season() {
     })
 
     setSeasons(sortedData)
-  }
+  }, [selectedChurchId, selectedCommunityId])
 
   useEffect(() => {
     fetchChurches()
@@ -85,7 +87,7 @@ export default function Admin_Season() {
 
   useEffect(() => {
     if (selectedChurchId !== '' && selectedCommunityId !== '') fetchSeasons()
-  }, [selectedChurchId, selectedCommunityId])
+  }, [fetchSeasons, selectedChurchId, selectedCommunityId])
 
   const fetchChurches = async () => {
     const querySnapshot = await getDocs(collection(firestore, 'churches'))

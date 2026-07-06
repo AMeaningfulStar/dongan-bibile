@@ -38,6 +38,19 @@ export default function Bible({ searchParams }: BiblePageProps) {
   const [isDatePickModal, setIsDatePickModal] = useState<boolean>(false)
   const [isSetModal, setIsSetModal] = useState<boolean>(false)
   const [isDataSetLoading, setIsDataSetLoading] = useState<boolean>(false)
+  const [inputValue, setInputValue] = useState<string>('')
+  const [isSetLoading, setIsSetLoading] = useState<boolean>(false)
+
+  const { markRead } = useMarkBibleRead()
+  const createKeyword = useCreateKeyword()
+  const deleteKeyword = useDeleteKeyword()
+  const likeKeyword = useLikeKeyword()
+  const { keywords, isLoading: isKeywordLoading, isError: isKeywordError, mutate } = useKeywords({
+    datePick: bible && bible.length > 0 && user ? datePick : '',
+    uid: user?.uid ?? '',
+    churchId: user?.church ? user.church.id : undefined,
+    communityId: user?.community ? user.community.id : undefined,
+  })
 
   // 날짜 선택 버튼
   const PickerButton = () => {
@@ -130,7 +143,6 @@ export default function Bible({ searchParams }: BiblePageProps) {
 
       try {
         setIsDataSetLoading(true)
-        const { markRead } = useMarkBibleRead()
 
         const res = await markRead({
           datePick,
@@ -189,20 +201,9 @@ export default function Bible({ searchParams }: BiblePageProps) {
       return
     }
 
-    const { keywords, isLoading, isError, mutate } = useKeywords({
-      datePick,
-      uid: user.uid,
-      churchId: user.church ? user.church.id : undefined,
-      communityId: user.community ? user.community.id : undefined,
-    })
-
-    const [inputValue, setInputValue] = useState<string>('')
-    const [isSetLoading, setIsSetLoading] = useState<boolean>(false)
-
     const handleCreateKeyword = async () => {
       try {
         setIsSetLoading(true)
-        const createKeyword = useCreateKeyword()
 
         const res = await createKeyword({
           datePick,
@@ -232,8 +233,6 @@ export default function Bible({ searchParams }: BiblePageProps) {
       if (!confirmed || !user) return
 
       try {
-        const deleteKeyword = useDeleteKeyword()
-
         const res = await deleteKeyword(keyword, {
           datePick,
           uid: user.uid,
@@ -256,8 +255,6 @@ export default function Bible({ searchParams }: BiblePageProps) {
 
     const handleKeywordLike = async (keyword: string) => {
       try {
-        const likeKeyword = useLikeKeyword()
-
         const ref = await likeKeyword(keyword, {
           datePick,
           uid: user.uid,
@@ -277,7 +274,7 @@ export default function Bible({ searchParams }: BiblePageProps) {
       }
     }
 
-    if (isLoading) {
+    if (isKeywordLoading) {
       return (
         <div className="flex w-full flex-col border-t-[5px] border-gl-grayscale-base text-caption-14-l">
           정보를 불러오는 중...
@@ -285,7 +282,7 @@ export default function Bible({ searchParams }: BiblePageProps) {
       )
     }
 
-    if (isError) {
+    if (isKeywordError) {
       return (
         <div className="flex w-full flex-col border-t-[5px] border-gl-grayscale-base text-caption-14-l">
           정보를 불러오지 못했어요

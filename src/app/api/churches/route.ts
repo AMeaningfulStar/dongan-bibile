@@ -2,6 +2,8 @@ import { firestore } from '@/libs/firebase'
 import { addDoc, collection, getDocs, Timestamp } from 'firebase/firestore'
 import { NextRequest, NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     const snapshot = await getDocs(collection(firestore, 'churches'))

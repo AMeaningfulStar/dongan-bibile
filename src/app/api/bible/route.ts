@@ -2,6 +2,8 @@ import { firestore } from '@/libs/firebase'
 import { doc, getDoc } from 'firebase/firestore'
 import { NextRequest, NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(req: NextRequest) {
   // URL이 undefined인 경우 처리
   if (!req.url) {

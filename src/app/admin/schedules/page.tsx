@@ -3,7 +3,7 @@
 import { collection, doc, getDoc, getDocs, setDoc, Timestamp, updateDoc } from 'firebase/firestore'
 import moment from 'moment'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { firestore } from '@/libs/firebase'
 import { BookOption, options } from '@/utils/bibleOption'
@@ -73,9 +73,51 @@ export default function Admin_Schedule() {
 
   const [open, setOpen] = useState<boolean>(false)
 
+  const fetchChurches = useCallback(async () => {
+    const querySnapshot = await getDocs(collection(firestore, 'churches'))
+    const churchList: Church[] = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...(doc.data() as Omit<Church, 'id'>),
+    }))
+    setChurches(churchList)
+  }, [])
+
+  const fetchCommunities = useCallback(async () => {
+    if (!churchId) return
+
+    const querySnapshot = await getDocs(collection(firestore, 'churches', churchId, 'communities'))
+    const communityList: Community[] = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...(doc.data() as Omit<Community, 'id'>),
+    }))
+    setCommunities(communityList)
+  }, [churchId])
+
+  const fetchSeasons = useCallback(async () => {
+    if (!churchId || !communitiesId) return
+
+    const snapshot = await getDocs(collection(firestore, 'churches', churchId, 'communities', communitiesId, 'bibleSeasons'))
+    const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Season)
+    setSeasons(data)
+  }, [churchId, communitiesId])
+
+  const fetchBibleInfo = useCallback(async () => {
+    if (!selectedDate || !churchId || !communitiesId) return
+
+    const docId = moment(selectedDate).format('YYYY-MM-DD')
+    const docRef = doc(firestore, 'churches', churchId, 'communities', communitiesId, 'biblePlan', docId)
+    const docSnap = await getDoc(docRef)
+    if (docSnap.exists()) {
+      const data = docSnap.data()
+      setExistingBibleInfo(data.bibleInfo || [])
+    } else {
+      setExistingBibleInfo([])
+    }
+  }, [churchId, communitiesId, selectedDate])
+
   useEffect(() => {
     fetchChurches()
-  }, [])
+  }, [fetchChurches])
 
   useEffect(() => {
     if (churchId) {
@@ -89,58 +131,11 @@ export default function Admin_Schedule() {
     } else {
       setSeasons([])
     }
-  }, [churchId, communitiesId])
+  }, [churchId, communitiesId, fetchCommunities, fetchSeasons])
 
   useEffect(() => {
     fetchBibleInfo()
-  }, [selectedDate])
-
-  const fetchChurches = async () => {
-    const querySnapshot = await getDocs(collection(firestore, 'churches'))
-    const churchList: Church[] = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...(doc.data() as Omit<Church, 'id'>),
-    }))
-    setChurches(churchList)
-  }
-
-  const fetchCommunities = async () => {
-    const querySnapshot = await getDocs(collection(firestore, 'churches', churchId as string, 'communities'))
-    const communityList: Community[] = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...(doc.data() as Omit<Community, 'id'>),
-    }))
-    setCommunities(communityList)
-  }
-
-  const fetchSeasons = async () => {
-    const snapshot = await getDocs(
-      collection(firestore, 'churches', churchId as string, 'communities', communitiesId as string, 'bibleSeasons'),
-    )
-    const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Season)
-    setSeasons(data)
-  }
-
-  const fetchBibleInfo = async () => {
-    if (!selectedDate) return
-    const docId = moment(selectedDate).format('YYYY-MM-DD')
-    const docRef = doc(
-      firestore,
-      'churches',
-      churchId as string,
-      'communities',
-      communitiesId as string,
-      'biblePlan',
-      docId,
-    )
-    const docSnap = await getDoc(docRef)
-    if (docSnap.exists()) {
-      const data = docSnap.data()
-      setExistingBibleInfo(data.bibleInfo || [])
-    } else {
-      setExistingBibleInfo([])
-    }
-  }
+  }, [fetchBibleInfo])
 
   const handleSaveBiblePlan = async () => {
     if (!selectedSeason || !selectedDate || !bibleInfo.book || !bibleInfo.chapter) {
