@@ -2,9 +2,9 @@ import { firestore } from '@/libs/firebase'
 import { deleteDoc, doc, getDoc } from 'firebase/firestore'
 import { NextRequest, NextResponse } from 'next/server'
 
-export async function DELETE(req: NextRequest, context: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const keywordId = context.params.id
+    const { id: keywordId } = await context.params
     const { searchParams } = new URL(req.url)
     const date = searchParams.get('datePick')
     const churchId = searchParams.get('churchId')

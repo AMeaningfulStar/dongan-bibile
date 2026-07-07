@@ -3,14 +3,14 @@ import { deleteDoc, doc, updateDoc } from 'firebase/firestore'
 import { NextRequest, NextResponse } from 'next/server'
 
 interface Params {
-  params: {
+  params: Promise<{
     churchId: string
-  }
+  }>
 }
 
 export async function DELETE(_: NextRequest, { params }: Params) {
   try {
-    const { churchId } = params
+    const { churchId } = await params
 
     if (!churchId) {
       return NextResponse.json({ status: 400, message: '교회 ID가 필요합니다.' })
@@ -27,7 +27,7 @@ export async function DELETE(_: NextRequest, { params }: Params) {
 
 export async function PATCH(req: NextRequest, { params }: Params) {
   try {
-    const { churchId } = params
+    const { churchId } = await params
     const { name, location } = await req.json()
 
     if (!churchId || !name) {

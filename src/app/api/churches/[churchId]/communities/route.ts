@@ -5,14 +5,14 @@ import { NextRequest, NextResponse } from 'next/server'
 export const dynamic = 'force-dynamic'
 
 interface Params {
-  params: {
+  params: Promise<{
     churchId: string
-  }
+  }>
 }
 
 export async function GET(_: NextRequest, { params }: Params) {
   try {
-    const { churchId } = params
+    const { churchId } = await params
     const snapshot = await getDocs(collection(firestore, 'churches', churchId, 'communities'))
 
     const communities = snapshot.docs.map((doc) => ({
@@ -29,7 +29,7 @@ export async function GET(_: NextRequest, { params }: Params) {
 
 export async function POST(req: NextRequest, { params }: Params) {
   try {
-    const { churchId } = params
+    const { churchId } = await params
     const { name, description } = await req.json()
 
     if (!name) {

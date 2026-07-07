@@ -3,15 +3,15 @@ import { deleteDoc, doc, updateDoc } from 'firebase/firestore'
 import { NextRequest, NextResponse } from 'next/server'
 
 interface Params {
-  params: {
+  params: Promise<{
     churchId: string
     communityId: string
-  }
+  }>
 }
 
 export async function PATCH(req: NextRequest, { params }: Params) {
   try {
-    const { churchId, communityId } = params
+    const { churchId, communityId } = await params
     const { name, description } = await req.json()
 
     if (!name) {
@@ -33,7 +33,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
 export async function DELETE(_: NextRequest, { params }: Params) {
   try {
-    const { churchId, communityId } = params
+    const { churchId, communityId } = await params
 
     if (!churchId || !communityId) {
       return NextResponse.json({ status: 400, message: '필수 정보가 누락되었습니다.' })

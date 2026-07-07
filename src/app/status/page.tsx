@@ -2,24 +2,27 @@
 
 import moment from 'moment'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { Suspense, useState } from 'react'
 
 import { DatePick } from '@/components/Modal'
 import { useReadingStatus } from '@/hooks/useReadingStatus'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { twMerge } from 'tailwind-merge'
 
-interface StatusPageProps {
-  searchParams: {
-    datePick?: string
-    churchId?: string | null
-    communityId?: string | null
-  }
+export default function Status() {
+  return (
+    <Suspense>
+      <StatusContent />
+    </Suspense>
+  )
 }
 
-export default function Status({ searchParams }: StatusPageProps) {
-  const datePick = searchParams.datePick || moment().format('YYYY-MM-DD')
-  const { churchId, communityId } = searchParams
+function StatusContent() {
+  const searchParams = useSearchParams()
+  const datePick = searchParams.get('datePick') || moment().format('YYYY-MM-DD')
+  const churchId = searchParams.get('churchId')
+  const communityId = searchParams.get('communityId')
   const { user } = useAuthStore()
 
   const { status, count, isLoading } = useReadingStatus({

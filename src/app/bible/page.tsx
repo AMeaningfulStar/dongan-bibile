@@ -1,7 +1,8 @@
 'use client'
 
 import Image from 'next/image'
-import { useState } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { Suspense, useState } from 'react'
 import { twMerge } from 'tailwind-merge'
 
 import { URLCopy } from '@/components/Button'
@@ -16,17 +17,19 @@ import HEARTOUTLINE_ICON from '@icon/heart_out_line_icon.png'
 import RECYCLEBIN_ICON from '@icon/recycle_bin_icon.png'
 import SET_ICON from '@icon/set_icon.png'
 
-interface BiblePageProps {
-  searchParams: {
-    datePick: string
-    churchId?: string | null
-    communityId?: string | null
-  }
+export default function Bible() {
+  return (
+    <Suspense>
+      <BibleContentPage />
+    </Suspense>
+  )
 }
 
-export default function Bible({ searchParams }: BiblePageProps) {
-  const params = searchParams
-  const { datePick, churchId, communityId } = params
+function BibleContentPage() {
+  const searchParams = useSearchParams()
+  const datePick = searchParams.get('datePick') ?? ''
+  const churchId = searchParams.get('churchId')
+  const communityId = searchParams.get('communityId')
   const { user, setUser } = useAuthStore()
 
   const { bible, isError, isLoading } = useBible({
